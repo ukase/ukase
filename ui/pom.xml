@@ -25,12 +25,12 @@
     <artifactId>ukase-ui</artifactId>
     <packaging>jar</packaging>
 
-    <name>Ukase UI Module</name>
+    <name>Ukase UI</name>
 
     <parent>
         <groupId>me.entresol</groupId>
         <artifactId>ukase-parent</artifactId>
-        <version>${parent.version}</version>
+        <version>1.0-SNAPSHOT</version>
         <relativePath>../</relativePath>
     </parent>
 

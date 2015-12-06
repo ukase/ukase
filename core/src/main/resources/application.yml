@@ -1,0 +1,17 @@
+spring:
+  main:
+    banner-mode: off
+server:
+  port: 10081
+logging:
+  config: classpath:logback-prod.xml
+
+ukase:
+  project-root: .
+
+---
+
+spring:
+  profiles: development
+logging:
+  config: classpath:logback-dev.xml
