@@ -70,6 +70,10 @@
             <groupId>com.github.jknack</groupId>
             <artifactId>handlebars</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-validator</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

@@ -19,36 +19,29 @@
 
 package me.entresol.ukase.web;
 
-import me.entresol.ukase.domain.*;
+import lombok.extern.slf4j.Slf4j;
+import me.entresol.ukase.service.HtmlRenderer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+import java.io.IOException;
+
+@Slf4j
 @RestController
 @RequestMapping("/api")
 public class UkaseController {
     @Autowired
-    private TaskManager taskManager;
+    private HtmlRenderer htmlRenderer;
 
-    @RequestMapping(value = "/html", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Task> generateHtml(Task.Payload payload) {
-        Task task = new Task(payload);
-        taskManager.registerTask(task);
-        task.setStatus(Task.Status.DONE);
-        return ResponseEntity.ok(task);
-    }
-
-    @RequestMapping(value = "/status/{uuid}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Task> getStatus(@PathVariable("uuid") String uuid) {
-        return ResponseEntity.ok(new Task(Task.Status.IN_PROGRESS));
-    }
-
-    @RequestMapping(value = "/html/{uuid}")
-    public ResponseEntity<?> getHtml(@PathVariable("uuid") String id) {
-        if (id.equals("fake-uuid")) {
-            return ResponseEntity.ok()
-                    .contentType(MediaType.TEXT_HTML).body("<html><body><h1>Hello</h1></body></html>");
-        }
-        return ResponseEntity.notFound().build();
+    @RequestMapping(value = "/html", method = RequestMethod.POST)
+    public ResponseEntity<String> generateHtml(@RequestBody @Valid UkasePayload payload) throws IOException {
+        String result = htmlRenderer.render(payload.getIndex(), payload.getData());
+        return ResponseEntity.ok(result);
     }
 }

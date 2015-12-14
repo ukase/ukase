@@ -17,42 +17,27 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package me.entresol.ukase.domain;
+package me.entresol.ukase.service;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.*;
+import com.github.jknack.handlebars.Handlebars;
+import com.github.jknack.handlebars.Template;
+import me.entresol.ukase.web.UkasePayload;
+import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.io.IOException;
+import java.util.Map;
 
-@Data
-public class Task {
-    private String token;
-    private Status status;
-    @JsonIgnore
-    private Payload payload;
-
-    public Task(Status status) {
-        this.status = status;
-    }
-
-    public Task(Payload payload) {
-        this.payload = payload;
-    }
-
-    public enum Status {
-        ERROR, DONE, IN_PROGRESS
-    }
-
-    @Data
-    public static class Payload {
-        private List<HtmlTemplate> htmlTemplates;
-        private Map<String, Object> data;
-
-        @Data
-        public static class HtmlTemplate {
-            private String location;
-            private String name;
-            private String content;
+@Service
+public class HtmlRenderer {
+    public String render(UkasePayload.HtmlTemplateInfo htmlTemplateInfo, Map<String, Object> params) throws IOException {
+        Handlebars handlebars = new Handlebars();
+        Template template;
+        if (htmlTemplateInfo.getLocation() != null) {
+            throw new UnsupportedOperationException("Not yet implemented!");
+        } else {
+            template = handlebars.compileInline(htmlTemplateInfo.getContent());
         }
+
+        return template.apply(params);
     }
 }

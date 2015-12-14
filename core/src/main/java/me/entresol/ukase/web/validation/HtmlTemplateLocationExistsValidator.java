@@ -17,28 +17,19 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package me.entresol.ukase.domain;
+package me.entresol.ukase.web.validation;
 
-import org.springframework.stereotype.Service;
-import org.springframework.util.*;
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
 
-import java.util.*;
-import java.util.concurrent.*;
-
-@Service
-public class TaskManager {
-    private final ConcurrentMap<String, Task> registry = new ConcurrentHashMap<>();
-
-    public void registerTask(Task task) {
-        IdGenerator tokenGenerator = new AlternativeJdkIdGenerator();
-        do {
-            UUID uuid = tokenGenerator.generateId();
-            String token = uuid.toString();
-            task.setToken(token);
-        } while (registry.putIfAbsent(task.getToken(), task) != null);
+public class HtmlTemplateLocationExistsValidator implements ConstraintValidator<HtmlTemplateLocationExists, Object> {
+    @Override
+    public void initialize(HtmlTemplateLocationExists constraintAnnotation) {
     }
 
-    public void unregisterTask(String token) {
-        registry.remove(token);
+    @Override
+    public boolean isValid(Object value, ConstraintValidatorContext context) {
+        // TODO: XXX
+        return true;
     }
 }
