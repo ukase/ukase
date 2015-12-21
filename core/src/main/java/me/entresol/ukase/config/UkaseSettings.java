@@ -28,4 +28,5 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "ukase")
 public class UkaseSettings {
     private String projectRoot;
+    private String resources;
 }

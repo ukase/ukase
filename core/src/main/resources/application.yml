@@ -8,6 +8,7 @@ logging:
 
 ukase:
   project-root: .
+  resources: .
 
 ---
 
@@ -15,3 +16,10 @@ spring:
   profiles: development
 logging:
   config: classpath:logback-dev.xml
+
+---
+
+spring:
+  profiles: test
+ukase:
+  resources: target/test-classes/
