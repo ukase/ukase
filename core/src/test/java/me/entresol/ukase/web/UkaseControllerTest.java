@@ -85,7 +85,6 @@ public class UkaseControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.post("/api/pdf").content(payload).contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(this::checkPdf);
-        fail("not implemented yet");
     }
 
     private void checkPdf(MvcResult result) {
