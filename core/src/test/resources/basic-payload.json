@@ -1,0 +1,16 @@
+{
+  "index": "basic",
+  "data": {
+    "user": {
+      "id": 11001,
+      "name": "Turbo Pascal"
+    },
+    "books": [
+      {
+        "id": 1,
+        "author": 15,
+        "name": "Twenty thousands leagues under the sea"
+      }
+    ]
+  }
+}

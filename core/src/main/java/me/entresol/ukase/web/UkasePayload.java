@@ -20,30 +20,16 @@
 package me.entresol.ukase.web;
 
 import lombok.Data;
-import me.entresol.ukase.web.validation.HtmlTemplateLocationExists;
-import me.entresol.ukase.web.validation.RequiredAnyOf;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Data
 public class UkasePayload {
     @NotNull
     @Valid
-    private HtmlTemplateInfo index;
-    private List<HtmlTemplateInfo> partials = new ArrayList<>();
+    private String index;
     private Map<String, Object> data = new HashMap<>();
-
-    @Data
-    @RequiredAnyOf({"content", "location"})
-    public static class HtmlTemplateInfo {
-        private String name;
-        private String content;
-        @HtmlTemplateLocationExists
-        private String location;
-    }
 }
