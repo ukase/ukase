@@ -21,7 +21,7 @@ package me.entresol.ukase.service;
 
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
-import me.entresol.ukase.web.UkasePayload;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -29,15 +29,11 @@ import java.util.Map;
 
 @Service
 public class HtmlRenderer {
-    public String render(UkasePayload.HtmlTemplateInfo htmlTemplateInfo, Map<String, Object> params) throws IOException {
-        Handlebars handlebars = new Handlebars();
-        Template template;
-        if (htmlTemplateInfo.getLocation() != null) {
-            throw new UnsupportedOperationException("Not yet implemented!");
-        } else {
-            template = handlebars.compileInline(htmlTemplateInfo.getContent());
-        }
+    @Autowired
+    private Handlebars handlebars;
 
+    public String render(String templateName, Map<String, Object> params) throws IOException {
+        Template template = handlebars.compile(templateName);
         return template.apply(params);
     }
 }

@@ -40,7 +40,7 @@ public class PdfRenderer {
 
     @Autowired
     private PdfRenderer(UkaseSettings settings) {
-        File resources = new File(settings.getResources());
+        File resources = settings.getResources();
         if (!resources.isDirectory()) {
             throw new IllegalArgumentException("Wrong configuration - resource path is not a directory");
         }

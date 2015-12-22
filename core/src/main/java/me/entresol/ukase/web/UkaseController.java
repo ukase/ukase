@@ -19,10 +19,11 @@
 
 package me.entresol.ukase.web;
 
+import com.itextpdf.text.DocumentException;
 import lombok.extern.slf4j.Slf4j;
 import me.entresol.ukase.service.HtmlRenderer;
+import me.entresol.ukase.service.PdfRenderer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 @Slf4j
 @RestController
@@ -38,10 +40,17 @@ import java.io.IOException;
 public class UkaseController {
     @Autowired
     private HtmlRenderer htmlRenderer;
+    @Autowired
+    private PdfRenderer pdfRenderer;
 
     @RequestMapping(value = "/html", method = RequestMethod.POST)
     public ResponseEntity<String> generateHtml(@RequestBody @Valid UkasePayload payload) throws IOException {
         String result = htmlRenderer.render(payload.getIndex(), payload.getData());
         return ResponseEntity.ok(result);
+    }
+
+    @RequestMapping(value = "/pdf", method = RequestMethod.POST)
+    public ResponseEntity<byte[]> generatePdf(@RequestBody @Valid UkasePayload payload) throws IOException, DocumentException, URISyntaxException {
+        return ResponseEntity.ok(pdfRenderer.render(htmlRenderer.render(payload.getIndex(), payload.getData())));
     }
 }
