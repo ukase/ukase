@@ -23,10 +23,57 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+
 @Component
 @Data
 @ConfigurationProperties(prefix = "ukase")
 public class UkaseSettings {
+    private static final String CLASSPATH = "classpath:/";
+
     private String projectRoot;
-    private String resources;
+    private File templates;
+    private File resources;
+
+    public void setTemplates(String path) {
+        this.templates = translateToFile(path);
+    }
+
+    public void setResources(String path) {
+        this.resources = translateToFile(path);
+    }
+
+    private File translateToFile(String path) {
+        File directory;
+
+        if (path.startsWith(CLASSPATH)) {
+            if (path.length() == CLASSPATH.length()) {
+                directory = new File(getClassPathUri());
+            } else {
+                directory = new File(new File(getClassPathUri()), path.substring(CLASSPATH.length()));
+            }
+        } else {
+            directory = new File(path);
+        }
+
+        if (!directory.isDirectory()) {
+            throw new IllegalStateException("Wrong configuration - not a directory: " + directory);
+        }
+        return directory;
+    }
+
+    private URI getClassPathUri() {
+        try {
+            URL classPath = getClass().getClassLoader().getResource(".");
+            if (classPath == null) {
+                throw new IllegalStateException("ClassPath is null");
+            }
+            return classPath.toURI();
+        } catch (URISyntaxException e) {
+            throw new IllegalStateException("Cannot resolve ClassPath");
+        }
+    }
 }

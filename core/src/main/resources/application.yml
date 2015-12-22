@@ -9,6 +9,7 @@ logging:
 ukase:
   project-root: .
   resources: .
+  templates: .
 
 ---
 
@@ -22,4 +23,5 @@ logging:
 spring:
   profiles: test
 ukase:
-  resources: target/test-classes/
+  resources: classpath:/
+  templates: classpath:/templates/
