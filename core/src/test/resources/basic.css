@@ -17,29 +17,45 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-@page :first {
-    margin: 1cm 1cm 1cm 2cm;
+@page {
+    size: A4 portrait;
+    border: 1px dotted black;
+    margin: 1cm 1.5cm 2cm 2cm;
+
     @top-center {
-        content: 'First Page Header';
+        content: element(header);
+        vertical-align: bottom;
+    }
+    @bottom-center {
+        content: element(footer);
+        vertical-align: top;
+    }
+    @bottom-left {
+        content: element(footer-left);
+        vertical-align: top;
+    }
+    @bottom-right {
+        content: element(footer-right);
+        vertical-align: top;
+    }
+    @bottom-right-corner {
+        content: counter(page) '/' counter(pages);
+        font-size: 8pt;
     }
 }
 
-@page :left {
-    margin: 1cm 2cm 1cm 1cm;
+@page:first {
     @top-center {
-        content: 'Left Page Header';
-    }
-}
-
-@page :right {
-    margin: 1cm 1cm 1cm 2cm;
-    @top-center {
-        content: 'Right Page Header';
+        content: element(header-first);
+        vertical-align: bottom;
     }
 }
 
 .page {
-    page-break-before: always
+    page-break-before: always;
+}
+.page:first-child {
+    page-break-before: avoid;
 }
 
 table {

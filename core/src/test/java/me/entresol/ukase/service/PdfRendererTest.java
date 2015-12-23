@@ -49,7 +49,7 @@ public class PdfRendererTest {
         String html = getHtmlData("basic.html");
         assertNotNull(html);
         assertNotNull(pdf);
-        renderer.render(html);
+        savePdf(renderer.render(html), "render");
         //TODO:
         // check if there are any method to compare pdf files without their metadata (like creation date)
         // or another way to check results of pdf generation.
@@ -69,5 +69,9 @@ public class PdfRendererTest {
             return null;
         }
         return Files.readAllBytes(dataFile.toPath());
+    }
+
+    private void savePdf(byte[] data, String name) throws IOException {
+        Files.write(new File(settings.getResources(), name + ".pdf").toPath(), data);
     }
 }

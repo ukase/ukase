@@ -3,16 +3,24 @@
 <head>
     <meta content="text/html"/>
     <meta charset="utf-8"/>
+    <link type="text/css" href="footers-headers.css" rel="stylesheet"/>
     <link type="text/css" href="basic.css" rel="stylesheet"/>
 </head>
 <body>
-<div class="page page-first">
+<div class="page">
+    <div class="footers">
+        <div class="header-first">Main Title: {{user.name}}</div>
+        <div class="header">Secondary title: {{>id user}}</div>
+        <div class="footer-left"><img alt="dynamic" src="{{user.avatar}}"/></div>
+        <div class="footer"><h4>UKase v.0.1.4</h4></div>
+        <div class="footer-right"><img alt="" src="bar.png"/></div>
+    </div>
     <div class="center">
         Hello, {{user.name}}!
         {{>id user}}
     </div>
 </div>
-<div class="page page-second">
+<div class="page">
     <div class="center">
         <h1>Ordered books:</h1>
         {{#each books}}<h2>
@@ -20,6 +28,6 @@
         </h2>{{/each}}
     </div>
 </div>
-<div class="page page-third">This Page is empty.</div>
+<div class="page">This Page is empty.</div>
 </body>
 </html>
