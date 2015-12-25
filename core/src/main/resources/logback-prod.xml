@@ -20,7 +20,7 @@
 
 <configuration>
     <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/workflow-engine-server.log</file>
+        <file>logs/ukase-server.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>logs/ukase.%d{yyyy-MM-dd}.%i.gz</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
@@ -36,6 +36,6 @@
         <appender-ref ref="file"/>
     </root>
 
-    <logger name="com.luxoft.workflow" level="info"/>
+    <logger name="me.entresol.ukase" level="info"/>
     <logger name="org.springframework" level="warn"/>
 </configuration>
