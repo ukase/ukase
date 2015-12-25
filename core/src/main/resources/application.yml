@@ -8,8 +8,9 @@ logging:
 
 ukase:
   project-root: .
-  resources: .
-  templates: .
+  resources: classpath:/
+  templates: classpath:/
+  jar: false
 
 ---
 
@@ -25,3 +26,4 @@ spring:
 ukase:
   resources: classpath:/
   templates: classpath:/templates/
+  jar: false

@@ -17,26 +17,24 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package me.entresol.ukase.toolkit.handlebars;
+package me.entresol.ukase.toolkit;
 
-import com.github.jknack.handlebars.Handlebars;
-import com.github.jknack.handlebars.io.FileTemplateLoader;
+import com.github.jknack.handlebars.Helper;
 import com.github.jknack.handlebars.io.TemplateLoader;
-import me.entresol.ukase.config.UkaseSettings;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collection;
+import java.util.Map;
+import java.util.function.Predicate;
 
-@Component
-public class HandlebarsEngine extends Handlebars {
-    @Autowired
-    public HandlebarsEngine(UkaseSettings settings) {
-        super(prepareTemplateLoader(settings));
-    }
+public interface Source {
+    Predicate<String> IS_FONT = fileName -> fileName.toLowerCase().endsWith("ttf");
 
-    private static TemplateLoader prepareTemplateLoader(UkaseSettings settings) {
-        File templates = settings.getTemplates();
-        return new FileTemplateLoader(templates);
-    }
+    TemplateLoader getTemplateLoader();
+    Map<String, Helper<?>> getHelpers();
+    boolean hasHelpers();
+    boolean hasResource(String url);
+    InputStream getResource(String url) throws IOException;
+    Collection<String> getFontsUrls();
 }

@@ -20,10 +20,9 @@
 package me.entresol.ukase.service;
 
 import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.pdf.BaseFont;
+import me.entresol.ukase.toolkit.ResourceProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.xhtmlrenderer.pdf.ITextFontResolver;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 
 import me.entresol.ukase.config.UkaseSettings;
@@ -36,41 +35,28 @@ import java.net.URISyntaxException;
 @Service
 public class PdfRenderer {
     private final String resourcesPath;
-    private final File[] fonts;
+    private final ResourceProvider provider;
 
     @Autowired
-    private PdfRenderer(UkaseSettings settings) {
+    private PdfRenderer(UkaseSettings settings, ResourceProvider provider) {
         File resources = settings.getResources();
         if (!resources.isDirectory()) {
             throw new IllegalArgumentException("Wrong configuration - resource path is not a directory");
         }
 
         resourcesPath = resources.toURI().toString();
-        fonts = resources.listFiles((dir, name) -> isFontFileName(name));
-    }
-
-    private boolean isFontFileName(String fileName) {
-        fileName = fileName.toLowerCase();
-        return fileName.endsWith(".eot") || fileName.endsWith(".ttf");
+        this.provider = provider;
     }
 
     public byte[] render(String html) throws DocumentException, IOException, URISyntaxException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-        ITextRenderer renderer = setupFonts(new ITextRenderer());
+        ITextRenderer renderer = provider.getRenderer();
         renderer.setDocumentFromString(html, resourcesPath);
         renderer.layout();
         renderer.createPDF(baos, true);
         renderer.finishPDF();
 
         return baos.toByteArray();
-    }
-
-    private ITextRenderer setupFonts(ITextRenderer renderer) throws DocumentException, IOException {
-        ITextFontResolver resolver = renderer.getFontResolver();
-        for (File font: fonts) {
-            resolver.addFont(font.getAbsolutePath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-        }
-        return renderer;
     }
 }

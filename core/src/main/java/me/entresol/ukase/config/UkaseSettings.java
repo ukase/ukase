@@ -37,6 +37,7 @@ public class UkaseSettings {
     private String projectRoot;
     private File templates;
     private File resources;
+    private boolean jar;
 
     public void setTemplates(String path) {
         this.templates = translateToFile(path);
