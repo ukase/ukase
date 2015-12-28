@@ -81,6 +81,16 @@ public class UkaseControllerTest {
     }
 
     @Test
+    public void testWrongTemplate() throws Exception {
+        String wrongPayload = getFileContent("wrong-template-payload.json");
+        String wrongAnswer = getFileContent("wrong-template.answer.json");
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/html").content(wrongPayload).contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.content().string(wrongAnswer));
+    }
+
+    @Test
     public void testGeneratePdf() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post("/api/pdf").content(payload).contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.status().isOk())

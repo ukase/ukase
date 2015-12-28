@@ -92,6 +92,11 @@ public class JarSource implements Source {
     }
 
     @Override
+    public boolean hasTemplate(String name) {
+        return templateLoader.hasResource(name + ".hbs");
+    }
+
+    @Override
     public InputStream getResource(String url) throws IOException {
         return templateLoader.getResource(templateLoader.getResource(url));
     }

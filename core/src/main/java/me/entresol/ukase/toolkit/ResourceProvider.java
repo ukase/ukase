@@ -29,6 +29,7 @@ import me.entresol.ukase.toolkit.jar.JarSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
@@ -82,5 +83,11 @@ public class ResourceProvider {
         }
 
         return renderer;
+    }
+
+    @Bean
+    @Qualifier("calculated")
+    public Source getSource() {
+        return source;
     }
 }

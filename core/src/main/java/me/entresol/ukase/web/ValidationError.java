@@ -17,25 +17,27 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package me.entresol.ukase.toolkit;
+package me.entresol.ukase.web;
 
-import com.github.jknack.handlebars.Helper;
-import com.github.jknack.handlebars.io.TemplateLoader;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Data;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.Map;
-import java.util.function.Predicate;
+@Data
+@JsonInclude(value = JsonInclude.Include.NON_NULL)
+class ValidationError {
+    private final String field;
+    private final String object;
+    private final String message;
 
-public interface Source {
-    Predicate<String> IS_FONT = fileName -> fileName.toLowerCase().endsWith("ttf");
-
-    TemplateLoader getTemplateLoader();
-    Map<String, Helper<?>> getHelpers();
-    boolean hasHelpers();
-    boolean hasResource(String url);
-    boolean hasTemplate(String name);
-    InputStream getResource(String url) throws IOException;
-    Collection<String> getFontsUrls();
+    public ValidationError(ObjectError error) {
+        object = error.getObjectName();
+        message = error.getDefaultMessage();
+        if (error instanceof FieldError) {
+            field = ((FieldError)error).getField();
+        } else {
+            field = null;
+        }
+    }
 }

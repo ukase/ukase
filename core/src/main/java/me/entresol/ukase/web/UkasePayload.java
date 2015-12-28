@@ -20,6 +20,7 @@
 package me.entresol.ukase.web;
 
 import lombok.Data;
+import me.entresol.ukase.web.validation.HtmlTemplateLocationExists;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -28,6 +29,7 @@ import java.util.Map;
 
 @Data
 public class UkasePayload {
+    @HtmlTemplateLocationExists
     @NotNull
     @Valid
     private String index;

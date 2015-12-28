@@ -46,12 +46,14 @@ public class FileSource implements Source {
     @Getter
     private final TemplateLoader templateLoader;
     private final File resources;
+    private final File templates;
     private final Collection<String> fonts;
     //TODO WATCH SERVICE
 
     @Autowired
     public FileSource(UkaseSettings settings) {
-        templateLoader = new FileTemplateLoader(settings.getTemplates());
+        templates = settings.getTemplates();
+        templateLoader = new FileTemplateLoader(templates);
         resources = settings.getResources();
 
         File[] fontsFiles = resources.listFiles((dir, fileName) -> IS_FONT.test(fileName));
@@ -73,6 +75,11 @@ public class FileSource implements Source {
     @Override
     public boolean hasResource(String url) {
         return new File(resources, url).isFile();
+    }
+
+    @Override
+    public boolean hasTemplate(String name) {
+        return new File(templates, name + ".hbs").isFile();
     }
 
     @Override

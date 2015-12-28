@@ -1,0 +1,15 @@
+{
+  "index": "basic---1",
+  "data": {
+    "user": {
+      "id": 11001
+    },
+    "books": [
+      {
+        "id": 1,
+        "author": 15,
+        "name": "Twenty thousands leagues under the sea"
+      }
+    ]
+  }
+}

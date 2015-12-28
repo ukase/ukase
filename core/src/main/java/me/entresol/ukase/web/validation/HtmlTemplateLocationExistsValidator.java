@@ -19,17 +19,26 @@
 
 package me.entresol.ukase.web.validation;
 
+import me.entresol.ukase.toolkit.Source;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
+
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-public class HtmlTemplateLocationExistsValidator implements ConstraintValidator<HtmlTemplateLocationExists, Object> {
+@Component
+public class HtmlTemplateLocationExistsValidator implements ConstraintValidator<HtmlTemplateLocationExists, String> {
+    @Autowired
+    @Qualifier("calculated")
+    private Source source;
+
     @Override
     public void initialize(HtmlTemplateLocationExists constraintAnnotation) {
     }
 
     @Override
-    public boolean isValid(Object value, ConstraintValidatorContext context) {
-        // TODO: XXX
-        return true;
+    public boolean isValid(String value, ConstraintValidatorContext context) {
+        return source.hasTemplate(value);
     }
 }
