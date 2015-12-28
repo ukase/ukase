@@ -20,10 +20,12 @@
 package me.entresol.ukase.toolkit.helpers;
 
 import com.github.jknack.handlebars.Options;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
 
+@Component
 public class FormatNumberHelper extends AbstractHelper<Long> {
     private static final String HELPER_NAME = "format_number";
 

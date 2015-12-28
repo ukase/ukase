@@ -20,9 +20,11 @@
 package me.entresol.ukase.toolkit.helpers;
 
 import com.github.jknack.handlebars.Options;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+@Component
 public class SubStringHelper extends AbstractHelper<String> {
     private static final String HELPER_NAME = "substring";
 
