@@ -3,15 +3,21 @@
 ## UKase API
 
 ### method POST /api/html
-body: [UkasePayload](#UkasePayload)
-[possible errors](#PossibleErrors)
+
+body: [UkasePayload](#ukasepayload)
+
+[possible errors](#possible-errors)
+
 return type: text/html
 
 This method applies transferred data to selected template and returns rendered html as body of answer  
 
 ### method POST /api/pdf
-body: [UkasePayload](#UkasePayload)
-[possible errors](#PossibleErrors)
+
+body: [UkasePayload](#ukasepayload)
+
+[possible errors](#possible-errors)
+
 return type: application/octet-stream
 
 This method applies transferred data to selected template and applies rendered html with resources to flying saucer pdf generator.
