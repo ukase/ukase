@@ -24,8 +24,7 @@ import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.pdf.BaseFont;
 import me.entresol.ukase.config.UkaseSettings;
 import me.entresol.ukase.toolkit.fs.FileSource;
-import me.entresol.ukase.toolkit.helpers.FormatDateHelper;
-import me.entresol.ukase.toolkit.helpers.FormatNumberHelper;
+import me.entresol.ukase.toolkit.helpers.AbstractHelper;
 import me.entresol.ukase.toolkit.jar.JarSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,9 +41,8 @@ import java.io.IOException;
 @Service
 public class ResourceProvider {
     private static final Logger log = LoggerFactory.getLogger(ResourceProvider.class);
-    public static final String HELPER_FORMAT_DATE = "format_date";
-    public static final String HELPER_FORMAT_NUMBER = "format_number";
-
+    @Autowired
+    private ApplicationContext context;
     private Source source;
 
     @Autowired
@@ -61,7 +59,9 @@ public class ResourceProvider {
         if (source.hasHelpers()) {
             source.getHelpers().forEach(engine::registerHelper);
         }
-        registerInPackHelpers(engine);
+        context.getBeansOfType(AbstractHelper.class).values().stream().forEach(
+                helper -> engine.registerHelper(helper.getName(), helper)
+        );
 
         return engine;
     }
@@ -82,10 +82,5 @@ public class ResourceProvider {
         }
 
         return renderer;
-    }
-
-    private void registerInPackHelpers(Handlebars engine) {
-        engine.registerHelper(HELPER_FORMAT_DATE, new FormatDateHelper());
-        engine.registerHelper(HELPER_FORMAT_NUMBER, new FormatNumberHelper());
     }
 }

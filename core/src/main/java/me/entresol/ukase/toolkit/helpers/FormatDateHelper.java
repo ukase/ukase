@@ -19,16 +19,26 @@
 
 package me.entresol.ukase.toolkit.helpers;
 
-import com.github.jknack.handlebars.Helper;
 import com.github.jknack.handlebars.Options;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class FormatDateHelper implements Helper<Long> {
+@Component
+public class FormatDateHelper extends AbstractHelper<Long> {
+    private static final String HELPER_NAME = "format_date";
+
+    public FormatDateHelper() {
+        super(HELPER_NAME);
+    }
+
     @Override
     public CharSequence apply(Long context, Options options) throws IOException {
+        if (context == null) {
+            return "";
+        }
         String format = options.param(0, "");
         if (format.trim().length() == 0) {
             return "";

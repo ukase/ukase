@@ -22,25 +22,37 @@ package me.entresol.ukase.toolkit.helpers;
 import com.github.jknack.handlebars.Options;
 
 import java.io.IOException;
-import java.text.DecimalFormat;
 
-public class FormatNumberHelper extends AbstractHelper<Long> {
-    private static final String HELPER_NAME = "format_number";
+public class SubStringHelper extends AbstractHelper<String> {
+    private static final String HELPER_NAME = "substring";
 
-    public FormatNumberHelper() {
+    public SubStringHelper() {
         super(HELPER_NAME);
     }
 
     @Override
-    public CharSequence apply(Long context, Options options) throws IOException {
+    public CharSequence apply(String context, Options options) throws IOException {
         if (context == null) {
             return "";
         }
-        String format = options.param(0, "");
-        if (format.trim().length() == 0) {
+        Integer start = options.param(0, null);
+        Integer end = options.param(0, null);
+
+        if (isIncorrectParameters(context, start, end)
+                ) {
             return "";
         }
 
-        return new DecimalFormat(format).format(context);
+        if (end == null) {
+            return context.substring(start);
+        } else {
+            return context.substring(start, end);
+        }
+    }
+
+    private boolean isIncorrectParameters(String context, Integer start, Integer end) {
+        return start == null
+                || start < 0
+                || end != null && (end > context.length() || end < start);
     }
 }

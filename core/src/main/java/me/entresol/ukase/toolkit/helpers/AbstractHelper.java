@@ -19,28 +19,14 @@
 
 package me.entresol.ukase.toolkit.helpers;
 
-import com.github.jknack.handlebars.Options;
+import com.github.jknack.handlebars.Helper;
+import lombok.Getter;
 
-import java.io.IOException;
-import java.text.DecimalFormat;
+public abstract class AbstractHelper<T> implements Helper<T> {
+    @Getter
+    private final String name;
 
-public class FormatNumberHelper extends AbstractHelper<Long> {
-    private static final String HELPER_NAME = "format_number";
-
-    public FormatNumberHelper() {
-        super(HELPER_NAME);
-    }
-
-    @Override
-    public CharSequence apply(Long context, Options options) throws IOException {
-        if (context == null) {
-            return "";
-        }
-        String format = options.param(0, "");
-        if (format.trim().length() == 0) {
-            return "";
-        }
-
-        return new DecimalFormat(format).format(context);
+    public AbstractHelper(String name) {
+        this.name = name;
     }
 }
