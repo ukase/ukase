@@ -17,32 +17,21 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package me.entresol.ukase.toolkit.helpers;
+'use strict';
 
-import com.github.jknack.handlebars.Options;
-import org.springframework.stereotype.Component;
+var angular = require('angular');
 
-import java.io.IOException;
-import java.text.DecimalFormat;
+module.exports = angular
+    .module('ukase.routes.home', [
+        require('angular-ui-router'),
+        require('./index/home-index.route')
+    ])
+    .config(homeRoute)
+    .name;
 
-@Component
-public class FormatNumberHelper extends AbstractHelper<Number> {
-    private static final String HELPER_NAME = "format_number";
-
-    public FormatNumberHelper() {
-        super(HELPER_NAME);
-    }
-
-    @Override
-    public CharSequence apply(Number context, Options options) throws IOException {
-        if (context == null) {
-            return "";
-        }
-        String format = options.param(0, "");
-        if (format.trim().length() == 0) {
-            return "";
-        }
-
-        return new DecimalFormat(format).format(context);
-    }
+function homeRoute($stateProvider) {
+    $stateProvider.state('home', {
+        abstract: true,
+        template: '<ui-view layout="column" flex></ui-view>'
+    });
 }

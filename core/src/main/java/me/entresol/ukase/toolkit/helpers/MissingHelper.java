@@ -19,31 +19,23 @@
 
 package me.entresol.ukase.toolkit.helpers;
 
+import com.github.jknack.handlebars.HelperRegistry;
 import com.github.jknack.handlebars.Options;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 @Component
-public class FormatDateHelper extends AbstractHelper<Number> {
-    private static final String HELPER_NAME = "format_date";
-
-    public FormatDateHelper() {
-        super(HELPER_NAME);
+@Slf4j
+public class MissingHelper extends AbstractHelper<Object> {
+    public MissingHelper() {
+        super(HelperRegistry.HELPER_MISSING);
     }
 
     @Override
-    public CharSequence apply(Number context, Options options) throws IOException {
-        if (context == null) {
-            return "";
-        }
-        String format = options.param(0, "");
-        if (format.trim().length() == 0) {
-            return "";
-        }
-
-        return new SimpleDateFormat(format).format(new Date(context.longValue()));
+    public CharSequence apply(Object context, Options options) throws IOException {
+        log.error("Missed helper: " + options);
+        return null;
     }
 }

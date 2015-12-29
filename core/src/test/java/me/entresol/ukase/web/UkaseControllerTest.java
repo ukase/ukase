@@ -91,6 +91,14 @@ public class UkaseControllerTest {
     }
 
     @Test
+    public void testBrokenHelper() throws Exception {
+        String brokenPayload = getFileContent("broken-payload.json");
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/html").content(brokenPayload).contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.status().isInternalServerError());
+    }
+
+    @Test
     public void testGeneratePdf() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post("/api/pdf").content(payload).contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.status().isOk())

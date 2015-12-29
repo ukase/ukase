@@ -17,32 +17,24 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package me.entresol.ukase.toolkit.helpers;
+'use strict';
 
-import com.github.jknack.handlebars.Options;
-import org.springframework.stereotype.Component;
+var data = [
+    {label: 'Первый', state: 'home.index'}//,
+    //{label: 'Второй', state: 'home.index'},
+    //{label: 'Третий', state: 'home.index'}
+];
 
-import java.io.IOException;
-import java.text.DecimalFormat;
+module.exports = function (ngModule) {
+    ngModule.controller('HomeIndexController', homeIndexController);
+};
 
-@Component
-public class FormatNumberHelper extends AbstractHelper<Number> {
-    private static final String HELPER_NAME = "format_number";
+function homeIndexController() {
+    var vm = this;
 
-    public FormatNumberHelper() {
-        super(HELPER_NAME);
-    }
+    vm.getProcessDefinitions = getProcessDefinitions;
+}
 
-    @Override
-    public CharSequence apply(Number context, Options options) throws IOException {
-        if (context == null) {
-            return "";
-        }
-        String format = options.param(0, "");
-        if (format.trim().length() == 0) {
-            return "";
-        }
-
-        return new DecimalFormat(format).format(context);
-    }
+function getProcessDefinitions() {
+    return data;
 }

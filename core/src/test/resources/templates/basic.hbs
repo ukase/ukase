@@ -24,7 +24,7 @@
     <div class="center">
         <h1>Ordered books:</h1>
         {{#each books}}<h2>
-            {{name}} (by {{author}}, {{>id this}})
+            {{name}} (by {{format_date author 'dd.MM.yyyy'}}, {{>id this}})
         </h2>{{/each}}
     </div>
 </div>

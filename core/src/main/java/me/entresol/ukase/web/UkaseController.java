@@ -19,6 +19,7 @@
 
 package me.entresol.ukase.web;
 
+import com.github.jknack.handlebars.HandlebarsException;
 import com.itextpdf.text.DocumentException;
 import lombok.extern.slf4j.Slf4j;
 import me.entresol.ukase.service.HtmlRenderer;
@@ -67,5 +68,12 @@ public class UkaseController {
         List<ObjectError> allErrors = e.getBindingResult().getAllErrors();
         List<ValidationError> mappedErrors = allErrors.stream().map(ValidationError::new).collect(Collectors.toList());
         return new ResponseEntity<>(mappedErrors, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(HandlebarsException.class)
+    @ResponseBody
+    public ResponseEntity<String> handleHandlebarsException(HandlebarsException e) {
+        log.error("Some grand error caused in template mechanism", e);
+        return new ResponseEntity<>("Some grand error caused in template mechanism", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

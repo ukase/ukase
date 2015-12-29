@@ -23,27 +23,15 @@ import com.github.jknack.handlebars.Options;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 @Component
-public class FormatDateHelper extends AbstractHelper<Number> {
-    private static final String HELPER_NAME = "format_date";
-
-    public FormatDateHelper() {
-        super(HELPER_NAME);
+public class BrokenHelper extends AbstractHelper<Object> {
+    public BrokenHelper() {
+        super("broken");
     }
 
     @Override
-    public CharSequence apply(Number context, Options options) throws IOException {
-        if (context == null) {
-            return "";
-        }
-        String format = options.param(0, "");
-        if (format.trim().length() == 0) {
-            return "";
-        }
-
-        return new SimpleDateFormat(format).format(new Date(context.longValue()));
+    public CharSequence apply(Object context, Options options) throws IOException {
+        throw new RuntimeException("This is broken helper");
     }
 }

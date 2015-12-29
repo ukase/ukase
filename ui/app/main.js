@@ -29,6 +29,7 @@ require('./main.less');
 angular.module('ukase', [
     require('./config/main.config'),
     require('./config/theme.config'),
+    require('./routes/home/home.route'),
     require('angular-material')
 ]);
 
