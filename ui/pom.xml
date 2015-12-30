@@ -28,7 +28,7 @@
     <name>Ukase UI</name>
 
     <parent>
-        <groupId>me.entresol</groupId>
+        <groupId>com.github.ukase</groupId>
         <artifactId>ukase-parent</artifactId>
         <version>1.0-SNAPSHOT</version>
         <relativePath>../</relativePath>

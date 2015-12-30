@@ -36,6 +36,6 @@
         <appender-ref ref="file"/>
     </root>
 
-    <logger name="me.entresol.ukase" level="info"/>
+    <logger name="com.github.ukase" level="info"/>
     <logger name="org.springframework" level="warn"/>
 </configuration>

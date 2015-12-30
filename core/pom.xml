@@ -28,7 +28,7 @@
     <name>Ukase Service</name>
 
     <parent>
-        <groupId>me.entresol</groupId>
+        <groupId>com.github.ukase</groupId>
         <artifactId>ukase-parent</artifactId>
         <version>1.0-SNAPSHOT</version>
         <relativePath>../</relativePath>
@@ -36,7 +36,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>me.entresol</groupId>
+            <groupId>com.github.ukase</groupId>
             <artifactId>ukase-ui</artifactId>
         </dependency>
         <dependency>

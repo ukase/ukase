@@ -30,7 +30,7 @@
         <appender-ref ref="console"/>
     </root>
 
-    <logger name="me.entresol.ukase" level="debug"/>
+    <logger name="com.github.ukase" level="debug"/>
     <logger name="org.springframework.web.servlet.resource" level="trace"/>
     <logger name="org.springframework.web.servlet.view" level="trace"/>
 </configuration>
