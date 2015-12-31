@@ -19,19 +19,17 @@
 
 package com.github.ukase.web.validation;
 
-import com.github.ukase.toolkit.Source;
+import com.github.ukase.toolkit.CompoundSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 @Component
-public class HtmlTemplateLocationExistsValidator implements ConstraintValidator<HtmlTemplateLocationExists, String> {
+class HtmlTemplateLocationExistsValidator implements ConstraintValidator<HtmlTemplateLocationExists, String> {
     @Autowired
-    @Qualifier("calculated")
-    private Source source;
+    private CompoundSource source;
 
     @Override
     public void initialize(HtmlTemplateLocationExists constraintAnnotation) {

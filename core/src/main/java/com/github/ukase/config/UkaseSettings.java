@@ -37,7 +37,7 @@ public class UkaseSettings {
     private String projectRoot;
     private File templates;
     private File resources;
-    private boolean jar;
+    private File jar;
 
     public void setTemplates(String path) {
         this.templates = translateToFile(path);
@@ -45,6 +45,10 @@ public class UkaseSettings {
 
     public void setResources(String path) {
         this.resources = translateToFile(path);
+    }
+
+    public void setJar(String path) {
+        this.jar = translateToFile(path);
     }
 
     private File translateToFile(String path) {

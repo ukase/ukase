@@ -59,14 +59,18 @@ public class JarSource implements Source {
         }
 
         try {
-            ZipEntry resourcesEntry = templateLoader.getResource("imported-handlers.properties");
-            if (resourcesEntry != null) {
-                Properties properties = new Properties();
-                properties.load(templateLoader.getResource(resourcesEntry));
-                properties.forEach(this::registerHelper);
-            }
+            Collection<String> props = templateLoader.getResources(IS_HELPERS_CONFIGURATION);
 
-            fonts = findFonts(this.templateLoader);
+            Properties properties = new Properties();
+            props.stream().
+                    map(templateLoader::getResource).
+                    filter(entry -> entry != null).
+                    map(this::mapZipEntry).
+                    filter(stream -> stream != null).
+                    forEach(stream -> loadStreamToProperties(stream, properties));
+            properties.forEach(this::registerHelper);
+
+            fonts = templateLoader.getResources(IS_FONT);
 
             if (hasHelpers()) {
                 URL jar = settings.getJar().toURI().toURL();
@@ -126,7 +130,19 @@ public class JarSource implements Source {
         helpers.put((String) name, (String) className);
     }
 
-    private static Collection<String> findFonts(CompoundTemplateLoader templateLoader) {
-        return templateLoader.getResources(IS_FONT);
+    private InputStream mapZipEntry(ZipEntry entry) {
+        try {
+            return templateLoader.getResource(entry);
+        } catch (IOException e) {
+            throw new IllegalStateException("Wrong configuration", e);
+        }
+    }
+
+    private void loadStreamToProperties(InputStream stream, Properties properties) {
+        try {
+            properties.load(stream);
+        } catch (IOException e) {
+            throw new IllegalStateException("Wrong configuration", e);
+        }
     }
 }

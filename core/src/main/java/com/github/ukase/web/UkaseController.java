@@ -22,12 +22,11 @@ package com.github.ukase.web;
 import com.github.jknack.handlebars.HandlebarsException;
 import com.github.ukase.service.HtmlRenderer;
 import com.github.ukase.service.PdfRenderer;
-import com.github.ukase.toolkit.Source;
+import com.github.ukase.toolkit.CompoundSource;
 import com.github.ukase.toolkit.SourceListener;
 import com.itextpdf.text.DocumentException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.ObjectError;
@@ -55,8 +54,7 @@ public class UkaseController {
     @Autowired
     private PdfRenderer pdfRenderer;
     @Autowired
-    @Qualifier("calculated")
-    private Source source;
+    private CompoundSource source;
 
     @RequestMapping(value = "/html", method = RequestMethod.POST)
     public ResponseEntity<String> generateHtml(@RequestBody @Valid UkasePayload payload) throws IOException {

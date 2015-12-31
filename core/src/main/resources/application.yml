@@ -10,7 +10,7 @@ ukase:
   project-root: .
   resources: classpath:/
   templates: classpath:/
-  jar: false
+  jar:
 
 ---
 
@@ -26,4 +26,4 @@ spring:
 ukase:
   resources: classpath:/
   templates: classpath:/templates/
-  jar: false
+  jar:

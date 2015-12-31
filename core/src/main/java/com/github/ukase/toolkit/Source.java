@@ -30,6 +30,9 @@ import java.util.function.Predicate;
 
 public interface Source {
     Predicate<String> IS_FONT = fileName -> fileName.toLowerCase().endsWith("ttf");
+    Predicate<String> IS_HELPERS_CONFIGURATION = fileName ->
+                    fileName.startsWith("imported-handlers") &&
+                    fileName.endsWith(".properties");
 
     Map<String, Helper<?>> getHelpers();
     boolean hasHelpers();
