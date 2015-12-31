@@ -32,6 +32,6 @@ module.exports = angular
 function homeRoute($stateProvider) {
     $stateProvider.state('home', {
         abstract: true,
-        template: '<ui-view layout="column" flex></ui-view>'
+        template: '<ui-view data-layout="column" data-flex></ui-view>'
     });
 }

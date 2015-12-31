@@ -20,15 +20,17 @@
 'use strict';
 
 module.exports = function (ngModule) {
-    ngModule.controller('HomeIndexController', homeIndexController);
+    ngModule.controller('ukaseDataController', [
+        '$scope',
+        'ukaseFactory',
+        'ukasePdfService',
+        ukaseDataController
+    ]);
 };
 
-function homeIndexController() {
-    var vm = this;
-
-    vm.getProcessDefinitions = getProcessDefinitions;
-}
-
-function getProcessDefinitions() {
-    return data;
+function ukaseDataController($scope, factory, service) {
+    $scope.jsonData = factory.json;
+    $scope.send = function() {
+        service.sendData();
+    };
 }

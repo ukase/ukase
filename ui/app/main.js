@@ -19,19 +19,21 @@
 
 'use strict';
 
-var angular = require('angular');
+var angular = require('angular'),
+    ngModule;
 
 require('./index.html');
 require('angular-material/angular-material.css');
 require('./assets/fonts/MaterialIcons-Regular.woff2');
 require('./main.less');
 
-angular.module('ukase', [
+ngModule = angular.module('ukase', [
     require('./config/main.config'),
     require('./config/theme.config'),
     require('./routes/home/home.route'),
     require('angular-material')
 ]);
 
-
-
+require('./ukase.poller')(ngModule);
+require('./ukase.factory')(ngModule);
+require('./ukase-pdf.service')(ngModule);

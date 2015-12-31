@@ -20,15 +20,27 @@
 'use strict';
 
 module.exports = function (ngModule) {
-    ngModule.controller('HomeIndexController', homeIndexController);
+    ngModule.controller('ukaseMenuController', [
+        '$scope',
+        'ukasePoller',
+        'ukasePdfService',
+        'ukaseFactory',
+        ukaseMenuController
+    ]);
 };
 
-function homeIndexController() {
-    var vm = this;
+function ukaseMenuController($scope, poller, service, factory) {
+    $scope.pollerEnabled = poller.flag;
+    $scope.pollerClicked = function() {
+        if ($scope.pollerEnabled) {
+            service.startPolling();
+        }
+    };
 
-    vm.getProcessDefinitions = getProcessDefinitions;
-}
-
-function getProcessDefinitions() {
-    return data;
+    $scope.autoResourcesUpdate = factory.flag;
+    $scope.autoResourcesClicked = function() {
+        if ($scope.autoResourcesUpdate) {
+            service.startAutoUpdate();
+        }
+    };
 }

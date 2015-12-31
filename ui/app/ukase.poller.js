@@ -20,15 +20,37 @@
 'use strict';
 
 module.exports = function (ngModule) {
-    ngModule.controller('HomeIndexController', homeIndexController);
+    ngModule.factory('ukasePoller', ['$http', '$q', ukasePoller]);
 };
 
-function homeIndexController() {
-    var vm = this;
+function ukasePoller($http, $q) {
+    function head(url) {
+        return $http({
+            method: 'HEAD',
+            url: url
+        });
+    }
 
-    vm.getProcessDefinitions = getProcessDefinitions;
-}
+    return {
+        flag: false,
+        poll: function (template, defer) {
+            var $d = !defer ? $q.defer() : defer,
+                requestUrl = '/api/pdf/' + template,
+                $request = head(encodeURI(requestUrl));
 
-function getProcessDefinitions() {
-    return data;
+            $request.success(function (data) {
+                $d.resolve(data);
+            });
+
+            $request.error(function (error) {
+                if (this.flag) {
+                    this.poll(template, $d);
+                } else {
+                    $d.reject(error);
+                }
+            });
+
+            return $d.promise;
+        }
+    };
 }

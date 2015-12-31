@@ -20,15 +20,13 @@
 'use strict';
 
 module.exports = function (ngModule) {
-    ngModule.controller('HomeIndexController', homeIndexController);
+    ngModule.controller('ukasePdfViewController', [
+        '$scope',
+        'ukasePdfService',
+        ukasePdfViewController
+    ]);
 };
 
-function homeIndexController() {
-    var vm = this;
-
-    vm.getProcessDefinitions = getProcessDefinitions;
-}
-
-function getProcessDefinitions() {
-    return data;
+function ukasePdfViewController($scope, service) {
+    $scope.pdfData = service.pdfData;
 }

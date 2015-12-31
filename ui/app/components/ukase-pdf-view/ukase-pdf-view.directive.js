@@ -19,16 +19,29 @@
 
 'use strict';
 
-module.exports = function (ngModule) {
-    ngModule.controller('HomeIndexController', homeIndexController);
-};
+var angular = require('angular'),
+    ngModule;
 
-function homeIndexController() {
-    var vm = this;
+ngModule = angular.module('ukase.components.ukase-pdf-view',
+    [
 
-    vm.getProcessDefinitions = getProcessDefinitions;
-}
+    ])
+    .directive('ukasePdfView', ukasePdfView);
 
-function getProcessDefinitions() {
-    return data;
+require('./ukase-pdf-view.controller')(ngModule);
+
+module.exports = ngModule.name;
+
+function ukasePdfView() {
+    return {
+        restrict: 'E',
+        transclude: true,
+        scope: {},
+        bindToController: true,
+        controllerAs: 'vm',
+        controller: 'ukasePdfViewController',
+        template: '<md-whiteframe class="md-whiteframe-2dp" layout layout-align="center center">' +
+                '   <embed ng-src="pdfData" style="width: 500px; height: 500px;">pdf preview (not loaded yet)</embed>' +
+                '</md-whiteframe>'
+    };
 }

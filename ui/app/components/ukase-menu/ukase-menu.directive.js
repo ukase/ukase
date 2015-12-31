@@ -19,16 +19,25 @@
 
 'use strict';
 
-module.exports = function (ngModule) {
-    ngModule.controller('HomeIndexController', homeIndexController);
-};
+var angular = require('angular'),
+    ngModule;
 
-function homeIndexController() {
-    var vm = this;
+ngModule = angular.module('ukase.components.ukase-menu', [])
+    .directive('ukaseMenu', ukaseMenu);
 
-    vm.getProcessDefinitions = getProcessDefinitions;
-}
+require('./ukase-menu.controller')(ngModule);
 
-function getProcessDefinitions() {
-    return data;
+module.exports = ngModule.name;
+
+function ukaseMenu() {
+    return {
+        restrict: 'E',
+        transclude: true,
+        scope: {},
+        bindToController: true,
+        controllerAs: 'vm',
+        controller: 'ukaseMenuController',
+        template: '<md-checkbox layout="column" ng-model="autoResourcesUpdate" ng-click="autoResourcesClicked">Update pdf on data update</md-checkbox>' +
+                '<md-checkbox layout="column" ng-model="pollerEnabled" ng-click="pollerClicked">Update pdf on template update</md-checkbox>'
+    };
 }

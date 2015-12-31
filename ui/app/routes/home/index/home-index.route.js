@@ -21,15 +21,16 @@
 'use strict';
 
 var angular = require('angular'),
-    //components = require('../../../components'),
+    components = require('../../../components'),
     ngModule;
 
 
 ngModule = angular
     .module('ukase.routes.home.index', [
-        require('angular-ui-router')//,
-        //components.wfProcessDefinition,
-        //components.wfSiteMenu
+        require('angular-ui-router'),
+        components.ukaseMenu,
+        components.ukaseData,
+        components.ukasePdfView
     ]).config(homeIndexRoute);
 
 require('./home-index.controller')(ngModule);

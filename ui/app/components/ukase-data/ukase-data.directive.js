@@ -19,16 +19,28 @@
 
 'use strict';
 
-module.exports = function (ngModule) {
-    ngModule.controller('HomeIndexController', homeIndexController);
-};
+var angular = require('angular'),
+    ngModule;
 
-function homeIndexController() {
-    var vm = this;
+ngModule = angular.module('ukase.components.ukase-data', [])
+    .directive('ukaseData', ukaseData);
 
-    vm.getProcessDefinitions = getProcessDefinitions;
-}
+require('./ukase-data.controller')(ngModule);
 
-function getProcessDefinitions() {
-    return data;
+module.exports = ngModule.name;
+
+function ukaseData() {
+    return {
+        restrict: 'E',
+        transclude: true,
+        scope: {},
+        bindToController: true,
+        controllerAs: 'vm',
+        controller: 'ukaseDataController',
+        template: '<md-input-container class="md-block">' +
+            '   <label>JSON-data</label>' +
+            '   <textarea data-ng-model="jsonData" rows="5"></textarea>' +
+            '</md-input-container>' +
+            '<md-button class="md-raised md-primary" ng-click="send()">Update PDF</md-button>'
+    };
 }

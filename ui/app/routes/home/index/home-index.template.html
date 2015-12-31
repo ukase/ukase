@@ -1,0 +1,43 @@
+<!--
+  ~ Copyright (c) 2015 Konstantin Lepa <konstantin+ukase@lepabox.net>
+  ~
+  ~ This file is part of Ukase.
+  ~
+  ~  Ukase is free software: you can redistribute it and/or modify
+  ~  it under the terms of the GNU Affero General Public License as
+  ~  published by the Free Software Foundation, either version 3 of the
+  ~  License, or (at your option) any later version.
+  ~
+  ~   This program is distributed in the hope that it will be useful,
+  ~  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~  GNU Affero General Public License for more details.
+  ~
+  ~  You should have received a copy of the GNU Affero General Public License
+  ~  along with this program. If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+
+<div data-layout="column" data-flex data-ng-controller="HomeIndexController as vm">
+    <md-toolbar layout="row">
+        <md-toolbar-filler data-layout data-layout-align="center center">
+            <!--md-icon md-svg-icon="call:chat"></md-icon-->
+        </md-toolbar-filler>
+        <h2 data-layout="column">PDF-generator</h2>
+        <md-menu-bar data-layout="column" >
+            <ukase-menu>
+
+            </ukase-menu>
+        </md-menu-bar>
+    </md-toolbar>
+
+    <div data-flex data-layout="row">
+        <md-sidenav  data-md-is-locked-open="true" class="md-whiteframe-z2" style="min-height: 100%;">
+            <ukase-data></ukase-data>
+        </md-sidenav>
+        <md-content data-layout="column" data-flex id="content" style="min-height: 100%;">
+            <ukase-pdf-view></ukase-pdf-view>
+        </md-content>
+    </div>
+</div>
+

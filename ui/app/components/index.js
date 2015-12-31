@@ -17,18 +17,11 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 'use strict';
 
-module.exports = function (ngModule) {
-    ngModule.controller('HomeIndexController', homeIndexController);
+module.exports = {
+    ukaseMenu: require('./ukase-menu/ukase-menu.directive'),
+    ukaseData: require('./ukase-data/ukase-data.directive'),
+    ukasePdfView: require('./ukase-pdf-view/ukase-pdf-view.directive')
 };
-
-function homeIndexController() {
-    var vm = this;
-
-    vm.getProcessDefinitions = getProcessDefinitions;
-}
-
-function getProcessDefinitions() {
-    return data;
-}

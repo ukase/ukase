@@ -19,16 +19,20 @@
 
 'use strict';
 
-module.exports = function (ngModule) {
-    ngModule.controller('HomeIndexController', homeIndexController);
+var ngStorage = require('ngstorage');
+
+module.exports = function(ngModule) {
+    ngModule.factory('ukaseFactory', ukaseFactory);
 };
 
-function homeIndexController() {
-    var vm = this;
+function ukaseFactory() {
+    var data = ngStorage.ukaseData;
+    if (!data) {
+        data = '{"index": "basic", "data": {}}';
+    }
 
-    vm.getProcessDefinitions = getProcessDefinitions;
-}
-
-function getProcessDefinitions() {
-    return data;
+    return {
+        flag: false,
+        json: data
+    };
 }
