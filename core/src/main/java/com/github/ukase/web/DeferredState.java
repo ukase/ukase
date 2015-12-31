@@ -17,28 +17,10 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.ukase.toolkit;
+package com.github.ukase.web;
 
-import com.github.jknack.handlebars.Helper;
-import com.github.jknack.handlebars.io.TemplateLoader;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.context.request.async.DeferredResult;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.Map;
-import java.util.function.Predicate;
-
-public interface Source {
-    Predicate<String> IS_FONT = fileName -> fileName.toLowerCase().endsWith("ttf");
-
-    TemplateLoader getTemplateLoader();
-    Map<String, Helper<?>> getHelpers();
-    boolean hasHelpers();
-    boolean hasResource(String url);
-    boolean hasTemplate(String name);
-    InputStream getResource(String url) throws IOException;
-    Collection<String> getFontsUrls();
-    default void registerListener(SourceListener listener) {
-        listener.resourceUpdated("");
-    }
+public class DeferredState extends DeferredResult<ResponseEntity<Object>> {
 }

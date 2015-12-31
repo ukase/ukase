@@ -22,14 +22,18 @@ package com.github.ukase.web;
 import com.github.jknack.handlebars.HandlebarsException;
 import com.github.ukase.service.HtmlRenderer;
 import com.github.ukase.service.PdfRenderer;
+import com.github.ukase.toolkit.Source;
+import com.github.ukase.toolkit.SourceListener;
 import com.itextpdf.text.DocumentException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -50,6 +54,9 @@ public class UkaseController {
     private HtmlRenderer htmlRenderer;
     @Autowired
     private PdfRenderer pdfRenderer;
+    @Autowired
+    @Qualifier("calculated")
+    private Source source;
 
     @RequestMapping(value = "/html", method = RequestMethod.POST)
     public ResponseEntity<String> generateHtml(@RequestBody @Valid UkasePayload payload) throws IOException {
@@ -58,8 +65,18 @@ public class UkaseController {
     }
 
     @RequestMapping(value = "/pdf", method = RequestMethod.POST)
-    public ResponseEntity<byte[]> generatePdf(@RequestBody @Valid UkasePayload payload) throws IOException, DocumentException, URISyntaxException {
+    public ResponseEntity<byte[]> generatePdf(@RequestBody @Valid UkasePayload payload)
+            throws IOException, DocumentException, URISyntaxException {
         return ResponseEntity.ok(pdfRenderer.render(htmlRenderer.render(payload.getIndex(), payload.getData())));
+    }
+
+    @RequestMapping(value = "/pdf/{template}", method = RequestMethod.HEAD)
+    public @ResponseBody DeferredState checkTemplate(@PathVariable String template) throws IOException {
+        DeferredState state = new DeferredState();
+        SourceListener listener = SourceListener.templateListener(template,
+                test -> state.setResult(translateState(test)));
+        source.registerListener(listener);
+        return state;
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -75,5 +92,13 @@ public class UkaseController {
     public ResponseEntity<String> handleHandlebarsException(HandlebarsException e) {
         log.error("Some grand error caused in template mechanism", e);
         return new ResponseEntity<>("Some grand error caused in template mechanism", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    private ResponseEntity<Object> translateState(boolean selectedTemplateUpdated) {
+        if (selectedTemplateUpdated) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
+        }
     }
 }

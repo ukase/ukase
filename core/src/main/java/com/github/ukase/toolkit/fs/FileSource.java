@@ -22,6 +22,7 @@ package com.github.ukase.toolkit.fs;
 import com.github.jknack.handlebars.Helper;
 import com.github.jknack.handlebars.io.FileTemplateLoader;
 import com.github.jknack.handlebars.io.TemplateLoader;
+import com.github.ukase.toolkit.SourceListener;
 import lombok.Getter;
 import com.github.ukase.config.UkaseSettings;
 import com.github.ukase.toolkit.Source;
@@ -29,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PreDestroy;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -47,19 +49,36 @@ public class FileSource implements Source {
     private final TemplateLoader templateLoader;
     private final File resources;
     private final File templates;
+    private final FileUpdatesListener resourcesListener;
+    private final FileUpdatesListener templatesListener;
     private final Collection<String> fonts;
-    //TODO WATCH SERVICE
 
     @Autowired
-    public FileSource(UkaseSettings settings) {
+    public FileSource(UkaseSettings settings) throws IOException {
         templates = settings.getTemplates();
         templateLoader = new FileTemplateLoader(templates);
         resources = settings.getResources();
+
+        resourcesListener = new FileUpdatesListener(resources);
+        if (isSubDirectory(resources, templates)) {
+            templatesListener = null;
+        } else {
+            templatesListener = new FileUpdatesListener(templates);
+        }
 
         File[] fontsFiles = resources.listFiles((dir, fileName) -> IS_FONT.test(fileName));
         fonts = Arrays.stream(fontsFiles)
                 .map(File::getAbsolutePath)
                 .collect(Collectors.toList());
+
+    }
+
+    @PreDestroy
+    public void stopFSListeners() {
+        resourcesListener.stopNear();
+        if (templatesListener != null) {
+            templatesListener.stopNear();
+        }
     }
 
     @Override
@@ -89,5 +108,21 @@ public class FileSource implements Source {
 
     public Collection<String> getFontsUrls() {
         return Collections.unmodifiableCollection(fonts);
+    }
+
+    @Override
+    public void registerListener(SourceListener listener) {
+        resourcesListener.registerListener(listener);
+        if (templatesListener != null) {
+            templatesListener.registerListener(listener);
+        }
+    }
+
+    private boolean isSubDirectory(File dir, File kind) {
+        if (kind == null) {
+            return false;
+        }
+
+        return kind.equals(dir) || isSubDirectory(dir, kind.getParentFile());
     }
 }

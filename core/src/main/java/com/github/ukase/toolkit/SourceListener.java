@@ -19,26 +19,20 @@
 
 package com.github.ukase.toolkit;
 
-import com.github.jknack.handlebars.Helper;
-import com.github.jknack.handlebars.io.TemplateLoader;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.Map;
 import java.util.function.Predicate;
+import java.util.function.Consumer;
 
-public interface Source {
-    Predicate<String> IS_FONT = fileName -> fileName.toLowerCase().endsWith("ttf");
+public interface SourceListener {
+    void resourceUpdated(String resourceName);
 
-    TemplateLoader getTemplateLoader();
-    Map<String, Helper<?>> getHelpers();
-    boolean hasHelpers();
-    boolean hasResource(String url);
-    boolean hasTemplate(String name);
-    InputStream getResource(String url) throws IOException;
-    Collection<String> getFontsUrls();
-    default void registerListener(SourceListener listener) {
-        listener.resourceUpdated("");
+    static SourceListener templateListener(String templateName, Consumer<Boolean> consumer) {
+        Predicate<String> predicate;
+        if (templateName.equals("ANY")) {
+            predicate = resourceName -> true;
+        } else {
+            predicate = resourceName -> !resourceName.endsWith("hbs") || resourceName.equals(templateName + ".hbs");
+        }
+
+        return resourceName -> consumer.accept(predicate.test(resourceName));
     }
 }
