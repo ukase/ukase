@@ -96,7 +96,7 @@ public class UkaseController {
 
     private ResponseEntity<Object> translateState(boolean selectedTemplateUpdated) {
         if (selectedTemplateUpdated) {
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>("updated", HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
         }
