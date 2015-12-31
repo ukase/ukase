@@ -24,11 +24,5 @@ module.exports = function (ngModule) {
 };
 
 function homeIndexController() {
-    var vm = this;
-
-    vm.getProcessDefinitions = getProcessDefinitions;
 }
 
-function getProcessDefinitions() {
-    return data;
-}
