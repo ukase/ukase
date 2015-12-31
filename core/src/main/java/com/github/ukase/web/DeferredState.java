@@ -22,5 +22,5 @@ package com.github.ukase.web;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.context.request.async.DeferredResult;
 
-public class DeferredState extends DeferredResult<ResponseEntity<Object>> {
+class DeferredState extends DeferredResult<ResponseEntity<Object>> {
 }
