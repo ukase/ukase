@@ -17,15 +17,19 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.ukase.toolkit.jar;
+package com.github.ukase.toolkit;
 
 import com.github.jknack.handlebars.io.AbstractTemplateLoader;
+import com.github.jknack.handlebars.io.FileTemplateLoader;
+import com.github.jknack.handlebars.io.TemplateLoader;
 import com.github.jknack.handlebars.io.TemplateSource;
 import com.github.ukase.config.UkaseSettings;
+import com.github.ukase.toolkit.jar.ZipTemplateSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
@@ -37,35 +41,63 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 @Component
-@Scope("prototype")
-class ZipTemplateLoader extends AbstractTemplateLoader {
+public class CompoundTemplateLoader extends AbstractTemplateLoader {
     private final ZipFile zip;
     private final Map<String, ZipEntry> resources = new HashMap<>();
+    private final TemplateLoader externalLoader;
 
     @Autowired
-    public ZipTemplateLoader(UkaseSettings settings) throws IOException {
-        zip = new ZipFile(settings.getResources());
+    public CompoundTemplateLoader(UkaseSettings settings) throws IOException {
+        File templates = settings.getTemplates();
+        externalLoader =  templates == null ? null : new FileTemplateLoader(templates);
+
+        if (settings.getJar() == null) {
+            zip = null;
+            return;
+        }
+
+        zip = new ZipFile(settings.getJar());
         zip.stream().forEach(this::registerResource);
     }
 
     @Override
     public TemplateSource sourceAt(String location) throws IOException {
-        return new ZipTemplateSource(zip, zip.getEntry(location));
+        try {
+            return externalLoader.sourceAt(location);
+        } catch (FileNotFoundException e) {
+            ZipEntry entry = zip.getEntry(location);
+            if (entry == null) {
+                throw e;
+            }
+            return new ZipTemplateSource(zip, entry);
+        }
     }
 
-    boolean hasResource(String location) {
+    @Override
+    public void setSuffix(String suffix) {
+        externalLoader.setSuffix(suffix);
+        super.setSuffix(suffix);
+    }
+
+    @Override
+    public void setPrefix(String prefix) {
+        externalLoader.setPrefix(prefix);
+        super.setPrefix(prefix);
+    }
+
+    public boolean hasResource(String location) {
         return resources.containsKey(location);
     }
 
-    ZipEntry getResource(String location) {
+    public ZipEntry getResource(String location) {
         return resources.get(location);
     }
 
-    InputStream getResource(ZipEntry resource) throws IOException {
+    public InputStream getResource(ZipEntry resource) throws IOException {
         return zip.getInputStream(resource);
     }
 
-    Collection<String> getResources(Predicate<String> filter) {
+    public Collection<String> getResources(Predicate<String> filter) {
         return resources.keySet().stream().filter(filter).collect(Collectors.toList());
     }
 

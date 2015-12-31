@@ -20,14 +20,10 @@
 package com.github.ukase.toolkit.fs;
 
 import com.github.jknack.handlebars.Helper;
-import com.github.jknack.handlebars.io.FileTemplateLoader;
-import com.github.jknack.handlebars.io.TemplateLoader;
 import com.github.ukase.toolkit.SourceListener;
-import lombok.Getter;
 import com.github.ukase.config.UkaseSettings;
 import com.github.ukase.toolkit.Source;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
@@ -42,11 +38,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
-@Scope("prototype")
 public class FileSource implements Source {
-
-    @Getter
-    private final TemplateLoader templateLoader;
     private final File resources;
     private final File templates;
     private final FileUpdatesListener resourcesListener;
@@ -56,26 +48,36 @@ public class FileSource implements Source {
     @Autowired
     public FileSource(UkaseSettings settings) throws IOException {
         templates = settings.getTemplates();
-        templateLoader = new FileTemplateLoader(templates);
         resources = settings.getResources();
 
-        resourcesListener = new FileUpdatesListener(resources);
-        if (isSubDirectory(resources, templates)) {
-            templatesListener = null;
+        if (resources != null) {
+            resourcesListener = new FileUpdatesListener(resources);
+            if (isSubDirectory(resources, templates)) {
+                templatesListener = null;
+            } else {
+                templatesListener = new FileUpdatesListener(templates);
+            }
+
+            File[] fontsFiles = resources.listFiles((dir, fileName) -> IS_FONT.test(fileName));
+            fonts = Arrays.stream(fontsFiles)
+                    .map(File::getAbsolutePath)
+                    .collect(Collectors.toList());
         } else {
-            templatesListener = new FileUpdatesListener(templates);
+            resourcesListener = null;
+            if (templates != null) {
+                templatesListener = new FileUpdatesListener(templates);
+            } else {
+                templatesListener = null;
+            }
+            fonts = Collections.emptyList();
         }
-
-        File[] fontsFiles = resources.listFiles((dir, fileName) -> IS_FONT.test(fileName));
-        fonts = Arrays.stream(fontsFiles)
-                .map(File::getAbsolutePath)
-                .collect(Collectors.toList());
-
     }
 
     @PreDestroy
     public void stopFSListeners() {
-        resourcesListener.stopNear();
+        if (resourcesListener != null) {
+            resourcesListener.stopNear();
+        }
         if (templatesListener != null) {
             templatesListener.stopNear();
         }
@@ -93,17 +95,20 @@ public class FileSource implements Source {
 
     @Override
     public boolean hasResource(String url) {
-        return new File(resources, url).isFile();
+        return resources != null && new File(resources, url).isFile();
     }
 
     @Override
     public boolean hasTemplate(String name) {
-        return new File(templates, name + ".hbs").isFile();
+        return templates != null && new File(templates, name + ".hbs").isFile();
     }
 
     @Override
     public InputStream getResource(String url) throws IOException {
-        return new FileInputStream(new File(resources, url));
+        if (hasResource(url)) {
+            return new FileInputStream(new File(resources, url));
+        }
+        return null;
     }
 
     public Collection<String> getFontsUrls() {
@@ -112,9 +117,14 @@ public class FileSource implements Source {
 
     @Override
     public void registerListener(SourceListener listener) {
-        resourcesListener.registerListener(listener);
+        if (resourcesListener != null) {
+            resourcesListener.registerListener(listener);
+        }
         if (templatesListener != null) {
             templatesListener.registerListener(listener);
+        }
+        if (resourcesListener == null && templatesListener == null) {
+            listener.resourceUpdated(null);
         }
     }
 

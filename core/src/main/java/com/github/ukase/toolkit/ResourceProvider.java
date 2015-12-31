@@ -20,10 +20,7 @@
 package com.github.ukase.toolkit;
 
 import com.github.jknack.handlebars.Handlebars;
-import com.github.ukase.config.UkaseSettings;
-import com.github.ukase.toolkit.fs.FileSource;
 import com.github.ukase.toolkit.helpers.AbstractHelper;
-import com.github.ukase.toolkit.jar.JarSource;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.pdf.BaseFont;
 import org.slf4j.Logger;
@@ -42,20 +39,20 @@ import java.io.IOException;
 @Service
 public class ResourceProvider {
     private static final Logger log = LoggerFactory.getLogger(ResourceProvider.class);
-    @Autowired
-    private ApplicationContext context;
-    private Source source;
+    private final ApplicationContext context;
+    private final CompoundSource source;
+    private final CompoundTemplateLoader templateLoader;
 
     @Autowired
-    public ResourceProvider(UkaseSettings settings, ApplicationContext context) {
-        this.source = settings.isJar()
-                ? context.getBean(JarSource.class)
-                : context.getBean(FileSource.class);
+    public ResourceProvider(ApplicationContext context, CompoundSource source, CompoundTemplateLoader templateLoader) {
+        this.context = context;
+        this.source = source;
+        this.templateLoader = templateLoader;
     }
 
     @Bean
     public Handlebars getEngine() {
-        Handlebars engine = new Handlebars(source.getTemplateLoader());
+        Handlebars engine = new Handlebars(templateLoader);
 
         if (source.hasHelpers()) {
             source.getHelpers().forEach(engine::registerHelper);

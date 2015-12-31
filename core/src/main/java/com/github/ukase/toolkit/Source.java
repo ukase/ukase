@@ -31,7 +31,6 @@ import java.util.function.Predicate;
 public interface Source {
     Predicate<String> IS_FONT = fileName -> fileName.toLowerCase().endsWith("ttf");
 
-    TemplateLoader getTemplateLoader();
     Map<String, Helper<?>> getHelpers();
     boolean hasHelpers();
     boolean hasResource(String url);

@@ -36,14 +36,14 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-public class WrappedUserAgentCallback implements UserAgentCallback {
+class WrappedUserAgentCallback implements UserAgentCallback {
     private static final Logger log = LoggerFactory.getLogger(WrappedUserAgentCallback.class);
 
     private final UserAgentCallback delegate;
     private final Source source;
     private final SharedContext context;
 
-    public WrappedUserAgentCallback(Source source, SharedContext context) {
+    WrappedUserAgentCallback(Source source, SharedContext context) {
         this.source = source;
         this.context = context;
         this.delegate = context.getUserAgentCallback();

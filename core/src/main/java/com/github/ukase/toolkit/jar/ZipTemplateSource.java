@@ -27,11 +27,11 @@ import java.nio.charset.Charset;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-class ZipTemplateSource implements TemplateSource {
+public class ZipTemplateSource implements TemplateSource {
     private final ZipEntry entry;
     private final ZipFile zip;
 
-    ZipTemplateSource(ZipFile zip, ZipEntry entry) {
+    public ZipTemplateSource(ZipFile zip, ZipEntry entry) {
         this.entry = entry;
         this.zip = zip;
     }

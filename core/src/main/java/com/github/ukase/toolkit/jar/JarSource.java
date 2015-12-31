@@ -21,10 +21,10 @@ package com.github.ukase.toolkit.jar;
 
 import com.github.jknack.handlebars.Helper;
 import com.github.ukase.config.UkaseSettings;
+import com.github.ukase.toolkit.CompoundTemplateLoader;
 import lombok.Getter;
 import com.github.ukase.toolkit.Source;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -39,20 +39,26 @@ import java.util.Properties;
 import java.util.zip.ZipEntry;
 
 @Component
-@Scope("prototype")
 public class JarSource implements Source {
     @Getter
-    private final ZipTemplateLoader templateLoader;
+    private final CompoundTemplateLoader templateLoader;
     private final Map<String, String> helpers = new HashMap<>();
     private final Map<String, Helper<?>> helpersInstances = new HashMap<>();
     private final URLClassLoader classLoader;
     private final Collection<String> fonts;
 
     @Autowired
-    public JarSource(ZipTemplateLoader templateLoader, UkaseSettings settings) {
-        try {
-            this.templateLoader = templateLoader;
+    public JarSource(CompoundTemplateLoader templateLoader, UkaseSettings settings) {
+        this.templateLoader = templateLoader;
 
+        if (settings.getJar() == null) {
+            classLoader = null;
+            fonts = Collections.emptyList();
+
+            return;
+        }
+
+        try {
             ZipEntry resourcesEntry = templateLoader.getResource("imported-handlers.properties");
             if (resourcesEntry != null) {
                 Properties properties = new Properties();
@@ -63,7 +69,7 @@ public class JarSource implements Source {
             fonts = findFonts(this.templateLoader);
 
             if (hasHelpers()) {
-                URL jar = settings.getResources().toURI().toURL();
+                URL jar = settings.getJar().toURI().toURL();
                 URL[] jars = new URL[] {jar};
                 classLoader = new URLClassLoader(jars, getClass().getClassLoader());
                 helpers.forEach((name, className) -> helpersInstances.put(name, getHelper(className)));
@@ -120,7 +126,7 @@ public class JarSource implements Source {
         helpers.put((String) name, (String) className);
     }
 
-    private static Collection<String> findFonts(ZipTemplateLoader templateLoader) {
+    private static Collection<String> findFonts(CompoundTemplateLoader templateLoader) {
         return templateLoader.getResources(IS_FONT);
     }
 }
