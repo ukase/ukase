@@ -24,11 +24,11 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
@@ -54,7 +54,7 @@ class FileUpdatesListener {
 
     FileUpdatesListener(File root) throws IOException {
         this.keys = new HashMap<>();
-        this.watcher = FileSystems.getFileSystem(root.toURI()).newWatchService();
+        this.watcher = Paths.get(root.toURI()).getFileSystem().newWatchService();
         this.visitor = new FileVisitor();
         Files.walkFileTree(root.toPath(), visitor);
         new Thread(new Watcher(), getClass().getName() + "-thread").start();

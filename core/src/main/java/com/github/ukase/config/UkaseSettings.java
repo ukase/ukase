@@ -54,6 +54,10 @@ public class UkaseSettings {
     private File translateToFile(String path) {
         File directory;
 
+        if (path == null || path.trim().isEmpty()) {
+            return null;
+        }
+
         if (path.startsWith(CLASSPATH)) {
             if (path.length() == CLASSPATH.length()) {
                 directory = new File(getClassPathUri());
