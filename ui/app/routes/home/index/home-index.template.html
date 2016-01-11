@@ -31,11 +31,11 @@
         </md-menu-bar>
     </md-toolbar>
 
-    <div data-flex data-layout="row">
-        <md-sidenav  data-md-is-locked-open="true" class="md-whiteframe-z2" style="min-height: 100%;">
+    <div data-flex data-layout="row" class="main-area">
+        <md-sidenav  data-md-is-locked-open="true" class="md-whiteframe-z2 data-view">
             <ukase-data></ukase-data>
         </md-sidenav>
-        <md-content data-layout="column" data-flex id="content" style="min-height: 100%;">
+        <md-content data-layout="column" data-flex id="content">
             <ukase-pdf-view></ukase-pdf-view>
         </md-content>
     </div>

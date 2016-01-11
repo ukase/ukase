@@ -34,7 +34,8 @@ function ukasePoller($http, $q) {
     return {
         flag: false,
         poll: function (template, defer) {
-            var $d = !defer ? $q.defer() : defer,
+            var self = this,
+                $d = !defer ? $q.defer() : defer,
                 requestUrl = '/api/pdf/' + template,
                 $request = head(encodeURI(requestUrl));
 
@@ -44,7 +45,7 @@ function ukasePoller($http, $q) {
 
             $request.error(function (error) {
                 if (this.flag) {
-                    this.poll(template, $d);
+                    self.poll(template, $d);
                 } else {
                     $d.reject(error);
                 }
