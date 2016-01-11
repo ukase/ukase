@@ -40,18 +40,18 @@ public class UkaseSettings {
     private File jar;
 
     public void setTemplates(String path) {
-        this.templates = translateToFile(path);
+        this.templates = translateToFile(path, true);
     }
 
     public void setResources(String path) {
-        this.resources = translateToFile(path);
+        this.resources = translateToFile(path, true);
     }
 
     public void setJar(String path) {
-        this.jar = translateToFile(path);
+        this.jar = translateToFile(path, false);
     }
 
-    private File translateToFile(String path) {
+    private File translateToFile(String path, boolean isDirectory) {
         File directory;
 
         if (path == null || path.trim().isEmpty()) {
@@ -68,8 +68,12 @@ public class UkaseSettings {
             directory = new File(path);
         }
 
-        if (!directory.isDirectory()) {
-            throw new IllegalStateException("Wrong configuration - not a directory: " + directory);
+        if (isDirectory) {
+            if (!directory.isDirectory()) {
+                throw new IllegalStateException("Wrong configuration - not a directory/file: " + directory);
+            }
+        } else if(!directory.isFile()) {
+            throw new IllegalStateException("Wrong configuration - not a jar file: " + directory);
         }
         return directory;
     }
