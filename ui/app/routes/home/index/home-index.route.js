@@ -37,6 +37,8 @@ require('./home-index.controller')(ngModule);
 
 module.exports = ngModule.name;
 
+require('./home-index.template.less');
+
 function homeIndexRoute($stateProvider) {
     $stateProvider.state('home.index', {
         url: '/',
