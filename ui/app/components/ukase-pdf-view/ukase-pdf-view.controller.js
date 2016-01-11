@@ -28,5 +28,11 @@ module.exports = function (ngModule) {
 };
 
 function ukasePdfViewController($scope, service) {
-    $scope.pdfData = service.pdfData;
+    $scope.service = service;
+    $scope.pdfData = service.getData();
+    $scope.$watch('service.getData()',
+        function(newVal) {
+            $scope.pdfData = newVal;
+        }
+    );
 }

@@ -62,7 +62,7 @@ public class UkaseController {
         return ResponseEntity.ok(result);
     }
 
-    @RequestMapping(value = "/pdf", method = RequestMethod.POST)
+    @RequestMapping(value = "/pdf", method = RequestMethod.POST, produces = "application/pdf")
     public ResponseEntity<byte[]> generatePdf(@RequestBody @Valid UkasePayload payload)
             throws IOException, DocumentException, URISyntaxException {
         return ResponseEntity.ok(pdfRenderer.render(htmlRenderer.render(payload.getIndex(), payload.getData())));

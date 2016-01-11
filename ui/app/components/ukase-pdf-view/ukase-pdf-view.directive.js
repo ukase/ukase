@@ -32,6 +32,8 @@ require('./ukase-pdf-view.controller')(ngModule);
 
 module.exports = ngModule.name;
 
+require('./ukase-pdf-view.less');
+
 function ukasePdfView() {
     return {
         restrict: 'E',
@@ -40,8 +42,9 @@ function ukasePdfView() {
         bindToController: true,
         controllerAs: 'vm',
         controller: 'ukasePdfViewController',
-        template: '<md-whiteframe class="md-whiteframe-2dp" layout layout-align="center center">' +
-                '   <embed ng-src="pdfData" style="width: 500px; height: 500px;">pdf preview (not loaded yet)</embed>' +
+        template: '<md-whiteframe class="md-whiteframe-2dp preview" layout layout-align="center center">' +
+                '   <object data-ng-if="pdfData" data="{{pdfData}}" type="application/pdf"></object> ' +
+                '   <span data-ng-if="!pdfData">pdf preview (not loaded yet)</span>' +
                 '</md-whiteframe>'
     };
 }

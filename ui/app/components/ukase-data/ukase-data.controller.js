@@ -22,15 +22,32 @@
 module.exports = function (ngModule) {
     ngModule.controller('ukaseDataController', [
         '$scope',
+        '$timeout',
         'ukaseFactory',
         'ukasePdfService',
         ukaseDataController
     ]);
 };
 
-function ukaseDataController($scope, factory, service) {
+function ukaseDataController($scope, $timeout, factory, service) {
+    var timeout = 1000/*ms*/,
+        promise;
+
     $scope.jsonData = factory.json;
-    $scope.send = function() {
+    $scope.$watch('jsonData', function (newValue) {
+        factory.json = newValue;
+        if (service.isAutoUpdate()) {
+            if (promise) {
+                $timeout.cancel(promise);
+            }
+            $timeout(
+                function () {
+                    service.sendData();
+                }, timeout
+            );
+        }
+    });
+    $scope.send = function () {
         service.sendData();
     };
 }

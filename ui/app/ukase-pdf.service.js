@@ -24,13 +24,14 @@ module.exports = function (ngModule) {
         '$http',
         '$q',
         '$log',
+        '$sce',
         'ukasePoller',
         'ukaseFactory',
         ukasePdfService]);
 
 };
 
-function ukasePdfService($http, $q, $log, poller, factory) {
+function ukasePdfService($http, $q, $log, $sce, poller, factory) {
     function send(json) {
         var defer = $q.defer(),
             requestUrl = '/api/pdf/';
@@ -39,37 +40,55 @@ function ukasePdfService($http, $q, $log, poller, factory) {
             method: 'POST',
             data: json,
             responseType: 'arraybuffer',
+            accepts: 'application/pdf',
             url: encodeURI(requestUrl)
         }).success(function (data) {
             var file = new Blob([data], {type: 'application/pdf'}),
                 fileUrl = URL.createObjectURL(file);
-            defer.resolve(fileUrl);
+            $log.debug('success: ' + fileUrl);
+            defer.resolve($sce.trustAsResourceUrl(fileUrl));
         }).error(function (error) {
+            $log.warn('error: ' + error);
             defer.reject(error);
         });
 
         return defer.promise;
     }
 
-    return {
-        pdfData: undefined,
-        startPolling: function () {
-            while (poller.flag) {
-                if (poller.poll() === 'updated') {
+    function checkPoller() {
+        poller.poll().then(
+            function(result) {
+                if (result === 'updated') {
                     this.pdfData = send(factory.json);
+                } else {
+                    checkPoller();
                 }
             }
+        );
+    }
+
+    return {
+        pdfData: undefined,
+        autoUpdate: false,
+        startPolling: function () {
+            checkPoller();
         },
-        startAutoUpdate: function () {
-            //var interval;
-            while (factory.flag) {
-                //interval = setInterval()
-                //todo
-            }
-            //clearInterval(interval);
+        setAutoUpdate: function (update) {
+            this.autoUpdate = update;
         },
         sendData: function () {
-            this.pdfData = send(factory.json);
+            var self = this;
+            send(factory.json).then(
+                function(data) {
+                    self.pdfData = data;
+                }
+            );
+        },
+        getData: function() {
+            return this.pdfData;
+        },
+        isAutoUpdate: function() {
+            return this.autoUpdate;
         }
     };
 }

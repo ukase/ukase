@@ -37,7 +37,7 @@ function ukaseMenu() {
         bindToController: true,
         controllerAs: 'vm',
         controller: 'ukaseMenuController',
-        template: '<md-checkbox layout="column" ng-model="autoResourcesUpdate" ng-click="autoResourcesClicked">Update pdf on data update</md-checkbox>' +
-                '<md-checkbox layout="column" ng-model="pollerEnabled" ng-click="pollerClicked">Update pdf on template update</md-checkbox>'
+        template: '<md-checkbox layout="column" data-ng-model="autoResourcesUpdate">Update pdf on data update</md-checkbox>' +
+                '<md-checkbox layout="column" data-ng-model="pollerEnabled">Update pdf on template update</md-checkbox>'
     };
 }

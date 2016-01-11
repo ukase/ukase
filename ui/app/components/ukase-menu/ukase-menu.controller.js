@@ -36,11 +36,15 @@ function ukaseMenuController($scope, poller, service, factory) {
             service.startPolling();
         }
     };
+    $scope.$watch('pollerEnabled', function(newVal) {
+        poller.flag = newVal;
+        if (newVal) {
+            service.startPolling();
+        }
+    });
 
     $scope.autoResourcesUpdate = factory.flag;
-    $scope.autoResourcesClicked = function() {
-        if ($scope.autoResourcesUpdate) {
-            service.startAutoUpdate();
-        }
-    };
+    $scope.$watch('autoResourcesUpdate', function(newVal) {
+        service.setAutoUpdate(newVal);
+    });
 }
