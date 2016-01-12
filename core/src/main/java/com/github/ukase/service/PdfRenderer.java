@@ -31,9 +31,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.regex.Pattern;
 
 @Service
 public class PdfRenderer {
+    private static final String COMMON_DOCTYPE = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" " +
+            "\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">";
+    private static final String DOCTYPE_HTML5 = "<!DOCTYPE html>";
+    private static final Pattern HTML_TAG = Pattern.compile("<html([^>]*)lang=\"([^\"]+)\"([^>]*)>");
+    private static final String HTML_TAG_REPLACEMENT =
+            "<html$1lang=\"$2\" xml:lang=\"$2\" xmlns=\"http://www.w3.org/1999/xhtml\"$3>";
+
     private final String resourcesPath;
     private final ResourceProvider provider;
 
@@ -52,11 +60,22 @@ public class PdfRenderer {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
         ITextRenderer renderer = provider.getRenderer();
-        renderer.setDocumentFromString(html, resourcesPath);
+        renderer.setDocumentFromString(wrapHtml5Document(html), resourcesPath);
         renderer.layout();
         renderer.createPDF(baos, true);
         renderer.finishPDF();
 
         return baos.toByteArray();
+    }
+
+    private String wrapHtml5Document(String html5PossibleDocument) {
+        String document = html5PossibleDocument;
+
+        if (html5PossibleDocument.contains(DOCTYPE_HTML5)) {
+            document = document.replace(DOCTYPE_HTML5 , COMMON_DOCTYPE);
+            document = HTML_TAG.matcher(document).replaceAll(HTML_TAG_REPLACEMENT);
+        }
+
+        return document;
     }
 }
