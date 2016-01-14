@@ -20,11 +20,13 @@
 'use strict';
 
 var angular = require('angular');
+require('ngStorage');
 
 module.exports = angular
     .module('ukase.config.main', [
         require('angular-ui-router'),
-        require('../routes/errors/errors.route')
+        require('../routes/errors/errors.route'),
+        'ngStorage'
     ])
     .config(mainConfig)
     .run(mainRun)

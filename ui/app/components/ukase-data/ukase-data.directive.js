@@ -38,9 +38,9 @@ function ukaseData() {
         controllerAs: 'vm',
         controller: 'ukaseDataController',
         template: '<md-input-container class="md-block">' +
-            '   <label>JSON-data</label>' +
-            '   <textarea data-ng-model="jsonData" rows="5"></textarea>' +
+            '   <div class="json-editor"></div>' +
             '</md-input-container>' +
-            '<md-button class="md-raised md-primary" ng-click="send()">Update PDF</md-button>'
+            '<md-button class="md-raised md-primary" ng-click="send()">Update PDF</md-button>' +
+            '<md-button class="md-raised md-primary" ng-click="store()">Store json</md-button>'
     };
 }

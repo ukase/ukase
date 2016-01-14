@@ -19,9 +19,15 @@
 
 'use strict';
 
+var JsonEditor = require('jsoneditor');
+
+require('jsoneditor_css');
+require('./ukase-data.controller.less');
+
 module.exports = function (ngModule) {
     ngModule.controller('ukaseDataController', [
         '$scope',
+        '$element',
         '$timeout',
         'ukaseFactory',
         'ukasePdfService',
@@ -29,13 +35,28 @@ module.exports = function (ngModule) {
     ]);
 };
 
-function ukaseDataController($scope, $timeout, factory, service) {
+function ukaseDataController($scope, $element, $timeout, factory, service) {
     var timeout = 1000/*ms*/,
-        promise;
+        promise,
+        options = {
+            mode: 'tree',
+            modes: ['code', 'tree', 'text'],
+            title: 'JSON-data',
+            onChange: jsonChanged
+        },
+        editor = new JsonEditor($element.find('.json-editor')[0], options);
+    editor.setText(factory.json);
+    editor.expandAll();
 
-    $scope.jsonData = factory.json;
-    $scope.$watch('jsonData', function (newValue) {
-        factory.json = newValue;
+    $scope.send = function () {
+        service.sendData();
+    };
+    $scope.store = function () {
+        factory.saveToStorage();
+    };
+
+    function jsonChanged() {
+        factory.json = editor.getText();
         if (service.isAutoUpdate()) {
             if (promise) {
                 $timeout.cancel(promise);
@@ -46,8 +67,5 @@ function ukaseDataController($scope, $timeout, factory, service) {
                 }, timeout
             );
         }
-    });
-    $scope.send = function () {
-        service.sendData();
-    };
+    }
 }

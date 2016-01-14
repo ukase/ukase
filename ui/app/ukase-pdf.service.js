@@ -56,7 +56,7 @@ function ukasePdfService($http, $q, $log, $sce, poller, factory) {
     }
 
     function checkPoller() {
-        poller.poll().then(
+        poller.poll('ANY').then(
             function(result) {
                 if (result === 'updated') {
                     this.pdfData = send(factory.json);

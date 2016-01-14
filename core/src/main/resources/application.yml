@@ -2,7 +2,7 @@ spring:
   main:
     banner-mode: off
 server:
-  port: 10081
+  port: 10080
 logging:
   config: classpath:logback-prod.xml
 
@@ -27,3 +27,14 @@ ukase:
   resources: classpath:/
   templates: classpath:/templates/
   jar:
+
+---
+
+spring:
+  profiles: templates-dev
+ukase:
+  jar: C:/Users/puvarov/Projects/MADI/MADI-AP/madi-ap-pdf/target/madi-ap-pdf-1.0-SNAPSHOT.jar
+  resources: C:/Users/puvarov/Projects/MADI/MADI-AP/madi-ap-pdf/src/main/resources
+  templates: C:/Users/puvarov/Projects/MADI/MADI-AP/madi-ap-pdf/src/main/resources
+
+

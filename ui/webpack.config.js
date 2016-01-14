@@ -38,6 +38,7 @@ config = {
     },
     resolve: {
         alias: {
+            jsoneditor_css: path.resolve(__dirname, 'node_modules', 'jsoneditor', 'dist', 'jsoneditor.min.css'),
             sinon: 'sinon/pkg/sinon.js' // https://github.com/webpack/webpack/issues/304
         }
     },

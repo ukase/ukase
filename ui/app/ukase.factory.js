@@ -19,20 +19,21 @@
 
 'use strict';
 
-var ngStorage = require('ngstorage');
-
 module.exports = function(ngModule) {
     ngModule.factory('ukaseFactory', ukaseFactory);
 };
 
-function ukaseFactory() {
-    var data = ngStorage.ukaseData;
+function ukaseFactory($localStorage) {
+    var data = $localStorage.ukaseData;
     if (!data) {
         data = '{"index": "basic", "data": {}}';
     }
 
     return {
         flag: false,
-        json: data
+        json: data,
+        saveToStorage: function() {
+            $localStorage.ukaseData = this.json;
+        }
     };
 }
