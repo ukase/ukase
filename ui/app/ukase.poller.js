@@ -39,8 +39,8 @@ function ukasePoller($http, $q) {
                 requestUrl = '/api/pdf/' + template,
                 $request = head(encodeURI(requestUrl));
 
-            $request.success(function (data) {
-                $d.resolve(data);
+            $request.success(function () {
+                $d.resolve('updated');
             });
 
             $request.error(function (error) {

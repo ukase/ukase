@@ -32,6 +32,11 @@ module.exports = function (ngModule) {
 };
 
 function ukasePdfService($http, $q, $log, $sce, poller, factory) {
+    var service = {
+        pdfData: undefined,
+        autoUpdate: false
+    };
+
     function send(json) {
         var defer = $q.defer(),
             requestUrl = '/api/pdf/';
@@ -60,7 +65,8 @@ function ukasePdfService($http, $q, $log, $sce, poller, factory) {
         poller.poll('ANY').then(
             function(result) {
                 if (result === 'updated') {
-                    this.pdfData = send(factory.json);
+                    service.sendData();
+                    checkPoller();
                 } else {
                     checkPoller();
                 }
@@ -68,29 +74,24 @@ function ukasePdfService($http, $q, $log, $sce, poller, factory) {
         );
     }
 
-    return {
-        pdfData: undefined,
-        autoUpdate: false,
-        startPolling: function () {
-            checkPoller();
-        },
-        setAutoUpdate: function (update) {
-            this.autoUpdate = update;
-        },
-        sendData: function () {
-            var self = this;
-            send(factory.json).then(
-                function(data) {
-                    self.pdfData = data;
-                }
-            );
-        },
-        getData: function() {
-            return this.pdfData;
-        },
-        isAutoUpdate: function() {
-            return this.autoUpdate;
-        }
+    service.startPolling = checkPoller;
+    service.setAutoUpdate = function (update) {
+        this.autoUpdate = update;
     };
+    service.sendData = function () {
+        send(factory.json).then(
+            function(data) {
+                service.pdfData = data;
+            }
+        );
+    };
+    service.getData = function() {
+        return service.pdfData;
+    };
+    service.isAutoUpdate = function() {
+        return this.autoUpdate;
+    };
+
+    return service;
 }
 
