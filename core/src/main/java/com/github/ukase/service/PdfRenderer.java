@@ -48,11 +48,12 @@ public class PdfRenderer {
     @Autowired
     private PdfRenderer(UkaseSettings settings, ResourceProvider provider) {
         File resources = settings.getResources();
-        if (!resources.isDirectory()) {
-            throw new IllegalArgumentException("Wrong configuration - resource path is not a directory");
+        if (resources == null || !resources.isDirectory()) {
+            resourcesPath = null;
+        } else {
+            resourcesPath = resources.toURI().toString();
         }
 
-        resourcesPath = resources.toURI().toString();
         this.provider = provider;
     }
 
@@ -60,7 +61,11 @@ public class PdfRenderer {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
         ITextRenderer renderer = provider.getRenderer();
-        renderer.setDocumentFromString(wrapHtml5Document(html), resourcesPath);
+        if (resourcesPath != null) {
+            renderer.setDocumentFromString(wrapHtml5Document(html), resourcesPath);
+        } else {
+            renderer.setDocumentFromString(wrapHtml5Document(html));
+        }
         renderer.layout();
         renderer.createPDF(baos, true);
         renderer.finishPDF();

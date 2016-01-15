@@ -36,6 +36,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 
 @Component
@@ -59,6 +60,8 @@ public class JarSource implements Source {
         }
 
         try {
+            URL jar = settings.getJar().toURI().toURL();
+
             Collection<String> props = templateLoader.getResources(IS_HELPERS_CONFIGURATION);
 
             Properties properties = new Properties();
@@ -70,10 +73,11 @@ public class JarSource implements Source {
                     forEach(stream -> loadStreamToProperties(stream, properties));
             properties.forEach(this::registerHelper);
 
-            fonts = templateLoader.getResources(IS_FONT);
+            fonts = templateLoader.getResources(IS_FONT).parallelStream()
+                    .map(font -> "jar:" + jar + "!/" + font)
+                    .collect(Collectors.toList());
 
             if (hasHelpers()) {
-                URL jar = settings.getJar().toURI().toURL();
                 URL[] jars = new URL[] {jar};
                 classLoader = new URLClassLoader(jars, getClass().getClassLoader());
                 helpers.forEach((name, className) -> helpersInstances.put(name, getHelper(className)));

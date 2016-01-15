@@ -63,13 +63,12 @@ public class CompoundTemplateLoader extends AbstractTemplateLoader {
     @Override
     public TemplateSource sourceAt(String location) throws IOException {
         try {
+            if (externalLoader == null) {
+                return getTemplateSource(location, null);
+            }
             return externalLoader.sourceAt(location);
         } catch (FileNotFoundException e) {
-            ZipEntry entry = zip.getEntry(location);
-            if (entry == null) {
-                throw e;
-            }
-            return new ZipTemplateSource(zip, entry);
+            return getTemplateSource(location, e);
         }
     }
 
@@ -104,4 +103,20 @@ public class CompoundTemplateLoader extends AbstractTemplateLoader {
     private void registerResource(ZipEntry entry) {
         resources.put(entry.getName(), entry);
     }
+
+    private TemplateSource getTemplateSource(String location, FileNotFoundException e) throws FileNotFoundException {
+        location = resolve(location);
+        if (location.startsWith("/")) {
+            location = location.substring(1);
+        }
+        ZipEntry entry = zip.getEntry(location);
+        if (entry == null) {
+            if (e == null) {
+                throw new IllegalStateException("Illegal state");
+            }
+            throw e;
+        }
+        return new ZipTemplateSource(zip, entry);
+    }
+
 }

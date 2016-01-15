@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
@@ -48,8 +49,9 @@ public class CompoundSource implements Source{
 
     @Override
     public Collection<String> getFontsUrls() {
-        //TODO fix fonts for jars (should be possible to provide them from jars)
-        return fileSource.getFontsUrls();
+        Collection<String> fonts = new ArrayList<>(fileSource.getFontsUrls());
+        fonts.addAll(jarSource.getFontsUrls());
+        return fonts;
     }
 
     @Override

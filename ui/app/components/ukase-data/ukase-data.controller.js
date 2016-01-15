@@ -45,7 +45,6 @@ function ukaseDataController($scope, $element, $timeout, factory, service) {
         },
         editor = new JsonEditor($element.find('.json-editor')[0], options);
     editor.setText(factory.json);
-    editor.expandAll();
 
     $scope.send = function () {
         service.sendData();
