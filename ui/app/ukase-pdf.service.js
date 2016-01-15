@@ -27,11 +27,12 @@ module.exports = function (ngModule) {
         '$sce',
         'ukasePoller',
         'ukaseFactory',
+        '$mdToast',
         ukasePdfService]);
 
 };
 
-function ukasePdfService($http, $q, $log, $sce, poller, factory) {
+function ukasePdfService($http, $q, $log, $sce, poller, factory, $mdToast) {
     var service = {
         pdfData: undefined,
         autoUpdate: false
@@ -53,8 +54,13 @@ function ukasePdfService($http, $q, $log, $sce, poller, factory) {
                 fileUrl = URL.createObjectURL(file);
             $log.debug('success: ' + fileUrl);
             defer.resolve($sce.trustAsResourceUrl(fileUrl));
-        }).error(function (error) {
-            $log.warn('error: ' + error);
+        }).error(function (error, code) {
+            var message = code === 406 ? 'Error in JSON data' : 'Error with rendering on server';
+            $mdToast.show({
+                template: '<md-toast><span flex>Error on load: ' + message + '</span></md-toast>',
+                position: 'top right'
+            });
+            $log.warn(message);
             defer.reject(error);
         });
 
