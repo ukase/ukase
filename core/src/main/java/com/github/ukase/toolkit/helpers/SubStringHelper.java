@@ -38,7 +38,7 @@ public class SubStringHelper extends AbstractHelper<String> {
             return "";
         }
         Integer start = options.param(0, null);
-        Integer end = options.param(0, null);
+        Integer end = options.param(1, null);
 
         if (isIncorrectParameters(context, start, end)
                 ) {

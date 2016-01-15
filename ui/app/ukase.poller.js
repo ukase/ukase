@@ -24,6 +24,10 @@ module.exports = function (ngModule) {
 };
 
 function ukasePoller($http, $q) {
+    var poller = {
+        flag: false
+    };
+
     function head(url) {
         return $http({
             method: 'HEAD',
@@ -31,27 +35,25 @@ function ukasePoller($http, $q) {
         });
     }
 
-    return {
-        flag: false,
-        poll: function (template, defer) {
-            var self = this,
-                $d = !defer ? $q.defer() : defer,
-                requestUrl = '/api/pdf/' + template,
-                $request = head(encodeURI(requestUrl));
+    poller.poll = function (template, defer) {
+        var $d = !defer ? $q.defer() : defer,
+            requestUrl = '/api/pdf/' + template,
+            $request = head(encodeURI(requestUrl));
 
-            $request.success(function () {
-                $d.resolve('updated');
-            });
+        $request.success(function () {
+            $d.resolve('updated');
+        });
 
-            $request.error(function (error) {
-                if (this.flag) {
-                    self.poll(template, $d);
-                } else {
-                    $d.reject(error);
-                }
-            });
+        $request.error(function (error) {
+            if (poller.flag) {
+                poller.poll(template, $d);
+            } else {
+                $d.reject(error);
+            }
+        });
 
-            return $d.promise;
-        }
+        return $d.promise;
     };
+
+    return poller;
 }
