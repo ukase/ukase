@@ -22,7 +22,6 @@
 var JsonEditor = require('jsoneditor');
 
 require('jsoneditor_css');
-require('./ukase-data.controller.less');
 
 module.exports = function (ngModule) {
     ngModule.controller('ukaseDataController', [

@@ -35,6 +35,7 @@ function ukasePdfService($http, $q, $log, $sce, poller, factory) {
     function send(json) {
         var defer = $q.defer(),
             requestUrl = '/api/pdf/';
+        $log.debug('pdf post data: ' + json);
 
         $http({
             method: 'POST',

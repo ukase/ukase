@@ -23,7 +23,7 @@
         <md-toolbar-filler data-layout data-layout-align="center center">
             <md-icon md-svg-src="assets/img/icon-pdf.svg" aria-label="Pdf Generator Service" class="icon"></md-icon>
         </md-toolbar-filler>
-        <h2 data-layout="column">PDF-generator</h2>
+        <h2 data-layout="column">Ukase (dynamic PDF-generator)</h2>
         <md-menu-bar data-layout="column" >
             <ukase-menu>
 
@@ -32,11 +32,11 @@
     </md-toolbar>
 
     <div data-flex data-layout="row" class="main-area">
-        <md-sidenav  data-md-is-locked-open="true" class="md-whiteframe-z2 data-view">
-            <ukase-data></ukase-data>
+        <md-sidenav data-md-is-locked-open="true" class="md-whiteframe-z2 data-view" md-component-id="data-panel">
+            <ukase-data data-flex data-layout="row"></ukase-data>
         </md-sidenav>
         <md-content data-layout="column" data-flex id="content">
-            <ukase-pdf-view></ukase-pdf-view>
+            <ukase-pdf-view data-flex data-layout="row"></ukase-pdf-view>
         </md-content>
     </div>
 </div>

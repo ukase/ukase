@@ -37,10 +37,12 @@ function ukaseData() {
         bindToController: true,
         controllerAs: 'vm',
         controller: 'ukaseDataController',
-        template: '<md-input-container class="md-block">' +
-            '   <div class="json-editor"></div>' +
-            '</md-input-container>' +
-            '<md-button class="md-raised md-primary" ng-click="send()">Update PDF</md-button>' +
-            '<md-button class="md-raised md-primary" ng-click="store()">Store json</md-button>'
+        template: '<div data-flex data-layout="column">' +
+            '  <div class="json-editor flex-grow" ></div>' +
+            '  <div data-flex data-layout="row" class="flex-initial layout-align-center-center">' +
+            '    <md-button class="md-raised md-primary" ng-click="send()">Update PDF</md-button>' +
+            '    <md-button class="md-raised md-primary" ng-click="store()">Store json</md-button>' +
+            '  </div>' +
+            '</div>'
     };
 }
