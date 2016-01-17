@@ -75,7 +75,8 @@ public class WebConfig extends WebMvcConfigurerAdapter {
                         new PathResourceResolver() {
                             @Override
                             protected Resource getResource(String resourcePath, Resource location) throws IOException {
-                                return location.exists() && location.isReadable() ? location : null;
+                                Resource resource = location.createRelative(resourcePath);
+                                return resource.exists() && resource.isReadable() ? resource : null;
                             }
                         });
     }
