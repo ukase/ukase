@@ -81,6 +81,12 @@ public class PdfRenderer {
             document = HTML_TAG.matcher(document).replaceAll(HTML_TAG_REPLACEMENT);
         }
 
-        return document;
+        return filterKnownEntities(document);
+    }
+
+    private String filterKnownEntities(String html) {
+        return html.replace("&#x27;", "'")
+                .replace("&#x3D;", "=")
+                .replace("&#x3D", "=");
     }
 }
