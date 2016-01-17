@@ -1,5 +1,29 @@
 # ukase
 
+## Get&amp;install
+Download release from [from GitHub](https://github.com/ukase/ukase/releases/download/Ukase-1.0/ukase-1.0.war)
+
+Download using maven:
+```
+mvn dependency:get -Dartifact=com.github.ukase:ukase:1.0:war -Dtransitive=false -Ddest=ukase.jar
+```
+
+After downloading create `config` directory and place here `application.yml` file, sample:
+```
+spring:
+  main:
+    banner-mode: off
+server:
+  port: 10080
+logging:
+  config: classpath:logback-prod.xml
+ukase:
+  project-root: .
+  resources: 
+  templates: 
+  jar: absolut-path-to-jar-with-templates_resources_fonts/templates_fonts_resources.jar
+```
+
 ## UKase API
 
 ### method POST /api/html
