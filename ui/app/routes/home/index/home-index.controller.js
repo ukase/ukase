@@ -19,10 +19,13 @@
 
 'use strict';
 
+var iconSvg = require('../../../assets/img/icon-pdf.svg');
+
 module.exports = function (ngModule) {
     ngModule.controller('HomeIndexController', homeIndexController);
 };
 
-function homeIndexController() {
+function homeIndexController($scope) {
+    $scope.svg = iconSvg;
 }
 
