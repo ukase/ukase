@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Konstantin Lepa <konstantin+ukase@lepabox.net>
+ * Copyright (c) 2016 Konstantin Lepa <konstantin+ukase@lepabox.net>
  *
  * This file is part of Ukase.
  *
@@ -17,22 +17,19 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.ukase.web;
+package com.github.ukase.config;
 
-import com.github.ukase.web.validation.HtmlTemplateLocationExists;
 import lombok.Data;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import java.util.HashMap;
-import java.util.Map;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 @Data
-public class UkasePayload {
-    @HtmlTemplateLocationExists
-    @NotNull
-    @Valid
-    private String index;
-    private Map<String, Object> data = new HashMap<>();
-    private boolean sample;
+@Component
+@ConfigurationProperties(prefix = "ukase.water-mark")
+public class WaterMarkSettings {
+    private float size;
+    private float x;
+    private float y;
+    private float degree;
+    private String text;
 }

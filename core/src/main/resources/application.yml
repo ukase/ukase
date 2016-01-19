@@ -11,7 +11,12 @@ ukase:
   resources: classpath:/
   templates: classpath:/
   jar:
-
+  water-mark:
+    degree: 60
+    size: 180
+    text: Sample
+    x: 350
+    y: 400
 ---
 
 spring:
