@@ -43,8 +43,8 @@ function ukasePdfView() {
         controllerAs: 'vm',
         controller: 'ukasePdfViewController',
         template: '<md-whiteframe class="md-whiteframe-2dp flex-grow layout-align-center-center preview" data-flex data-layout="column">' +
-                '   <div class="flex-grow">' +
-                '     <object data-ng-if="pdfData" data="{{pdfData}}" type="application/pdf"></object> ' +
+                '   <div class="flex-grow" data-flex data-layout="column">' +
+                '     <iframe class="flex-grow" data-ng-if="pdfData" src="{{pdfData}}"></iframe> ' +
                 '   </div>' +
                 '   <span data-ng-if="!pdfData">pdf preview (not loaded yet)</span>' +
                 '</md-whiteframe>'

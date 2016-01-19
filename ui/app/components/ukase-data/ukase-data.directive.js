@@ -25,6 +25,7 @@ var angular = require('angular'),
 ngModule = angular.module('ukase.components.ukase-data', [])
     .directive('ukaseData', ukaseData);
 
+require('./ukase-data.less');
 require('./ukase-data.controller')(ngModule);
 
 module.exports = ngModule.name;
@@ -38,10 +39,11 @@ function ukaseData() {
         controllerAs: 'vm',
         controller: 'ukaseDataController',
         template: '<div data-flex data-layout="column">' +
-            '  <div class="json-editor flex-grow" ></div>' +
+            '  <div class="json-editor flex-grow"></div>' +
             '  <div data-flex data-layout="row" class="flex-initial layout-align-center-center">' +
             '    <md-button class="md-raised md-primary" ng-click="send()">Update PDF</md-button>' +
             '    <md-button class="md-raised md-primary" ng-click="store()">Store json</md-button>' +
+            '    <md-checkbox layout="column" data-ng-model="pollerEnabled">Update pdf on template update</md-checkbox>' +
             '  </div>' +
             '</div>'
     };

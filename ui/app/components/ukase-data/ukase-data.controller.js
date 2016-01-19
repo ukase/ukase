@@ -29,12 +29,13 @@ module.exports = function (ngModule) {
         '$element',
         '$timeout',
         'ukaseFactory',
+        'ukasePoller',
         'ukasePdfService',
         ukaseDataController
     ]);
 };
 
-function ukaseDataController($scope, $element, $timeout, factory, service) {
+function ukaseDataController($scope, $element, $timeout, factory, poller, service) {
     var timeout = 1000/*ms*/,
         promise,
         options = {
@@ -52,6 +53,14 @@ function ukaseDataController($scope, $element, $timeout, factory, service) {
     $scope.store = function () {
         factory.saveToStorage();
     };
+
+    $scope.pollerEnabled = poller.flag;
+    $scope.$watch('pollerEnabled', function(newVal) {
+        poller.flag = newVal;
+        if (newVal) {
+            service.startPolling();
+        }
+    });
 
     function jsonChanged() {
         factory.json = editor.getText();

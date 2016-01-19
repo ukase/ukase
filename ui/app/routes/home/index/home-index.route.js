@@ -28,7 +28,6 @@ var angular = require('angular'),
 ngModule = angular
     .module('ukase.routes.home.index', [
         require('angular-ui-router'),
-        components.ukaseMenu,
         components.ukaseData,
         components.ukasePdfView
     ]).config(homeIndexRoute);

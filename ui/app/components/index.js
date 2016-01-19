@@ -21,7 +21,6 @@
 'use strict';
 
 module.exports = {
-    ukaseMenu: require('./ukase-menu/ukase-menu.directive'),
     ukaseData: require('./ukase-data/ukase-data.directive'),
     ukasePdfView: require('./ukase-pdf-view/ukase-pdf-view.directive')
 };
