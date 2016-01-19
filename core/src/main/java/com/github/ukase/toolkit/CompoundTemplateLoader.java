@@ -112,7 +112,7 @@ public class CompoundTemplateLoader extends AbstractTemplateLoader {
         ZipEntry entry = zip.getEntry(location);
         if (entry == null) {
             if (e == null) {
-                throw new IllegalStateException("File not found in jar, while no dir configuration");
+                throw new IllegalStateException("File not found in jar, while no dir configuration " + location);
             }
             throw e;
         }
