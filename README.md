@@ -96,6 +96,7 @@ In case of specified template name - it works for only specified template (no up
 ```
 {
     "index": "template-name", // mandatory field, should contain real template name that exists in service templates path
+    "sample": true, // non-mandatory field (defaults - false), turns on configured 'sample' watermark
     "data": { // data object that will be passed to handlebars template as context at render stage
     }
 }

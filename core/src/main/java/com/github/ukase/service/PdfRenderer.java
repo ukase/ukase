@@ -104,7 +104,7 @@ public class PdfRenderer {
     private void addSampleWatermark(ByteArrayOutputStream baos, char pdfVersion) throws IOException, DocumentException {
         PdfReader reader = new PdfReader(baos.toByteArray());
         baos.reset();
-        Font font = new Font(Font.FontFamily.UNDEFINED, waterMark.getSize(), 0, BaseColor.GRAY);
+        Font font = new Font(Font.FontFamily.UNDEFINED, waterMark.getSize(), 0, BaseColor.LIGHT_GRAY);
         Phrase phrase = new Phrase(waterMark.getText(), font);
         PdfStamper stamper = new PdfStamper(reader, baos, pdfVersion);
         for (int i = 1; i <= reader.getNumberOfPages(); i++) {
