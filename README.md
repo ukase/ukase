@@ -1,11 +1,11 @@
 # ukase
 
 ## Get&amp;configure
-Download release from [from GitHub](https://github.com/ukase/ukase/releases/download/Ukase-1.0/ukase-1.0.war)
+Download release from [from GitHub](https://github.com/ukase/ukase/releases/download/Ukase-1.1/ukase-1.1.war)
 
 Download using maven:
 ```
-mvn dependency:get -Dartifact=com.github.ukase:ukase:1.0:war -Dtransitive=false -Ddest=ukase.jar
+mvn dependency:get -Dartifact=com.github.ukase:ukase:LATEST:war -Dtransitive=false -Ddest=ukase.jar
 ```
 
 After downloading create `config` directory and place here `application.yml` file, prod sample:
