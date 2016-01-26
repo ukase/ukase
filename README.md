@@ -1,7 +1,7 @@
 # ukase
 
 ## Get&amp;configure
-Download release from [from GitHub](https://github.com/ukase/ukase/releases/download/Ukase-1.1/ukase-1.1.war)
+Download release from [from GitHub](https://github.com/ukase/ukase/releases/download/Ukase-1.2/ukase-1.2.war)
 
 Download using maven:
 ```
