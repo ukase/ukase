@@ -41,12 +41,16 @@ public class ResourceProvider {
     private final ApplicationContext context;
     private final CompoundSource source;
     private final CompoundTemplateLoader templateLoader;
+    private final String defaultFont;
 
     @Autowired
     public ResourceProvider(ApplicationContext context, CompoundSource source, CompoundTemplateLoader templateLoader) {
         this.context = context;
         this.source = source;
         this.templateLoader = templateLoader;
+        this.defaultFont = this.source.getFontsUrls().stream()
+                .filter(name -> !(name.contains("Bold")) && !(name.contains("Italic")))
+                .findAny().orElse(null);
     }
 
     @Bean
@@ -79,5 +83,9 @@ public class ResourceProvider {
         }
 
         return renderer;
+    }
+
+    public String getDefaultFont() {
+        return defaultFont;
     }
 }

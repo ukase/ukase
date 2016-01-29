@@ -26,6 +26,7 @@ import com.github.ukase.toolkit.ResourceProvider;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.ColumnText;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfReader;
@@ -58,9 +59,10 @@ public class PdfRenderer {
     private final String resourcesPath;
     private final ResourceProvider provider;
     private final WaterMarkSettings waterMark;
+    private final Font font;
 
     @Autowired
-    private PdfRenderer(UkaseSettings settings, ResourceProvider provider) {
+    private PdfRenderer(UkaseSettings settings, ResourceProvider provider) throws IOException, DocumentException {
         File resources = settings.getResources();
         if (resources == null || !resources.isDirectory()) {
             resourcesPath = null;
@@ -70,6 +72,9 @@ public class PdfRenderer {
 
         this.provider = provider;
         this.waterMark = settings.getWaterMark();
+
+        BaseFont baseFont = BaseFont.createFont(provider.getDefaultFont(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        this.font = new Font(baseFont, waterMark.getSize(), 0, BaseColor.LIGHT_GRAY);
     }
 
     public byte[] render(String html, boolean sample) throws DocumentException, IOException, URISyntaxException {
@@ -104,7 +109,6 @@ public class PdfRenderer {
     private void addSampleWatermark(ByteArrayOutputStream baos, char pdfVersion) throws IOException, DocumentException {
         PdfReader reader = new PdfReader(baos.toByteArray());
         baos.reset();
-        Font font = new Font(Font.FontFamily.UNDEFINED, waterMark.getSize(), 0, BaseColor.LIGHT_GRAY);
         Phrase phrase = new Phrase(waterMark.getText(), font);
         PdfStamper stamper = new PdfStamper(reader, baos, pdfVersion);
         for (int i = 1; i <= reader.getNumberOfPages(); i++) {
