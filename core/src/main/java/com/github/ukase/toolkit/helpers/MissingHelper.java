@@ -35,7 +35,7 @@ public class MissingHelper extends AbstractHelper<Object> {
 
     @Override
     public CharSequence apply(Object context, Options options) throws IOException {
-        log.error("Missed helper: " + options);
+        log.error("Missed helper: '" + options.helperName + "'");
         return null;
     }
 }
