@@ -17,6 +17,11 @@ ukase:
     text: Sample
     x: 350
     y: 400
+  bulk:
+    threads: 10
+    statusCodes: true
+    ttl: 60
+    path: pdfs
 ---
 
 spring:
@@ -32,6 +37,10 @@ ukase:
   resources: classpath:/
   templates: classpath:/templates/
   jar:
+  bulk:
+    threads: 10
+    statusCodes: true
+    ttl: 1
 
 ---
 
