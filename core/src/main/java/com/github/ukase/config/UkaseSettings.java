@@ -39,6 +39,7 @@ public class UkaseSettings {
     private File resources;
     private File jar;
     private WaterMarkSettings waterMark;
+    private BulkConfig bulk;
 
     public void setTemplates(String path) {
         this.templates = translateToFile(path, true);
