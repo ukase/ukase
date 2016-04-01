@@ -20,9 +20,12 @@
 package com.github.ukase.web;
 
 import com.github.jknack.handlebars.HandlebarsException;
+import com.github.ukase.bulk.BulkStatus;
+import com.github.ukase.config.BulkConfig;
+import com.github.ukase.service.BulkRenderer;
 import com.github.ukase.service.HtmlRenderer;
-import com.github.ukase.service.PdfRenderer;
 import com.github.ukase.toolkit.CompoundSource;
+import com.github.ukase.toolkit.RenderTaskBuilder;
 import com.github.ukase.toolkit.SourceListener;
 import com.itextpdf.text.DocumentException;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +43,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,13 +54,43 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequestMapping("/api")
-public class UkaseController {
+class UkaseController {
+    private static final String BULK_RESPONSE_READY;
+    private static final String BULK_RESPONSE_PROCESSING;
+    private static final String BULK_RESPONSE_ERROR;
+
+    static {
+        BULK_RESPONSE_READY = readJson(UkaseController.class.getResourceAsStream("bulk-response-ready.json"));
+        BULK_RESPONSE_PROCESSING = readJson(UkaseController.class.getResourceAsStream("bulk-response-processing.json"));
+        BULK_RESPONSE_ERROR = readJson(UkaseController.class.getResourceAsStream("bulk-response-error.json"));
+    }
+
+    private static String readJson(InputStream inputStream) {
+        if (inputStream == null) {
+            return null;
+        }
+        try(BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
+            return br.lines().collect(Collectors.joining("\n"));
+        } catch (IOException e) {
+            log.warn("Cannot read json file", e);
+            return null;
+        }
+    }
+
     @Autowired
     private HtmlRenderer htmlRenderer;
     @Autowired
-    private PdfRenderer pdfRenderer;
-    @Autowired
     private CompoundSource source;
+    @Autowired
+    private BulkRenderer bulkRenderer;
+    @Autowired
+    private BulkConfig bulkConfig;
+    @Autowired
+    private RenderTaskBuilder taskBuilder;
+
+    /*================================================================================================================
+     ==============================================   API controllers   ==============================================
+     =================================================================================================================*/
 
     @RequestMapping(value = "/html", method = RequestMethod.POST)
     public ResponseEntity<String> generateHtml(@RequestBody @Valid UkasePayload payload) throws IOException {
@@ -65,8 +101,7 @@ public class UkaseController {
     @RequestMapping(value = "/pdf", method = RequestMethod.POST, produces = "application/pdf")
     public ResponseEntity<byte[]> generatePdf(@RequestBody @Valid UkasePayload payload)
             throws IOException, DocumentException, URISyntaxException {
-        String html = htmlRenderer.render(payload.getIndex(), payload.getData());
-        return ResponseEntity.ok(pdfRenderer.render(html, payload.isSample()));
+        return ResponseEntity.ok(taskBuilder.build(payload).call());
     }
 
     @RequestMapping(value = "/pdf/{template}", method = RequestMethod.HEAD)
@@ -77,6 +112,45 @@ public class UkaseController {
         source.registerListener(listener);
         return state;
     }
+
+    /*================================================================================================================
+     ============================================== BulkAPI controllers ==============================================
+     =================================================================================================================*/
+
+    @RequestMapping(value = "/bulk", method = RequestMethod.POST,
+            consumes = {"text/json", "text/json;charset=UTF-8", "application/json"})
+    public @ResponseBody String postBulkInOrder(@RequestBody List<UkasePayload> payloads) throws IOException {
+        return bulkRenderer.putTaskInOrder(payloads);
+    }
+
+    @RequestMapping(value = "/bulk/sync", method = RequestMethod.POST,
+            produces = "application/pdf", consumes = "text/json")
+    public ResponseEntity<byte[]> renderBulk(@RequestBody List<UkasePayload> payloads)
+            throws IOException, InterruptedException {
+        return ResponseEntity.ok(bulkRenderer.processOrder(payloads));
+    }
+
+    @RequestMapping(value = "/bulk/{uuid}", method = RequestMethod.GET, produces = "application/pdf")
+    public ResponseEntity<byte[]> getBulk(@PathVariable String uuid) throws IOException {
+        byte[] bulk = bulkRenderer.getOrder(uuid);
+        return ResponseEntity.ok(bulk);
+    }
+
+    @RequestMapping(value = "/bulk/{uuid}", method = RequestMethod.HEAD)
+    public ResponseEntity<String> getBulkState(@PathVariable String uuid) throws IOException {
+        BulkStatus status = bulkRenderer.checkStatus(uuid);
+        switch (status) {
+            case PROCESSED:
+                return ResponseEntity.status(bulkConfig.statusProcessed()).body(BULK_RESPONSE_READY);
+            case ORDERED:
+                return ResponseEntity.status(bulkConfig.statusOrdered()).body(BULK_RESPONSE_PROCESSING);
+        }
+        return ResponseEntity.status(bulkConfig.statusError()).body(BULK_RESPONSE_ERROR);
+    }
+
+    /*================================================================================================================
+     ============================================== Exceptions handling ==============================================
+     =================================================================================================================*/
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseBody
@@ -92,6 +166,10 @@ public class UkaseController {
         log.error("Some grand error caused in template mechanism", e);
         return new ResponseEntity<>("Some grand error caused in template mechanism", HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    /*================================================================================================================
+     ==============================================  private utilities  ==============================================
+     =================================================================================================================*/
 
     private ResponseEntity<Object> translateState(boolean selectedTemplateUpdated) {
         if (selectedTemplateUpdated) {
