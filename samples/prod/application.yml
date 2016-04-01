@@ -1,0 +1,13 @@
+spring:
+  main:
+    banner-mode: off
+server:
+  port: 10080 # port which be used by application
+logging:
+  config: classpath:logback-prod.xml # file that configures logging subsystem
+ukase:
+  project-root: . # project root directory...???????
+  resources: # not necessary in prod environment - it is recommended to keep all resources files in jar file
+  templates: # not necessary in prod environment - it is recommended to kepp all templates files in jar file
+  jar: absolute-path-to-jar-with-templates_resources_fonts/templates_fonts_resources.jar # jar file
+       # that contains resorces, templates, additional handlebars helpers

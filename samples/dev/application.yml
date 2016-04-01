@@ -1,0 +1,16 @@
+spring:
+  main:
+    banner-mode: off
+server:
+  port: 10080 # port which be used by application
+logging:
+  config: classpath:logback-dev.xml # file that configures logging subsystem
+ukase:
+  project-root: . # project root directory...???????
+  resources: path-to-dir-with-templates_fonts # absolute or relative path to dir with resources (such as fonts, images, css files and others)
+                                              # necessary if you want to update your resources on the fly
+  templates: path-to-dir-with-templates # absolute or relative path to dir with handlebars templates (including partials)
+                                        # necessary if you want to update your templates on the fly
+  jar: absolute-path-to-jar-with-templates_resources_fonts/templates_fonts_resources.jar # jar file
+        # that contains resorces, templates, additional handlebars helpers,
+        # necessary if you use any additional handlebars helper

@@ -1,56 +1,37 @@
 # ukase
 
 ## Get&amp;configure
-Download release from [from GitHub](https://github.com/ukase/ukase/releases/download/Ukase-1.2/ukase-1.2.war)
 
-Download using maven:
+### Get
+There are two ways:
+- Download release [from GitHub](https://github.com/ukase/ukase/releases/download/Ukase-1.3/ukase-1.3.war)
+- Download release using maven:
 ```
 mvn dependency:get -Dartifact=com.github.ukase:ukase:LATEST:war -Dtransitive=false -Ddest=ukase.jar
 ```
 
-After downloading create `config` directory and place here `application.yml` file, prod sample:
-```
-spring:
-  main:
-    banner-mode: off
-server:
-  port: 10080
-logging:
-  config: classpath:logback-prod.xml
-ukase:
-  project-root: .
-  resources: 
-  templates: 
-  jar: absolute-path-to-jar-with-templates_resources_fonts/templates_fonts_resources.jar
-```
-dev sample:
-```
-spring:
-  main:
-    banner-mode: off
-server:
-  port: 10080
-logging:
-  config: classpath:logback-dev.xml
-ukase:
-  project-root: .
-  resources: absolute-path-to-dir-with-templates_fonts
-  templates: absolute-path-to-dir-with-templates
-  jar: absolute-path-to-jar-with-templates_resources_fonts/templates_fonts_resources.jar
-```
-*note*: it is possible to use both - absolute and relative paths.
+### Configure
+1. Create directory for this application
+2. Move there downloaded `war` file
+3. Create `config` subfolder
+4. Create `application.yml` file there:
+  - [sample for development environment](/samples/dev/application.yml)
+  - [sample for prod environment](/samples/prod/application.yml)
+  
+### Start
+
+You can start application:
+- in your web application container (such as tomcat or jetty)
+- using included SpringBoot runner: `java -jar name_of_saved_war.war`
 
 ## Usage
 
-In case of prod - propagated that main usage goes over UKase API
-
-In Case of dev - propagated usage of UI that enables in real time see what changes made to current template
-(index.html is available over configured port at your localhost)
-
-Application can be started in some container (for example - tomcat) or started with SpringBoot option:
-```
-java -jar ukase-1.0.war
-```
+We propogate next usage templates:
+* prod
+  - using by some subsystem of other application to generate pdf-s over [UKase API](#UKase_API)
+* development
+  - using by development environment of any application to generate pdf-s over [UKase API](#UKase_API)
+  - using by developer to create and modify pdf templates. For these case we have UI that enables view and view's auto-refresh on any template change. 
 
 ## UKase API
 
@@ -92,6 +73,25 @@ refresh pdf in view at any updates.
 In case of `ANY` template name - it works for every template and resources.
 In case of specified template name - it works for only specified template (no updates on partials) and resources.
 
+### :new: method POST /api/bulk
+
+body:
+:boom: not finished yet
+
+### :new: method POST /api/bulk/sync
+
+body:
+:boom: not finished yet
+
+### :new: method HEAD /api/bulk/$id
+
+:boom: not finished yet
+
+### :new: method GET /api/bulk/$id
+
+:boom: not finished yet
+
+
 #### UkasePayload
 ```
 {
@@ -108,5 +108,5 @@ If "index" is null or contains wrong field value - `400 Bad Request` answer will
 [{"field":"index","object":"ukasePayload","message":"No such HTML template"}]
 ```
 
-## License
+## License :scroll:
 Ukase is available over GNU Affero General Public License ([see more information here](http://www.gnu.org/licenses/));
