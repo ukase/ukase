@@ -48,12 +48,12 @@ public class TTLChecker implements Runnable {
     @Override
     public void run() {
         while (flag) {
-            renderer.clearOldPDFs();
             try {
-                Thread.sleep(1000L);
+                Thread.sleep(60 * 1000L);
             } catch (InterruptedException e) {
                 //ignore
             }
+            renderer.clearOldPDFs();
         }
     }
 }

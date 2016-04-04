@@ -21,6 +21,7 @@ package com.github.ukase.toolkit;
 
 import com.github.jknack.handlebars.io.AbstractTemplateLoader;
 import com.github.jknack.handlebars.io.FileTemplateLoader;
+import com.github.jknack.handlebars.io.StringTemplateSource;
 import com.github.jknack.handlebars.io.TemplateLoader;
 import com.github.jknack.handlebars.io.TemplateSource;
 import com.github.ukase.config.UkaseSettings;
@@ -42,9 +43,21 @@ import java.util.zip.ZipFile;
 
 @Component
 public class CompoundTemplateLoader extends AbstractTemplateLoader {
+    private static final String IMAGE_AS_PAGE = "default - image as page";
+    private static final TemplateSource IMAGE_AS_PAGE_TEMPLATE;
+    static {
+        IMAGE_AS_PAGE_TEMPLATE =
+                new StringTemplateSource(IMAGE_AS_PAGE, StaticUtils.readStringFile(getStream("image-as-page.hbs")));
+    }
+
+    private static InputStream getStream(String fileName) {
+        return CompoundTemplateLoader.class.getResourceAsStream(fileName);
+    }
+
     private final ZipFile zip;
     private final Map<String, ZipEntry> resources = new HashMap<>();
     private final TemplateLoader externalLoader;
+    //private final
 
     @Autowired
     public CompoundTemplateLoader(UkaseSettings settings) throws IOException {
@@ -62,6 +75,10 @@ public class CompoundTemplateLoader extends AbstractTemplateLoader {
 
     @Override
     public TemplateSource sourceAt(String location) throws IOException {
+        if (IMAGE_AS_PAGE.equals(location)) {
+            //TODO extract loader for default templates (if there were more than 1)
+            return IMAGE_AS_PAGE_TEMPLATE;
+        }
         try {
             if (externalLoader == null) {
                 return getTemplateSource(location, null);

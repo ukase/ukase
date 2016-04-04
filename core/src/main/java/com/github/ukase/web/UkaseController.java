@@ -27,6 +27,7 @@ import com.github.ukase.service.HtmlRenderer;
 import com.github.ukase.toolkit.CompoundSource;
 import com.github.ukase.toolkit.RenderTaskBuilder;
 import com.github.ukase.toolkit.SourceListener;
+import com.github.ukase.toolkit.StaticUtils;
 import com.itextpdf.text.DocumentException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,10 +44,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -60,21 +59,13 @@ class UkaseController {
     private static final String BULK_RESPONSE_ERROR;
 
     static {
-        BULK_RESPONSE_READY = readJson(UkaseController.class.getResourceAsStream("bulk-response-ready.json"));
-        BULK_RESPONSE_PROCESSING = readJson(UkaseController.class.getResourceAsStream("bulk-response-processing.json"));
-        BULK_RESPONSE_ERROR = readJson(UkaseController.class.getResourceAsStream("bulk-response-error.json"));
+        BULK_RESPONSE_READY = StaticUtils.readStringFile(getStream("bulk-response-ready.json"));
+        BULK_RESPONSE_PROCESSING = StaticUtils.readStringFile(getStream("bulk-response-processing.json"));
+        BULK_RESPONSE_ERROR = StaticUtils.readStringFile(getStream("bulk-response-error.json"));
     }
 
-    private static String readJson(InputStream inputStream) {
-        if (inputStream == null) {
-            return null;
-        }
-        try(BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
-            return br.lines().collect(Collectors.joining("\n"));
-        } catch (IOException e) {
-            log.warn("Cannot read json file", e);
-            return null;
-        }
+    private static InputStream getStream(String fileName) {
+        return UkaseController.class.getResourceAsStream(fileName);
     }
 
     @Autowired
