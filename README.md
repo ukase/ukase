@@ -117,7 +117,7 @@ return code:
 
 Check status for task in queue 
 
-### :new: method GET /api/bulk/$id
+### :new: method GET /api/bulk/{id}
 
 {id} - UUID of queued task
 
