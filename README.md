@@ -56,9 +56,9 @@ return type: application/octet-stream
 This method applies transferred data to selected template and applies rendered html with resources to flying saucer pdf generator.
 Return generated pdf as array of bytes
 
-### method GET /api/pdf/templateName
+### method GET /api/pdf/{templateName}
 
-templateName - template name you interested in or ANY 
+{templateName} - template name you interested in or ANY 
 
 [possible errors](#possible-errors)
 
@@ -75,21 +75,61 @@ In case of specified template name - it works for only specified template (no up
 
 ### :new: method POST /api/bulk
 
-body:
-:boom: not finished yet
+body: array of [UkasePayload](#ukasepayload)
+
+return type: UUID in string mode
+
+return code:
+- 200 Ok - task were applied to work
+- 400 Bad Request - request were failed to be added to queue 
+
+Asynchronous method to add task (building pdf bulk) in queue. Answers contains string with UUID that assigned
+to the task.
 
 ### :new: method POST /api/bulk/sync
 
-body:
-:boom: not finished yet
+body: array of [UkasePayload](#ukasepayload)
 
-### :new: method HEAD /api/bulk/$id
+return type: byte array of bundled pdf
 
-:boom: not finished yet
+return code:
+- 200 Ok - pdf file generated
+- 400 Bad Request - request were failed to be added to queue or processed 
+- 410 Gone - request were interrupted (possible that server stopped at moment) 
+
+Synchronous method to process bulk of PDFs.
+
+### :new: method HEAD /api/bulk/{id}
+
+{id} - UUID of queued task
+
+body: none
+
+return type: [Status](#status)
+
+return code:
+* in case of option 'ukase.bulk.statusCodes' {true}:
+  - 200 Ok - pdf file generated
+  - 102 Processing - pdf bulk request added to queue or started processing 
+  - 400 Error - pdf bulk request were failed for some reason 
+* in case of option 'ukase.bulk.statusCodes' {false}:
+  - 200 Ok - status provided only in answer body
+
+Check status for task in queue 
 
 ### :new: method GET /api/bulk/$id
 
-:boom: not finished yet
+{id} - UUID of queued task
+
+body: none
+
+return type: byte array of bundled pdf
+
+return code:
+- 200 Ok - pdf file generated
+- 400 Error - pdf bulk request not ready yet or already failed 
+
+Return byte array if pdf already rendered.
 
 
 #### UkasePayload
@@ -99,6 +139,16 @@ body:
     "sample": true, // non-mandatory field (defaults - false), turns on configured 'sample' watermark
     "data": { // data object that will be passed to handlebars template as context at render stage
     }
+}
+```
+
+#### Status
+```
+{
+    "status": "error", // possible values:
+                       //     error - pdf bulk weren't bundled - some error while processing,
+                       //     processing - pdf bulk in order to be processed or still processing,
+                       //     ready - pdf bulk were bundled
 }
 ```
 

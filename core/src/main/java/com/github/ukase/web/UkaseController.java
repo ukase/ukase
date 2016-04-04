@@ -29,6 +29,7 @@ import com.github.ukase.toolkit.RenderTaskBuilder;
 import com.github.ukase.toolkit.SourceListener;
 import com.github.ukase.toolkit.StaticUtils;
 import com.itextpdf.text.DocumentException;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -124,6 +125,9 @@ class UkaseController {
     @RequestMapping(value = "/bulk/{uuid}", method = RequestMethod.GET, produces = "application/pdf")
     public ResponseEntity<byte[]> getBulk(@PathVariable String uuid) throws IOException {
         byte[] bulk = bulkRenderer.getOrder(uuid);
+        if (bulk == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
         return ResponseEntity.ok(bulk);
     }
 
@@ -142,6 +146,22 @@ class UkaseController {
     /*================================================================================================================
      ============================================== Exceptions handling ==============================================
      =================================================================================================================*/
+
+    @ExceptionHandler(IOException.class)
+    @ResponseBody
+    public ResponseEntity<ExceptionMessage> handleIOException(IOException e) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        ExceptionMessage message = new ExceptionMessage(e.getMessage(), status.value());
+        return new ResponseEntity<>(message, status);
+    }
+
+    @ExceptionHandler(InterruptedException.class)
+    @ResponseBody
+    public ResponseEntity<ExceptionMessage> handleInterruptedException(InterruptedException e) {
+        HttpStatus status = HttpStatus.GONE;
+        ExceptionMessage message = new ExceptionMessage(e.getMessage(), status.value());
+        return new ResponseEntity<>(message, status);
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseBody
@@ -167,6 +187,17 @@ class UkaseController {
             return new ResponseEntity<>("updated", HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
+        }
+    }
+
+    @Data
+    private static class ExceptionMessage {
+        private final String message;
+        private final int code;
+
+        public ExceptionMessage(String message, int code) {
+            this.message = message;
+            this.code = code;
         }
     }
 }
