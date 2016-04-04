@@ -62,7 +62,7 @@ public class BulkRenderTask {
         return id;
     }
 
-    public List<Runnable> getSubTasks() {
+    public List<RenderTask> getSubTasks() {
         return Collections.unmodifiableList(subTasks);
     }
 

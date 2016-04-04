@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-class SingleRenderTask implements Runnable {
+class SingleRenderTask implements RenderTask {
     private static final Logger log = LoggerFactory.getLogger(SingleRenderTask.class);
 
     private final RenderTask task;
@@ -40,21 +40,24 @@ class SingleRenderTask implements Runnable {
     }
 
     @Override
-    public void run() {
+    public byte[] call() {
         try {
             pdf = task.call();
             if (parentTask != null) {
                 parentTask.childProcessed();
             }
+            return pdf;
         } catch (IOException | DocumentException | URISyntaxException e) {
             log.warn("Cannot produce pdf", e);
         }
+        return pdf;
     }
 
     public byte[] getPdf() {
         return pdf;
     }
 
+    @Override
     public String getTemplateName() {
         return task.getTemplateName();
     }

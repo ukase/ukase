@@ -53,9 +53,14 @@ public class BulkRenderer {
     @Autowired
     private RenderTaskBuilder builder;
     @Autowired
-    private File path;
-    @Autowired
     private Long ttl;
+    private File path;
+
+    @Autowired
+    public void setPath(File path) {
+        this.path = path;
+        checkDataDirectory();
+    }
 
     public String putTaskInOrder(List<UkasePayload> payloads) throws IOException {
         return startProcessing(payloads).getId();
@@ -86,11 +91,6 @@ public class BulkRenderer {
         renderedPDFs.forEach(this::checkTTL);
     }
 
-    public void setPath(File path) {
-        this.path = path;
-        checkDataDirectory();
-    }
-
     private void checkTTL(String id, Long created) {
         if (created == null || created == Long.MAX_VALUE) {
             return;
@@ -107,7 +107,7 @@ public class BulkRenderer {
     private BulkRenderTask startProcessing(List<UkasePayload> payloads) throws IOException {
         List<RenderTask> tasks = payloads.stream().map(builder::build).collect(Collectors.toList());
         BulkRenderTask task = new BulkRenderTask(tasks, this::registerProcessedData, this::registerFail);
-        task.getSubTasks().forEach(executor::execute);
+        task.getSubTasks().forEach(executor::submit);
         renderedPDFs.put(task.getId(), Long.MAX_VALUE);
 
         return task;
