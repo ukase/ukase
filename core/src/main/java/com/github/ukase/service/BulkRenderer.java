@@ -82,7 +82,7 @@ public class BulkRenderer {
 
     public byte[] getOrder(String id) {
         if (checkStatus(id) == BulkStatus.PROCESSED) {
-            getFileData(id);
+            return getFileData(id);
         }
         return null;
     }
@@ -100,7 +100,16 @@ public class BulkRenderer {
             if (!pdf.delete()) {
                 log.warn("PDF for " + id + " weren't deleted");
             }
+
             renderedPDFs.remove(id);
+
+            File subDir = pdf.getParentFile();
+            File[] files = subDir.listFiles();
+            if (files != null && files.length == 0) {
+                log.info(subDir.getName() +
+                        " removing... " +
+                        (subDir.delete() ? "success" : "failed") );
+            }
         }
     }
 
@@ -124,6 +133,7 @@ public class BulkRenderer {
         try (FileOutputStream fos = new FileOutputStream(pdfFile, false)) {
             fos.write(data);
             fos.flush();
+            renderedPDFs.put(id, System.currentTimeMillis());
         } catch (IOException e) {
             log.error("Cannot create pdf file " + pdfFile.getName(), e);
             registerFail(id);
@@ -144,7 +154,7 @@ public class BulkRenderer {
 
     private void checkSubDirectories(File subDir) {
         if (subDir.isDirectory() && subDir.getName().length() == SUB_DIR_NAME_LENGTH) {
-            File[] pdfs = path.listFiles();
+            File[] pdfs = subDir.listFiles();
             if (pdfs == null) {
                 return;
             }

@@ -110,7 +110,7 @@ return type: [Status](#status)
 return code:
 * in case of option 'ukase.bulk.statusCodes' {true}:
   - 200 Ok - pdf file generated
-  - 102 Processing - pdf bulk request added to queue or started processing 
+  - 204 No content - pdf bulk request added to queue or started processing 
   - 400 Error - pdf bulk request were failed for some reason 
 * in case of option 'ukase.bulk.statusCodes' {false}:
   - 200 Ok - status provided only in answer body

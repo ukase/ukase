@@ -39,7 +39,7 @@ public class BulkConfig {
     private File path;
 
     private HttpStatus processed = HttpStatus.OK;
-    private HttpStatus ordered = HttpStatus.PROCESSING;
+    private HttpStatus ordered = HttpStatus.NO_CONTENT;
     private HttpStatus error = HttpStatus.BAD_REQUEST;
 
     @Bean

@@ -30,10 +30,11 @@ public class TTLChecker implements Runnable {
     private final Thread currentThread;
     private boolean flag = true;
 
-    @Autowired
-    private BulkRenderer renderer;
+    private final BulkRenderer renderer;
 
-    public TTLChecker() {
+    @Autowired
+    public TTLChecker(BulkRenderer renderer) {
+        this.renderer = renderer;
         currentThread = new Thread(this);
         currentThread.setName("PDF bulks TTL checker");
         currentThread.start();

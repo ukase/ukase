@@ -20,10 +20,10 @@
     </head>
     <body>
         <div class="page">
-            <img src="{{img.url}}" style="
-                             {{#if img.width}}width: {{img.width}}{{/if}}
-                             {{#if img.height}}height: {{img.height}}{{/if}}
-                 " alt="image"/>
+            <img src="{{img.url}}"
+                 {{#if img.width}}width="{{img.width}}" {{/if}}
+                 {{#if img.height}}height="{{img.height}}" {{/if}}
+                 alt="image"/>
         </div>
     </body>
 </html>
