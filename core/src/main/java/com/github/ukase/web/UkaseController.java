@@ -131,7 +131,7 @@ class UkaseController {
         return ResponseEntity.ok(bulk);
     }
 
-    @RequestMapping(value = "/bulk/{uuid}", method = RequestMethod.HEAD)
+    @RequestMapping(value = "/bulk/status/{uuid}", method = RequestMethod.GET)
     public ResponseEntity<String> getBulkState(@PathVariable String uuid) throws IOException {
         BulkStatus status = bulkRenderer.checkStatus(uuid);
         switch (status) {
@@ -158,7 +158,7 @@ class UkaseController {
     @ExceptionHandler(InterruptedException.class)
     @ResponseBody
     public ResponseEntity<ExceptionMessage> handleInterruptedException(InterruptedException e) {
-        HttpStatus status = HttpStatus.GONE;
+        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
         ExceptionMessage message = new ExceptionMessage(e.getMessage(), status.value());
         return new ResponseEntity<>(message, status);
     }

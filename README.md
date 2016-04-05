@@ -95,11 +95,11 @@ return type: byte array of bundled pdf
 return code:
 - 200 Ok - pdf file generated
 - 400 Bad Request - request were failed to be added to queue or processed 
-- 410 Gone - request were interrupted (possible that server stopped at moment) 
+- 500 Internal Server Error - request were interrupted (possible that server stopped at moment) 
 
 Synchronous method to process bulk of PDFs.
 
-### :new: method HEAD /api/bulk/{id}
+### :new: method GET /api/bulk/status/{id}
 
 {id} - UUID of queued task
 
@@ -110,8 +110,8 @@ return type: [Status](#status)
 return code:
 * in case of option 'ukase.bulk.statusCodes' {true}:
   - 200 Ok - pdf file generated
-  - 204 No content - pdf bulk request added to queue or started processing 
-  - 400 Error - pdf bulk request were failed for some reason 
+  - 404 Not Found - pdf bulk request added to queue or started processing 
+  - 400 Bad Request - pdf bulk request were failed for some reason 
 * in case of option 'ukase.bulk.statusCodes' {false}:
   - 200 Ok - status provided only in answer body
 
@@ -127,7 +127,7 @@ return type: byte array of bundled pdf
 
 return code:
 - 200 Ok - pdf file generated
-- 400 Error - pdf bulk request not ready yet or already failed 
+- 400 Bad Request - pdf bulk request not ready yet or already failed 
 
 Return byte array if pdf already rendered.
 
