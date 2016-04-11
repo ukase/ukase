@@ -1,4 +1,5 @@
 # ukase
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.ukase/ukase/badge.svg?style=flat)](http://mvnrepository.com/artifact/com.github.ukase/ukase)
 
 ## Get&amp;configure
 
