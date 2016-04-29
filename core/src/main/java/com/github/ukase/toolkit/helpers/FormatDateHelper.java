@@ -48,7 +48,7 @@ public class FormatDateHelper extends AbstractHelper<Object> {
         if (context instanceof CharSequence) {
             return apply(context.toString(), options);
         }
-        return "";
+        return format(new Date(), options);
     }
 
     private CharSequence apply(Number context, Options options) {

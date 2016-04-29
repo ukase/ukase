@@ -24,7 +24,9 @@ import com.github.ukase.bulk.BulkStatus;
 import com.github.ukase.config.BulkConfig;
 import com.github.ukase.service.BulkRenderer;
 import com.github.ukase.service.HtmlRenderer;
+import com.github.ukase.service.XlsxRenderer;
 import com.github.ukase.toolkit.CompoundSource;
+import com.github.ukase.toolkit.RenderException;
 import com.github.ukase.toolkit.RenderTaskBuilder;
 import com.github.ukase.toolkit.SourceListener;
 import com.github.ukase.toolkit.StaticUtils;
@@ -78,6 +80,8 @@ class UkaseController {
     @Autowired
     private BulkConfig bulkConfig;
     @Autowired
+    private XlsxRenderer xlsxRenderer;
+    @Autowired
     private RenderTaskBuilder taskBuilder;
 
     /*================================================================================================================
@@ -103,6 +107,13 @@ class UkaseController {
                 test -> state.setResult(translateState(test)));
         source.registerListener(listener);
         return state;
+    }
+
+    @RequestMapping(value = "/xlsx", method = RequestMethod.POST,
+            produces = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    public ResponseEntity<byte[]> generateXlsx(@RequestBody @Valid UkasePayload payload) throws IOException {
+        String html = htmlRenderer.render(payload.getIndex(), payload.getData());
+        return ResponseEntity.ok(xlsxRenderer.render(html));
     }
 
     /*================================================================================================================
@@ -175,7 +186,13 @@ class UkaseController {
     @ResponseBody
     public ResponseEntity<String> handleHandlebarsException(HandlebarsException e) {
         log.error("Some grand error caused in template mechanism", e);
-        return new ResponseEntity<>("Some grand error caused in template mechanism", HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>("Some error caused in template mechanism", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(RenderException.class)
+    @ResponseBody
+    public ResponseEntity<String> handleRenderException(RenderException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     /*================================================================================================================

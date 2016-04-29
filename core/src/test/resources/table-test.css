@@ -1,0 +1,65 @@
+/*
+ * Copyright (c) 2016 Konstantin Lepa <konstantin+ukase@lepabox.net>
+ *
+ * This file is part of Ukase.
+ *
+ *  Ukase is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+table {
+    border: 1px solid black;
+}
+
+table tr:first-child td,table tr:first-child th {
+    border-bottom: 1px dashed black;
+    text-align: left;
+}
+
+table#special th {
+    border-top: 0.1mm solid black;
+    border-bottom: 0.1mm dotted black;
+    text-align: center;
+}
+table#special th:first-child, table#special tr td:first-child {
+    border-left: 0.1mm solid black;
+    text-align: left;
+}
+table#special th:last-child, table#special tr td:last-child {
+    border-right: 0.1mm solid black;
+    text-align: right;
+}
+table#special tr {
+    text-align: center;
+}
+table#special tr:last-child td {
+    border-bottom: 0.1mm solid black;
+}
+table#special tr:last-child td:first-child {
+    border-left: none;
+}
+table#special tr:nth-child(4) td:first-child {
+    border-bottom: 0.1mm solid black;
+}
+table#special th:nth-child(1) {
+    width: 50px;
+}
+table#special th:nth-child(2) {
+    width: 150px;
+}
+table#special th:nth-child(3) {
+    width: 100px;
+}
+table#special th:nth-child(4) {
+    width: 200px;
+}

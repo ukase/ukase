@@ -36,42 +36,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 
-import com.github.ukase.config.UkaseSettings;
-import org.xhtmlrenderer.util.XRRuntimeException;
-import org.xml.sax.SAXParseException;
-
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.regex.Pattern;
 
 @Service
 @Log4j
 public class PdfRenderer {
-    private static final String COMMON_DOCTYPE = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" " +
-            "\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">";
-    private static final String DOCTYPE_HTML5 = "<!DOCTYPE html>";
-    private static final Pattern HTML_TAG = Pattern.compile("<html([^>]*)lang=\"([^\"]+)\"([^>]*)>");
-    private static final String HTML_TAG_REPLACEMENT =
-            "<html$1lang=\"$2\" xml:lang=\"$2\" xmlns=\"http://www.w3.org/1999/xhtml\"$3>";
-
-    private final String resourcesPath;
     private final ResourceProvider provider;
     private final WaterMarkSettings waterMark;
     private final Font font;
 
     @Autowired
-    private PdfRenderer(UkaseSettings settings, ResourceProvider provider) throws IOException, DocumentException {
-        File resources = settings.getResources();
-        if (resources == null || !resources.isDirectory()) {
-            resourcesPath = null;
-        } else {
-            resourcesPath = resources.toURI().toString();
-        }
-
+    private PdfRenderer(WaterMarkSettings settings, ResourceProvider provider) throws IOException, DocumentException {
         this.provider = provider;
-        this.waterMark = settings.getWaterMark();
+        this.waterMark = settings;
 
         BaseFont baseFont = BaseFont.createFont(provider.getDefaultFont(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
         this.font = new Font(baseFont, waterMark.getSize(), 0, BaseColor.LIGHT_GRAY);
@@ -79,22 +58,8 @@ public class PdfRenderer {
 
     public byte[] render(String html, boolean sample) throws DocumentException, IOException, URISyntaxException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ITextRenderer renderer = provider.getRenderer(html);
 
-        ITextRenderer renderer = provider.getRenderer();
-        try {
-            if (resourcesPath != null) {
-                renderer.setDocumentFromString(wrapHtml5Document(html), resourcesPath);
-            } else {
-                renderer.setDocumentFromString(wrapHtml5Document(html));
-            }
-        } catch (XRRuntimeException e) {
-            if (e.getCause() instanceof SAXParseException) {
-                SAXParseException parseException = (SAXParseException) e.getCause();
-                String[] lines = html.split("\r\n|\r|\n");
-                log.warn("Error in line -->\n" + lines[parseException.getLineNumber() - 1] + "\n<--", e);
-            }
-        }
-        renderer.layout();
         char pdfVersion = renderer.getPDFVersion();
         renderer.createPDF(baos, true);
         renderer.finishPDF();
@@ -121,22 +86,5 @@ public class PdfRenderer {
         }
         stamper.close();
         reader.close();
-    }
-
-    private String wrapHtml5Document(String html5PossibleDocument) {
-        String document = html5PossibleDocument;
-
-        if (html5PossibleDocument.contains(DOCTYPE_HTML5)) {
-            document = document.replace(DOCTYPE_HTML5, COMMON_DOCTYPE);
-            document = HTML_TAG.matcher(document).replaceAll(HTML_TAG_REPLACEMENT);
-        }
-
-        return filterKnownEntities(document);
-    }
-
-    private String filterKnownEntities(String html) {
-        return html.replace("&#x27;", "'")
-                .replace("&#x3D;", "=")
-                .replace("&#x3D", "=");
     }
 }

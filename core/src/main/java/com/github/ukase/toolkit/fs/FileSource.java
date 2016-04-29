@@ -129,10 +129,12 @@ public class FileSource implements Source {
     }
 
     private boolean isSubDirectory(File dir, File kind) {
-        if (kind == null) {
-            return false;
+        while (kind != null) {
+            if (kind.equals(dir)) {
+                return true;
+            }
+            kind = kind.getParentFile();
         }
-
-        return kind.equals(dir) || isSubDirectory(dir, kind.getParentFile());
+        return false;
     }
 }

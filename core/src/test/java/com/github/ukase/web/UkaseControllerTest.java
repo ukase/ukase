@@ -19,6 +19,7 @@
 
 package com.github.ukase.web;
 
+import com.github.ukase.TestHelper;
 import com.github.ukase.UkaseApplication;
 
 import org.junit.Before;
@@ -34,12 +35,9 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.util.StreamUtils;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
 
 import static org.junit.Assert.*;
 
@@ -51,15 +49,10 @@ public class UkaseControllerTest {
     private static final String payload;
     static {
         try {
-            payload = getFileContent("basic-payload.json");
+            payload = TestHelper.getFileContent("basic-payload.json", UkaseControllerTest.class);
         } catch (IOException e) {
             throw new IllegalStateException("Cannot read test data");
         }
-    }
-
-    private static String getFileContent(String fileName) throws IOException {
-        InputStream stream = UkaseControllerTest.class.getClassLoader().getResourceAsStream(fileName);
-        return StreamUtils.copyToString(stream, Charset.forName("UTF-8"));
     }
 
     private MockMvc mockMvc;
@@ -109,5 +102,9 @@ public class UkaseControllerTest {
         if (result.getResponse().getContentLength() <= 0) {
             fail("Generated pdf is empty");
         }
+    }
+
+    private String getFileContent(String fileName) throws IOException {
+        return TestHelper.getFileContent(fileName, getClass());
     }
 }
