@@ -28,7 +28,6 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 import org.xhtmlrenderer.render.BlockBox;
 
