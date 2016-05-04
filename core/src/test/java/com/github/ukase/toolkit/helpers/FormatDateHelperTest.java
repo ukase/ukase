@@ -37,7 +37,18 @@ public class FormatDateHelperTest {
 
     @Test
     public void testNull() throws Exception {
-        assertEquals(REASON_WRONG, "", HELPER.apply(null, null));
+        Options options = getOptions(null);
+        CharSequence result = HELPER.apply(null, options);
+        assertNotNull(REASON_WRONG, result);
+        assertEquals(REASON_WRONG, 0, result.length());
+    }
+
+    @Test
+    public void testNullCommonFormat() throws Exception {
+        Options options = getOptions(null, FormatDateHelper.DATE_FORMAT);
+        CharSequence result = HELPER.apply(null, options);
+        assertNotNull(REASON_WRONG, result);
+        assertEquals(REASON_WRONG, STRING_DATE.length(), result.length());
     }
 
     @Test
