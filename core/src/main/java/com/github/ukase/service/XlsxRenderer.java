@@ -24,6 +24,7 @@ import com.github.ukase.toolkit.xlsx.ElementList;
 import com.github.ukase.toolkit.xlsx.RenderingTable;
 import com.github.ukase.toolkit.xlsx.RenderingTableBuilder;
 import lombok.extern.log4j.Log4j;
+import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,9 @@ public class XlsxRenderer {
     @Autowired
     public XlsxRenderer(ResourceProvider provider) {
         this.provider = provider;
+        // for some xlsx-files default secure ratio can cause IOException "Zip bomb detected!"
+        // for more information see ZipSecureFile:advance
+        ZipSecureFile.setMinInflateRatio(0.005d);
     }
 
     public byte[] render(String html) throws IOException {
