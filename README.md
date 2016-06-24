@@ -2,7 +2,7 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.ukase/ukase/badge.svg?style=flat)](http://mvnrepository.com/artifact/com.github.ukase/ukase)
 
 Ukase is renderer for `html`, `pdf` and simple `xlsx` files written as service with Java 8.
-Releases provided as self-runnable war that bundled with Spring Boot(possible to run in some container, like jetty or tomcat), 
+Releases provided as self-runnable `war` that bundled with Spring Boot. 
 
 ## Get&amp;configure
 
@@ -33,7 +33,7 @@ mvn dependency:get -Dartifact=com.github.ukase:ukase:LATEST:war -Dtransitive=fal
 ### Start
 
 You can start application:
-- in your web application container (such as tomcat or jetty)
+- in your web application container (like tomcat or jetty)
 - using included SpringBoot runner: `java -jar name_of_saved_war.war`
 
 ## Usage
