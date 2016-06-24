@@ -23,6 +23,7 @@ import com.github.ukase.service.BulkRenderer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 @Service
@@ -37,6 +38,10 @@ public class TTLChecker implements Runnable {
         this.renderer = renderer;
         currentThread = new Thread(this);
         currentThread.setName("PDF bulks TTL checker");
+    }
+
+    @PostConstruct
+    public void startChecker() {
         currentThread.start();
     }
 
