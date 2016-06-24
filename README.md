@@ -48,14 +48,14 @@ We propogate next usage templates:
 ## UKase API
 
 Short list ([more](docs/api.md):
-[POST /api/html](docs/api.md#get-apihtml)
-[POST /api/pdf](docs/api.md#post-apipdf)
-[GET /api/pdf/{templateName}](docs/api.md#get-apipdftemplatename)
-[POST /api/bulk](docs/api.md#post-apibulk)
-[POST /api/bulk/sync](docs/api.md#post-apibulksync)
-[GET /api/bulk/status/{id}](docs/api.md#get-apibulkstatusid)
-[GET /api/bulk/{id}](docs/api.md#get-apibulkid)
-[POST /api/xlsx](docs/api.md#post-apixlsx-new)
+* [POST /api/html](docs/api.md#get-apihtml)
+* [POST /api/pdf](docs/api.md#post-apipdf)
+* [GET /api/pdf/{templateName}](docs/api.md#get-apipdftemplatename)
+* [POST /api/bulk](docs/api.md#post-apibulk)
+* [POST /api/bulk/sync](docs/api.md#post-apibulksync)
+* [GET /api/bulk/status/{id}](docs/api.md#get-apibulkstatusid)
+* [GET /api/bulk/{id}](docs/api.md#get-apibulkid)
+* [POST /api/xlsx](docs/api.md#post-apixlsx-new) :new:
 
 ## License :scroll:
 Ukase is available over GNU Affero General Public License ([see more information here](http://www.gnu.org/licenses/));
