@@ -47,8 +47,8 @@ We propogate next usage templates:
 
 ## UKase API
 
-Short list ([more](docs/api.md):
-* [POST /api/html](docs/api.md#get-apihtml)
+Short list [(more)](docs/api.md):
+* [POST /api/html](docs/api.md#post-apihtml)
 * [POST /api/pdf](docs/api.md#post-apipdf)
 * [GET /api/pdf/{templateName}](docs/api.md#get-apipdftemplatename)
 * [POST /api/bulk](docs/api.md#post-apibulk)
