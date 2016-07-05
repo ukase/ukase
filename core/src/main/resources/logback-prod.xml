@@ -37,5 +37,6 @@
     </root>
 
     <logger name="com.github.ukase" level="info"/>
+    <logger name="com.github.ukase.toolkit.helpers.MissingHelper" level="warn"/>
     <logger name="org.springframework" level="warn"/>
 </configuration>
