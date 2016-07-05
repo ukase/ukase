@@ -57,6 +57,7 @@ public class RenderTaskBuilder {
         public byte[] call() throws IOException, DocumentException, URISyntaxException {
             log.debug("Start processing: {}", payload.getIndex());
             String html = htmlRenderer.render(payload.getIndex(), payload.getData());
+            log.debug("Prepared xhtml:\n{}\n", html);
             byte[] renderedData = pdfRenderer.render(html, payload.isSample());
             log.debug("Processed successfully: {}", payload.getIndex());
             return renderedData;

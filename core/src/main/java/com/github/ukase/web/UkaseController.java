@@ -113,7 +113,9 @@ class UkaseController {
     @RequestMapping(value = "/xlsx", method = RequestMethod.POST,
             produces = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     public ResponseEntity<byte[]> generateXlsx(@RequestBody @Valid UkasePayload payload) throws IOException {
+        log.debug("Generate XLSX POST for '{}' :\n{}\n", payload.getIndex(), payload.getData());
         String html = htmlRenderer.render(payload.getIndex(), payload.getData());
+        log.debug("Prepared xhtml:\n{}\n", html);
         return ResponseEntity.ok(xlsxRenderer.render(html));
     }
 
@@ -196,7 +198,14 @@ class UkaseController {
     @ExceptionHandler(RenderException.class)
     @ResponseBody
     public ResponseEntity<String> handleRenderException(RenderException e) {
-        log.warn("Rendering: {}", e.getMessage());
+        log.warn("Rendering: " + e.getMessage(), e.getCause());
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseBody
+    public ResponseEntity<String> handleException(Exception e) {
+        log.warn("Common rendering problem: {}", e);
         return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
