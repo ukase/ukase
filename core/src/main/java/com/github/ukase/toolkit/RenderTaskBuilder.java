@@ -23,6 +23,7 @@ import com.github.ukase.service.HtmlRenderer;
 import com.github.ukase.service.PdfRenderer;
 import com.github.ukase.web.UkasePayload;
 import com.itextpdf.text.DocumentException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,6 +31,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 @Component
+@Slf4j
 public class RenderTaskBuilder {
     @Autowired
     private HtmlRenderer htmlRenderer;
@@ -53,8 +55,11 @@ public class RenderTaskBuilder {
 
         @Override
         public byte[] call() throws IOException, DocumentException, URISyntaxException {
+            log.debug("Start processing: {}", payload.getIndex());
             String html = htmlRenderer.render(payload.getIndex(), payload.getData());
-            return pdfRenderer.render(html, payload.isSample());
+            byte[] renderedData = pdfRenderer.render(html, payload.isSample());
+            log.debug("Processed successfully: {}", payload.getIndex());
+            return renderedData;
         }
 
         @Override

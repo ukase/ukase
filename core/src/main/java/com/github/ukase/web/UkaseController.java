@@ -97,6 +97,7 @@ class UkaseController {
     @RequestMapping(value = "/pdf", method = RequestMethod.POST, produces = "application/pdf")
     public ResponseEntity<byte[]> generatePdf(@RequestBody @Valid UkasePayload payload)
             throws IOException, DocumentException, URISyntaxException {
+        log.debug("Generate PDF POST for '{}' :\n{}\n", payload.getIndex(), payload.getData());
         return ResponseEntity.ok(taskBuilder.build(payload).call());
     }
 
@@ -163,6 +164,7 @@ class UkaseController {
     public ResponseEntity<ExceptionMessage> handleIOException(IOException e) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
         ExceptionMessage message = new ExceptionMessage(e.getMessage(), status.value());
+        log.warn("IO Exception: {}", e);
         return new ResponseEntity<>(message, status);
     }
 
@@ -171,6 +173,7 @@ class UkaseController {
     public ResponseEntity<ExceptionMessage> handleInterruptedException(InterruptedException e) {
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
         ExceptionMessage message = new ExceptionMessage(e.getMessage(), status.value());
+        log.warn("Interrupted: {}", message);
         return new ResponseEntity<>(message, status);
     }
 
@@ -179,6 +182,7 @@ class UkaseController {
     public ResponseEntity<List<ValidationError>> handleValidationException(MethodArgumentNotValidException e) {
         List<ObjectError> allErrors = e.getBindingResult().getAllErrors();
         List<ValidationError> mappedErrors = allErrors.stream().map(ValidationError::new).collect(Collectors.toList());
+        log.warn("Validation errors: {}", mappedErrors);
         return new ResponseEntity<>(mappedErrors, HttpStatus.BAD_REQUEST);
     }
 
@@ -192,6 +196,7 @@ class UkaseController {
     @ExceptionHandler(RenderException.class)
     @ResponseBody
     public ResponseEntity<String> handleRenderException(RenderException e) {
+        log.warn("Rendering: {}", e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
