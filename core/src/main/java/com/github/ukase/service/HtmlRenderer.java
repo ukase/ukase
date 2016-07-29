@@ -33,7 +33,8 @@ public class HtmlRenderer {
     @Autowired
     private Handlebars handlebars;
 
-    private HandlebarBugFilter filter = new HandlebarBugFilter();
+    @Autowired
+    private HandlebarBugFilter filter;
 
     public String render(String templateName, Map<String, Object> params) throws IOException {
         Template template = handlebars.compile(templateName);
