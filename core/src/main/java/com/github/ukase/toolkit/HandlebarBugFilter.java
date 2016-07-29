@@ -18,22 +18,12 @@ public class HandlebarBugFilter {
     public String doFilter(String str) {
         String result = str;
 
-        if (str != null) {
-            Matcher matcher = pattern.matcher(result);
+        Matcher matcher = pattern.matcher(result);
 
-            Set<String> tokens = new HashSet<>();
-
-            while (matcher.find()) {
-                tokens.add(matcher.group(1));
-            }
-
-            for(String token: tokens) {
-                result = result.replaceAll("(" + token + ")[^;]", "$1;");
-            }
-
-            return result;
-        } else {
-            return null;
+        while (matcher.find()) {
+            result = result.replaceAll("(" + matcher.group(1) + ")([^;])", "$1;$2");
         }
+
+        return result;
     }
 }
