@@ -30,7 +30,7 @@
     <parent>
         <groupId>com.github.ukase</groupId>
         <artifactId>ukase-parent</artifactId>
-        <version>1.7</version>
+        <version>1.7.1</version>
         <relativePath>../</relativePath>
     </parent>
 
