@@ -19,39 +19,35 @@
 
 package com.github.ukase.web;
 
-import com.github.jknack.handlebars.HandlebarsException;
 import com.github.ukase.bulk.BulkStatus;
 import com.github.ukase.config.BulkConfig;
 import com.github.ukase.service.BulkRenderer;
 import com.github.ukase.service.HtmlRenderer;
 import com.github.ukase.service.XlsxRenderer;
 import com.github.ukase.toolkit.CompoundSource;
-import com.github.ukase.toolkit.RenderException;
 import com.github.ukase.toolkit.RenderTaskBuilder;
 import com.github.ukase.toolkit.SourceListener;
 import com.github.ukase.toolkit.StaticUtils;
 import com.itextpdf.text.DocumentException;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.WebRequest;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -89,14 +85,24 @@ class UkaseController {
      =================================================================================================================*/
 
     @RequestMapping(value = "/html", method = RequestMethod.POST)
-    public ResponseEntity<String> generateHtml(@RequestBody @Valid UkasePayload payload) throws IOException {
+    public ResponseEntity<String> generateHtml(@RequestBody @Valid UkasePayload payload,
+                                               HttpServletRequest request,
+                                               WebRequest webRequest) throws IOException {
+        webRequest.setAttribute(RequestData.ATTRIBUTE_NAME,
+                new RequestData(request, payload),
+                RequestAttributes.SCOPE_REQUEST);
         String result = htmlRenderer.render(payload.getIndex(), payload.getData());
         return ResponseEntity.ok(result);
     }
 
     @RequestMapping(value = "/pdf", method = RequestMethod.POST, produces = "application/pdf")
-    public ResponseEntity<byte[]> generatePdf(@RequestBody @Valid UkasePayload payload)
+    public ResponseEntity<byte[]> generatePdf(@RequestBody @Valid UkasePayload payload,
+                                              HttpServletRequest request,
+                                              WebRequest webRequest)
             throws IOException, DocumentException, URISyntaxException {
+        webRequest.setAttribute(RequestData.ATTRIBUTE_NAME,
+                new RequestData(request, payload),
+                RequestAttributes.SCOPE_REQUEST);
         log.debug("Generate PDF POST for '{}' :\n{}\n", payload.getIndex(), payload.getData());
         return ResponseEntity.ok(taskBuilder.build(payload).call());
     }
@@ -112,7 +118,12 @@ class UkaseController {
 
     @RequestMapping(value = "/xlsx", method = RequestMethod.POST,
             produces = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-    public ResponseEntity<byte[]> generateXlsx(@RequestBody @Valid UkasePayload payload) throws IOException {
+    public ResponseEntity<byte[]> generateXlsx(@RequestBody @Valid UkasePayload payload,
+                                               HttpServletRequest request,
+                                               WebRequest webRequest) throws IOException {
+        webRequest.setAttribute(RequestData.ATTRIBUTE_NAME,
+                new RequestData(request, payload),
+                RequestAttributes.SCOPE_REQUEST);
         log.debug("Generate XLSX POST for '{}' :\n{}\n", payload.getIndex(), payload.getData());
         String html = htmlRenderer.render(payload.getIndex(), payload.getData());
         log.debug("Prepared xhtml:\n{}\n", html);
@@ -125,14 +136,24 @@ class UkaseController {
 
     @RequestMapping(value = "/bulk", method = RequestMethod.POST,
             consumes = {"text/json", "text/json;charset=UTF-8", "application/json"})
-    public @ResponseBody String postBulkInOrder(@RequestBody List<UkasePayload> payloads) throws IOException {
+    public @ResponseBody String postBulkInOrder(@RequestBody List<UkasePayload> payloads,
+                                                HttpServletRequest request,
+                                                WebRequest webRequest) throws IOException {
+        webRequest.setAttribute(RequestData.ATTRIBUTE_NAME,
+                new RequestData(request, payloads),
+                RequestAttributes.SCOPE_REQUEST);
         return bulkRenderer.putTaskInOrder(payloads);
     }
 
     @RequestMapping(value = "/bulk/sync", method = RequestMethod.POST,
             produces = "application/pdf", consumes = "text/json")
-    public ResponseEntity<byte[]> renderBulk(@RequestBody List<UkasePayload> payloads)
+    public ResponseEntity<byte[]> renderBulk(@RequestBody List<UkasePayload> payloads,
+                                             HttpServletRequest request,
+                                             WebRequest webRequest)
             throws IOException, InterruptedException {
+        webRequest.setAttribute(RequestData.ATTRIBUTE_NAME,
+                new RequestData(request, payloads),
+                RequestAttributes.SCOPE_REQUEST);
         return ResponseEntity.ok(bulkRenderer.processOrder(payloads));
     }
 
@@ -158,58 +179,6 @@ class UkaseController {
     }
 
     /*================================================================================================================
-     ============================================== Exceptions handling ==============================================
-     =================================================================================================================*/
-
-    @ExceptionHandler(IOException.class)
-    @ResponseBody
-    public ResponseEntity<ExceptionMessage> handleIOException(IOException e) {
-        HttpStatus status = HttpStatus.BAD_REQUEST;
-        ExceptionMessage message = new ExceptionMessage(e.getMessage(), status.value());
-        log.warn("IO Exception: {}", e);
-        return new ResponseEntity<>(message, status);
-    }
-
-    @ExceptionHandler(InterruptedException.class)
-    @ResponseBody
-    public ResponseEntity<ExceptionMessage> handleInterruptedException(InterruptedException e) {
-        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
-        ExceptionMessage message = new ExceptionMessage(e.getMessage(), status.value());
-        log.warn("Interrupted: {}", message);
-        return new ResponseEntity<>(message, status);
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseBody
-    public ResponseEntity<List<ValidationError>> handleValidationException(MethodArgumentNotValidException e) {
-        List<ObjectError> allErrors = e.getBindingResult().getAllErrors();
-        List<ValidationError> mappedErrors = allErrors.stream().map(ValidationError::new).collect(Collectors.toList());
-        log.warn("Validation errors: {}", mappedErrors);
-        return new ResponseEntity<>(mappedErrors, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(HandlebarsException.class)
-    @ResponseBody
-    public ResponseEntity<String> handleHandlebarsException(HandlebarsException e) {
-        log.error("Some grand error caused in template mechanism", e);
-        return new ResponseEntity<>("Some error caused in template mechanism", HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    @ExceptionHandler(RenderException.class)
-    @ResponseBody
-    public ResponseEntity<String> handleRenderException(RenderException e) {
-        log.warn("Rendering: " + e.getMessage(), e.getCause());
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    @ExceptionHandler(Exception.class)
-    @ResponseBody
-    public ResponseEntity<String> handleException(Exception e) {
-        log.warn("Common rendering problem: {}", e);
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    /*================================================================================================================
      ==============================================  private utilities  ==============================================
      =================================================================================================================*/
 
@@ -218,17 +187,6 @@ class UkaseController {
             return new ResponseEntity<>("updated", HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
-        }
-    }
-
-    @Data
-    private static class ExceptionMessage {
-        private final String message;
-        private final int code;
-
-        public ExceptionMessage(String message, int code) {
-            this.message = message;
-            this.code = code;
         }
     }
 }

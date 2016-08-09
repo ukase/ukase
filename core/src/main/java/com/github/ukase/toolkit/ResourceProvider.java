@@ -35,6 +35,8 @@ import org.xhtmlrenderer.pdf.ITextRenderer;
 import org.xhtmlrenderer.util.XRRuntimeException;
 import org.xml.sax.SAXParseException;
 
+import javax.xml.transform.SourceLocator;
+import javax.xml.transform.TransformerException;
 import java.io.File;
 import java.io.IOException;
 import java.util.regex.Pattern;
@@ -100,11 +102,7 @@ public class ResourceProvider {
         } catch (IOException | DocumentException e) {
             log.error("Some problem in font loading");
         } catch (XRRuntimeException e) {
-            if (e.getCause() instanceof SAXParseException) {
-                SAXParseException parseException = (SAXParseException) e.getCause();
-                String[] lines = htmlDocument.split("\r\n|\r|\n");
-                log.error("Error in line -->\n" + lines[parseException.getLineNumber() - 1] + "\n<--", e);
-            }
+            logErrorInLine(htmlDocument, e);
             throw new RenderException("Error in xhtml file processing", e);
         }
 
@@ -146,6 +144,59 @@ public class ResourceProvider {
     private String resolvePath(File resources) {
         if (resources != null && resources.isDirectory()) {
             return resources.toURI().toString();
+        }
+        return null;
+    }
+
+    private void logErrorInLine(String htmlDocument, XRRuntimeException e) {
+        SAXParseException parseCause = getCause(e, SAXParseException.class);
+        if (parseCause != null) {
+            logErrorInLine(htmlDocument, parseCause.getLineNumber(), parseCause.getColumnNumber(), parseCause);
+            return;
+        }
+
+        TransformerException transformCause = getCause(e, TransformerException.class);
+        if (transformCause != null) {
+            SourceLocator locator = transformCause.getLocator();
+            logErrorInLine(htmlDocument, locator.getLineNumber(), locator.getColumnNumber(), transformCause);
+        }
+    }
+
+    private <T extends Exception> T getCause(Throwable e, Class<T> tClass) {
+        if (e == null) {
+            return null;
+        }
+        Throwable cause = e.getCause();
+        if (tClass.isInstance(cause)) {
+            return tClass.cast(cause);
+        }
+        return getCause(cause, tClass);
+    }
+
+    private void logErrorInLine(String htmlDocument, int lineNumber, int columnNumber, Exception e) {
+        if (lineNumber < 0) {
+            log.error("Thrown xml parse exception, but no line were defined", e);
+            return;
+        }
+        StringBuilder sb = new StringBuilder("Generated html parsing error in line ")
+                .append(lineNumber)
+                .append(" at character ")
+                .append(columnNumber)
+                .append(":\n")
+                .append(getLine(htmlDocument, lineNumber))
+                .append("\n");
+        for (int i = 0 ; i < columnNumber - 1 ; i++) {
+            sb.append(" ");
+        }
+        sb.append("^")
+                .append("\n");
+        log.error(sb.toString(), e);
+    }
+
+    private String getLine(String htmlDocument, int lineNumber) {
+        String[] lines = htmlDocument.split("\r\n|\r|\n");
+        if (lineNumber <= lines.length) {
+            return lines[lineNumber - 1];
         }
         return null;
     }
