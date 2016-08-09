@@ -21,7 +21,6 @@ package com.github.ukase.service;
 
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
-import com.github.ukase.toolkit.HandlebarBugFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,11 +32,8 @@ public class HtmlRenderer {
     @Autowired
     private Handlebars handlebars;
 
-    @Autowired
-    private HandlebarBugFilter filter;
-
     public String render(String templateName, Map<String, Object> params) throws IOException {
         Template template = handlebars.compile(templateName);
-        return filter.doFilter(template.apply(params));
+        return template.apply(params);
     }
 }

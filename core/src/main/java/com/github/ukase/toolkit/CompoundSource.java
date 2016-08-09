@@ -27,14 +27,15 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 @Service
 public class CompoundSource implements Source{
     private final JarSource jarSource;
     private final FileSource fileSource;
+    private final Collection<String> fonts = new CopyOnWriteArraySet<>();
 
     @Autowired
     public CompoundSource(JarSource jarSource, FileSource fileSource) {
@@ -49,7 +50,7 @@ public class CompoundSource implements Source{
 
     @Override
     public Collection<String> getFontsUrls() {
-        Collection<String> fonts = new ArrayList<>(fileSource.getFontsUrls());
+        fonts.addAll(fileSource.getFontsUrls());
         fonts.addAll(jarSource.getFontsUrls());
         return fonts;
     }
