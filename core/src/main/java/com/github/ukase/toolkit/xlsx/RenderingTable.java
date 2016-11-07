@@ -21,15 +21,21 @@ package com.github.ukase.toolkit.xlsx;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xhtmlrenderer.css.constants.CSSName;
+import org.xhtmlrenderer.css.parser.FSColor;
+import org.xhtmlrenderer.css.parser.FSRGBColor;
 import org.xhtmlrenderer.css.style.CalculatedStyle;
+import org.xhtmlrenderer.css.style.FSDerivedValue;
 import org.xhtmlrenderer.css.style.derived.BorderPropertySet;
+import org.xhtmlrenderer.css.style.derived.ColorValue;
 import org.xhtmlrenderer.newtable.TableCellBox;
 import org.xhtmlrenderer.newtable.TableRowBox;
 import org.xhtmlrenderer.render.BlockBox;
@@ -49,6 +55,8 @@ public class RenderingTable implements Runnable {
     private static final String TAG_TH = "th";
     private static final String ATTR_COL_SPAN = "colspan";
     private static final String ATTR_ROW_SPAN = "rowspan";
+    private static final String CSS_VALUE_WORD_WRAP_ENABLE = "break-word";
+    private static final String CSS_VALUE_BOLD_FONT = "bold";
     private final Workbook wb;
     private final Sheet sheet;
     private final BlockBox box;
@@ -67,7 +75,7 @@ public class RenderingTable implements Runnable {
 
     @Override
     public void run() {
-        new ElementList(table.getElementsByTagName(TAG_TR)).stream()
+        new ElementList(table.getElementsByTagName(TAG_TR))
                 .forEach(this::processRows);
         cellSizes.forEach(sheet::setColumnWidth);
     }
@@ -146,6 +154,17 @@ public class RenderingTable implements Runnable {
 
         cellStyle.setAlignment(prepareAlignment(style.getIdent(CSSName.TEXT_ALIGN)));
 
+        if (translateCss(style, CSSName.WORD_WRAP, CSS_VALUE_WORD_WRAP_ENABLE)) {
+            cellStyle.setWrapText(true);
+            cellStyle.setShrinkToFit(true);
+        }
+
+        Font font = wb.createFont();
+        font.setBold(translateCss(style, CSSName.FONT_WEIGHT, CSS_VALUE_BOLD_FONT));
+        cellStyle.setFont(font);
+
+        trySetBackgroundColor(style.valueByName(CSSName.BACKGROUND_COLOR), cellStyle);
+
         return cellStyle;
     }
 
@@ -157,6 +176,29 @@ public class RenderingTable implements Runnable {
         if (width > 0) {
             cellSizes.compute(cellNumber,
                     (num, w) -> greaterInt(w, width));
+        }
+    }
+
+    private boolean translateCss(CalculatedStyle style, CSSName cssProperty, String trueValue) {
+        String cssValue = style.getIdent(cssProperty).asString();
+        return cssValue.equals(trueValue);
+    }
+
+    private void trySetBackgroundColor(FSDerivedValue value, XSSFCellStyle cellStyle) {
+        if (value == null || !(value instanceof ColorValue)) {
+            return;
+        }
+        FSColor color = value.asColor();
+        if (color instanceof FSRGBColor) {
+            FSRGBColor rgbColor = (FSRGBColor) color;
+            byte[] colors = new byte[3];
+            colors[0] = (byte)rgbColor.getRed();
+            colors[1] = (byte)rgbColor.getGreen();
+            colors[2] = (byte)rgbColor.getBlue();
+
+            XSSFColor xlsxColor = new XSSFColor(colors);
+            cellStyle.setFillPattern(XSSFCellStyle.SOLID_FOREGROUND);
+            cellStyle.setFillForegroundColor(xlsxColor);
         }
     }
 }

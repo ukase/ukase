@@ -83,7 +83,7 @@ public class ResourceProvider {
         if (source.hasHelpers()) {
             source.getHelpers().forEach(engine::registerHelper);
         }
-        context.getBeansOfType(AbstractHelper.class).values().stream().forEach(
+        context.getBeansOfType(AbstractHelper.class).values().forEach(
                 helper -> engine.registerHelper(helper.getName(), helper)
         );
 

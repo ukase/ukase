@@ -34,6 +34,7 @@ public class FormatDateHelper extends AbstractHelper<Object> {
     private static final Pattern DATE_ONLY = Pattern.compile("^\\d+.\\d+.\\d+$");
     private static final Pattern DATE_TIME = Pattern.compile("^\\d+.\\d+.\\d+ \\d+:\\d+$");
     private static final String DATE_TIME_FORMAT = "dd.MM.yyyy HH:mm";
+    private static final String PARAMETER_FORMAT = "parseFormat";
     static final String DATE_FORMAT = "dd.MM.yyyy";
 
     public FormatDateHelper() {
@@ -56,7 +57,7 @@ public class FormatDateHelper extends AbstractHelper<Object> {
     }
 
     private CharSequence apply(String context, Options options) {
-        String parseFormat = options.hash("parseFormat");
+        String parseFormat = options.hash(PARAMETER_FORMAT);
         if (parseFormat == null) {
             if (DATE_ONLY.matcher(context.trim()).matches()) {
                 parseFormat = DATE_FORMAT;
