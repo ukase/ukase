@@ -19,11 +19,13 @@
 
 package com.github.ukase.toolkit.xlsx;
 
+import com.github.ukase.toolkit.xlsx.translators.VerticalAlignmentTranslator;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
@@ -163,6 +165,9 @@ public class RenderingTable implements Runnable {
         font.setBold(translateCss(style, CSSName.FONT_WEIGHT, CSS_VALUE_BOLD_FONT));
         cellStyle.setFont(font);
 
+        cellStyle.setVerticalAlignment(VerticalAlignment.BOTTOM);
+
+        trySetVerticalAlignment(style, cellStyle);
         trySetBackgroundColor(style.valueByName(CSSName.BACKGROUND_COLOR), cellStyle);
 
         return cellStyle;
@@ -182,6 +187,14 @@ public class RenderingTable implements Runnable {
     private boolean translateCss(CalculatedStyle style, CSSName cssProperty, String trueValue) {
         String cssValue = style.getIdent(cssProperty).asString();
         return cssValue.equals(trueValue);
+    }
+
+    private void trySetVerticalAlignment(CalculatedStyle css, XSSFCellStyle style) {
+        VerticalAlignment verticalAlignment =
+                VerticalAlignmentTranslator.translate(css.valueByName(CSSName.VERTICAL_ALIGN));
+        if (verticalAlignment != null) {
+            style.setVerticalAlignment(verticalAlignment);
+        }
     }
 
     private void trySetBackgroundColor(FSDerivedValue value, XSSFCellStyle cellStyle) {
