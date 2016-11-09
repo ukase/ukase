@@ -19,6 +19,7 @@
 
 package com.github.ukase.toolkit.xlsx;
 
+import com.github.ukase.toolkit.xlsx.translators.FontTranslator;
 import com.github.ukase.toolkit.xlsx.translators.VerticalAlignmentTranslator;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -161,9 +162,7 @@ public class RenderingTable implements Runnable {
             cellStyle.setShrinkToFit(true);
         }
 
-        Font font = wb.createFont();
-        font.setBold(translateCss(style, CSSName.FONT_WEIGHT, CSS_VALUE_BOLD_FONT));
-        cellStyle.setFont(font);
+        tryApplyCustomFont(style, cellStyle);
 
         cellStyle.setVerticalAlignment(VerticalAlignment.BOTTOM);
 
@@ -171,6 +170,24 @@ public class RenderingTable implements Runnable {
         trySetBackgroundColor(style.valueByName(CSSName.BACKGROUND_COLOR), cellStyle);
 
         return cellStyle;
+    }
+
+    private void tryApplyCustomFont(CalculatedStyle style, XSSFCellStyle cellStyle) {
+        FSDerivedValue fontWeight = style.valueByName(CSSName.FONT_WEIGHT);
+        FSDerivedValue fontSize = style.valueByName(CSSName.FONT_SIZE);
+        boolean isFontWeightSet = FontTranslator.isFontWeightSet(fontWeight);
+        boolean isFontSizeSet = FontTranslator.isFontSizeSet(fontSize);
+
+        if (isFontSizeSet || isFontWeightSet) {
+            Font font = wb.createFont();
+            if (isFontWeightSet) {
+                font.setBold(FontTranslator.isBold(fontWeight));
+            }
+            if (isFontSizeSet) {
+                font.setFontHeightInPoints(FontTranslator.fontSizePt(fontSize));
+            }
+            cellStyle.setFont(font);
+        }
     }
 
     private void calculateColumnWidth(int cellNumber, CalculatedStyle style) {
