@@ -45,6 +45,9 @@ We propogate next usage templates:
   - using by development environment of any application to generate pdf-s over [UKase API](#UKase_API)
   - using by developer to create and modify pdf templates. For these case we have UI that enables view and view's auto-refresh on any template change. 
 
+## Xlsx rendering feature
+[Xlsx rendering feature docs](docs/xlsx.md)
+
 ## UKase API
 
 Short list [(more)](docs/api.md):
