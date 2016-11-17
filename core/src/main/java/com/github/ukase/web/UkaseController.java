@@ -67,18 +67,27 @@ class UkaseController {
         return UkaseController.class.getResourceAsStream(fileName);
     }
 
-    @Autowired
     private HtmlRenderer htmlRenderer;
-    @Autowired
     private CompoundSource source;
-    @Autowired
     private BulkRenderer bulkRenderer;
-    @Autowired
     private BulkConfig bulkConfig;
-    @Autowired
     private XlsxRenderer xlsxRenderer;
-    @Autowired
     private RenderTaskBuilder taskBuilder;
+
+    @Autowired
+    public UkaseController(HtmlRenderer htmlRenderer,
+                           CompoundSource source,
+                           BulkRenderer bulkRenderer,
+                           BulkConfig bulkConfig,
+                           XlsxRenderer xlsxRenderer,
+                           RenderTaskBuilder taskBuilder) {
+        this.htmlRenderer = htmlRenderer;
+        this.source = source;
+        this.bulkRenderer = bulkRenderer;
+        this.bulkConfig = bulkConfig;
+        this.xlsxRenderer = xlsxRenderer;
+        this.taskBuilder = taskBuilder;
+    }
 
     /*================================================================================================================
      ==============================================   API controllers   ==============================================

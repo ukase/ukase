@@ -20,14 +20,13 @@
 package com.github.ukase.service;
 
 import com.github.ukase.TestHelper;
-import com.github.ukase.UkaseApplication;
 import com.github.ukase.config.UkaseSettings;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,15 +34,14 @@ import java.nio.file.Files;
 
 import static org.junit.Assert.*;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @ActiveProfiles("test")
-@SpringApplicationConfiguration(UkaseApplication.class)
+@SpringBootTest()
 public class XlsxRendererTest {
     @Autowired
     private XlsxRenderer renderer;
     @Autowired
     private UkaseSettings settings;
-
 
     @Test
     public void testParseHtml() throws Exception {

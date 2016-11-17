@@ -35,7 +35,7 @@ class RequestData {
     private String fullUri;
     private Object data;
 
-    public RequestData(HttpServletRequest request, Object data) {
+    RequestData(HttpServletRequest request, Object data) {
         String requestAddress = request.getRequestURI();
         String queryString = request.getQueryString();
         if (queryString != null && queryString.length() > 0) {
@@ -47,7 +47,7 @@ class RequestData {
         this.data = data;
     }
 
-    public String getJsonData() {
+    String getJsonData() {
         try {
             return WRITER.writeValueAsString(data);
         } catch (JsonProcessingException e) {

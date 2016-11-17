@@ -27,9 +27,13 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 @Component
-class HtmlTemplateLocationExistsValidator implements ConstraintValidator<HtmlTemplateLocationExists, String> {
-    @Autowired
+public class HtmlTemplateLocationExistsValidator implements ConstraintValidator<HtmlTemplateLocationExists, String> {
     private CompoundSource source;
+
+    @Autowired
+    public HtmlTemplateLocationExistsValidator(CompoundSource source) {
+        this.source = source;
+    }
 
     @Override
     public void initialize(HtmlTemplateLocationExists constraintAnnotation) {

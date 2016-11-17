@@ -100,7 +100,9 @@ public class UkaseExceptionHandler {
 
 
     private void logRequest(RequestData data) {
-        if (data.getData() != null) {
+        if (data == null) {
+            log.warn("Failed load request data");
+        } else if (data.getData() != null) {
             log.warn("\nFailed {} request {} with data\n{}\n", data.getMethod(), data.getFullUri(), data.getJsonData());
         } else {
             log.warn("\nFailed {} request {}.\n", data.getMethod(), data.getFullUri());
@@ -112,7 +114,7 @@ public class UkaseExceptionHandler {
         private final String message;
         private final int code;
 
-        public ExceptionMessage(String message, int code) {
+        ExceptionMessage(String message, int code) {
             this.message = message;
             this.code = code;
         }

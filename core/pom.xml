@@ -63,9 +63,19 @@
             <optional>true</optional>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-test-autoconfigure</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>4.2.4.RELEASE</version>
+            <version>4.3.4.RELEASE</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -103,6 +113,12 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <additionalProperties>
+                        <java.source>${java.version}</java.source>
+                        <java.target>${java.version}</java.target>
+                    </additionalProperties>
+                </configuration>
             </plugin>
         </plugins>
     </build>

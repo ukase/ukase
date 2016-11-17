@@ -20,31 +20,65 @@
 package com.github.ukase.web;
 
 import com.github.ukase.TestHelper;
-import com.github.ukase.UkaseApplication;
 
-import org.junit.Before;
+import com.github.ukase.UkaseApplication;
+import com.github.ukase.config.BulkConfig;
+import com.github.ukase.config.UkaseSettings;
+import com.github.ukase.config.WaterMarkSettings;
+import com.github.ukase.config.WebConfig;
+import com.github.ukase.service.BulkRenderer;
+import com.github.ukase.service.HtmlRenderer;
+import com.github.ukase.service.PdfRenderer;
+import com.github.ukase.service.XlsxRenderer;
+import com.github.ukase.toolkit.CompoundSource;
+import com.github.ukase.toolkit.CompoundTemplateLoader;
+import com.github.ukase.toolkit.RenderTaskBuilder;
+import com.github.ukase.toolkit.ResourceProvider;
+import com.github.ukase.toolkit.fs.FileSource;
+import com.github.ukase.toolkit.helpers.FormatDateHelper;
+import com.github.ukase.toolkit.helpers.FormatNumberHelper;
+import com.github.ukase.toolkit.jar.JarSource;
+import com.github.ukase.web.validation.HtmlTemplateLocationExistsValidator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.WebIntegrationTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.io.IOException;
 
 import static org.junit.Assert.*;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @ActiveProfiles("test")
-@SpringApplicationConfiguration(UkaseApplication.class)
-@WebIntegrationTest(randomPort = true)
+@ContextConfiguration(classes = {
+        UkaseApplication.class,
+        UkaseSettings.class,
+        WebConfig.class,
+        WaterMarkSettings.class,
+        BulkConfig.class,
+        BulkRenderer.class,
+        HtmlRenderer.class,
+        PdfRenderer.class,
+        XlsxRenderer.class,
+        FileSource.class,
+        FormatDateHelper.class,
+        FormatNumberHelper.class,
+        JarSource.class,
+        CompoundSource.class,
+        CompoundTemplateLoader.class,
+        RenderTaskBuilder.class,
+        ResourceProvider.class,
+        HtmlTemplateLocationExistsValidator.class,
+
+})
+@WebMvcTest(controllers = {UkaseController.class, UkaseExceptionHandler.class})
 public class UkaseControllerTest {
     private static final String payload;
     static {
@@ -55,14 +89,8 @@ public class UkaseControllerTest {
         }
     }
 
-    private MockMvc mockMvc;
     @Autowired
-    private WebApplicationContext ctx;
-
-    @Before
-    public void setUp() throws Exception {
-        mockMvc = MockMvcBuilders.webAppContextSetup(ctx).build();
-    }
+    private MockMvc mockMvc;
 
     @Test
     public void testGenerateHtml() throws Exception {

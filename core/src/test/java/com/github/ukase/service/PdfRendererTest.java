@@ -20,13 +20,12 @@
 package com.github.ukase.service;
 
 import com.github.ukase.config.UkaseSettings;
-import com.github.ukase.UkaseApplication;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,14 +33,18 @@ import java.nio.file.Files;
 
 import static org.junit.Assert.*;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @ActiveProfiles("test")
-@SpringApplicationConfiguration(UkaseApplication.class)
+@SpringBootTest()
 public class PdfRendererTest {
     @Autowired
     private PdfRenderer renderer;
     @Autowired
     private UkaseSettings settings;
+
+    //TODO:
+    // check if there are any method to compare pdf files without their metadata (like creation date)
+    // or another way to check results of pdf generation.
 
     @Test
     public void testParseHtml() throws Exception {
@@ -50,9 +53,15 @@ public class PdfRendererTest {
         assertNotNull(html);
         assertNotNull(pdf);
         savePdf(renderer.render(html, false), "render");
-        //TODO:
-        // check if there are any method to compare pdf files without their metadata (like creation date)
-        // or another way to check results of pdf generation.
+    }
+
+    @Test
+    public void testParseSampleHtml() throws Exception {
+        byte[] pdf = getFile("basic.pdf");
+        String html = getHtmlData("basic.html");
+        assertNotNull(html);
+        assertNotNull(pdf);
+        savePdf(renderer.render(html, true), "render");
     }
 
     private String getHtmlData(String fileName) throws IOException {

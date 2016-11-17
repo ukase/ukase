@@ -29,8 +29,12 @@ import java.util.Map;
 
 @Service
 public class HtmlRenderer {
-    @Autowired
     private Handlebars handlebars;
+
+    @Autowired
+    public HtmlRenderer(Handlebars handlebars) {
+        this.handlebars = handlebars;
+    }
 
     public String render(String templateName, Map<String, Object> params) throws IOException {
         Template template = handlebars.compile(templateName);

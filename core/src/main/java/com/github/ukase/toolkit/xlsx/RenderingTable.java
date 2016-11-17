@@ -59,7 +59,6 @@ public class RenderingTable implements Runnable {
     private static final String ATTR_COL_SPAN = "colspan";
     private static final String ATTR_ROW_SPAN = "rowspan";
     private static final String CSS_VALUE_WORD_WRAP_ENABLE = "break-word";
-    private static final String CSS_VALUE_BOLD_FONT = "bold";
     private final Workbook wb;
     private final Sheet sheet;
     private final BlockBox box;
@@ -163,9 +162,6 @@ public class RenderingTable implements Runnable {
         }
 
         tryApplyCustomFont(style, cellStyle);
-
-        cellStyle.setVerticalAlignment(VerticalAlignment.BOTTOM);
-
         trySetVerticalAlignment(style, cellStyle);
         trySetBackgroundColor(style.valueByName(CSSName.BACKGROUND_COLOR), cellStyle);
 
@@ -211,6 +207,8 @@ public class RenderingTable implements Runnable {
                 VerticalAlignmentTranslator.translate(css.valueByName(CSSName.VERTICAL_ALIGN));
         if (verticalAlignment != null) {
             style.setVerticalAlignment(verticalAlignment);
+        } else {
+            style.setVerticalAlignment(VerticalAlignment.BOTTOM);
         }
     }
 

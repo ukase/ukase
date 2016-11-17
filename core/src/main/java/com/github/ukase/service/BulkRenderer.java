@@ -48,16 +48,16 @@ public class BulkRenderer {
 
     private final ConcurrentMap<String, Long> renderedPDFs = new ConcurrentHashMap<>();
 
-    @Autowired
     private ExecutorService executor;
-    @Autowired
     private RenderTaskBuilder builder;
-    @Autowired
     private Long ttl;
     private File path;
 
     @Autowired
-    public void setPath(File path) {
+    public BulkRenderer(ExecutorService executor, RenderTaskBuilder builder, Long ttl, File path) {
+        this.executor = executor;
+        this.builder = builder;
+        this.ttl = ttl;
         this.path = path;
         checkDataDirectory();
     }

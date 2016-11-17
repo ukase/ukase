@@ -40,11 +40,15 @@ import java.nio.file.Paths;
 
 @Configuration
 public class WebConfig extends WebMvcConfigurerAdapter {
-    @Autowired
     private Environment env;
-    @Autowired
     private UkaseSettings settings;
     private boolean devMode;
+
+    @Autowired
+    public WebConfig(Environment env, UkaseSettings settings) {
+        this.env = env;
+        this.settings = settings;
+    }
 
     @PostConstruct
     private void init() {

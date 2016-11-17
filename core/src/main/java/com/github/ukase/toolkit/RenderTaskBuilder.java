@@ -33,10 +33,14 @@ import java.net.URISyntaxException;
 @Component
 @Slf4j
 public class RenderTaskBuilder {
-    @Autowired
     private HtmlRenderer htmlRenderer;
-    @Autowired
     private PdfRenderer pdfRenderer;
+
+    @Autowired
+    public RenderTaskBuilder(HtmlRenderer htmlRenderer, PdfRenderer pdfRenderer) {
+        this.htmlRenderer = htmlRenderer;
+        this.pdfRenderer = pdfRenderer;
+    }
 
     public RenderTask build(UkasePayload payload) {
         return new DefaultRenderTask(payload, htmlRenderer, pdfRenderer);

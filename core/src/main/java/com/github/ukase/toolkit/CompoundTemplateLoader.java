@@ -57,7 +57,6 @@ public class CompoundTemplateLoader extends AbstractTemplateLoader {
     private final ZipFile zip;
     private final Map<String, ZipEntry> resources = new HashMap<>();
     private final TemplateLoader externalLoader;
-    //private final
 
     @Autowired
     public CompoundTemplateLoader(UkaseSettings settings) throws IOException {

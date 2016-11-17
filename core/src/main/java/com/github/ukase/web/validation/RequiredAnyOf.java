@@ -33,7 +33,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 @Constraint(validatedBy = RequiredAnyOfValidator.class)
 @Documented
-public @interface RequiredAnyOf {
+@interface RequiredAnyOf {
     String[] value();
 
     String message() default "No any of required values: {value}";
