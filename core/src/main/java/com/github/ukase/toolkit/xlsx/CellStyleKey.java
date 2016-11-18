@@ -29,6 +29,8 @@ import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.xhtmlrenderer.css.parser.FSColor;
 import org.xhtmlrenderer.css.parser.FSRGBColor;
 
+import java.util.function.Supplier;
+
 @Data
 class CellStyleKey {
     private BorderStyle borderTop;
@@ -42,10 +44,10 @@ class CellStyleKey {
     private boolean bold;
     private Short fontSize;
 
-    void applyToStyle(XSSFCellStyle style, Font font) {
+    void applyToStyle(XSSFCellStyle style, Supplier<Font> fontSupplier) {
         applyBorders(style);
         applyAlignment(style);
-        applyFont(style, font);
+        applyFont(style, fontSupplier);
         applyTextWrap(style);
         applyBackgroundColor(style);
     }
@@ -71,8 +73,14 @@ class CellStyleKey {
         }
     }
 
-    private void applyFont(XSSFCellStyle style, Font font) {
-        font.setBold(bold);
+    private void applyFont(XSSFCellStyle style, Supplier<Font> fontSupplier) {
+        if (!bold && fontSize == null) {
+            return;
+        }
+        Font font = fontSupplier.get();
+        if (bold) {
+            font.setBold(bold);
+        }
         if (fontSize != null) {
             font.setFontHeightInPoints(fontSize);
         }

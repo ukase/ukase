@@ -165,7 +165,7 @@ public class RenderingTable implements Runnable {
 
     private XSSFCellStyle getNewStyle(CellStyleKey key) {
         XSSFCellStyle style = (XSSFCellStyle)wb.createCellStyle();
-        key.applyToStyle(style, wb.createFont());
+        key.applyToStyle(style, wb::createFont);
         return style;
     }
 
