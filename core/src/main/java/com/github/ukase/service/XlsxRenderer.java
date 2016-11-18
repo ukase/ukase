@@ -47,10 +47,12 @@ public class XlsxRenderer {
         this.provider = provider;
         // for some xlsx-files default secure ratio can cause IOException "Zip bomb detected!"
         // for more information see ZipSecureFile:advance
-        ZipSecureFile.setMinInflateRatio(0.005d);
+        ZipSecureFile.setMinInflateRatio(0.002d);
     }
 
     public byte[] render(String html) throws IOException {
+        log.info("-------------------------------");
+        log.info("Start rendering xlsx from html with size of " + html.length());
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         SXSSFWorkbook wb = new SXSSFWorkbook(-1);
 
@@ -59,6 +61,8 @@ public class XlsxRenderer {
         BlockBox box = renderer.getRootBox();
         RenderingTableBuilder builder = new RenderingTableBuilder(wb, box);
 
+        log.info("Renderer prepared");
+
         new ElementList(document.getElementsByTagName(TAG_TABLE)).stream()
                 .map(builder::build)
                 .forEach(RenderingTable::run);
@@ -66,6 +70,7 @@ public class XlsxRenderer {
         wb.write(baos);
         wb.dispose();
 
+        log.info("xlsx rendered");
         return baos.toByteArray();
     }
 }

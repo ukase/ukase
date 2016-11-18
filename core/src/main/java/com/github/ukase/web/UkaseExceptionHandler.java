@@ -90,7 +90,7 @@ public class UkaseExceptionHandler {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler()
     @ResponseBody
     public ResponseEntity<String> handleException(Exception e) {
         log.warn("\nCommon rendering problem: {}", e);
