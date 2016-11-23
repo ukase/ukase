@@ -172,7 +172,9 @@ public class RenderingTable implements Runnable {
     private void tryApplyCustomFont(CalculatedStyle style, CellStyleKey key) {
         FSDerivedValue fontWeight = style.valueByName(CSSName.FONT_WEIGHT);
         FSDerivedValue fontSize = style.valueByName(CSSName.FONT_SIZE);
-        key.setBold(FontTranslator.isFontWeightSet(fontWeight));
+        if (FontTranslator.isFontWeightSet(fontWeight)) {
+            key.setBold(FontTranslator.isBold(fontWeight));
+        }
         if (FontTranslator.isFontSizeSet(fontSize)) {
             key.setFontSize(FontTranslator.fontSizePt(fontSize));
         }

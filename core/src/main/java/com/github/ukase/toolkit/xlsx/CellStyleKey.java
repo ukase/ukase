@@ -41,7 +41,7 @@ class CellStyleKey {
     private VerticalAlignment verticalAlignment;
     private boolean wordWrap;
     private FSColor backgroundColor;
-    private boolean bold;
+    private Boolean bold;
     private Short fontSize;
 
     void applyToStyle(XSSFCellStyle style, Supplier<Font> fontSupplier) {
