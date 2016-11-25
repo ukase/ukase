@@ -35,6 +35,7 @@ public class FormatDateHelper extends AbstractHelper<Object> {
     private static final Pattern DATE_TIME = Pattern.compile("^\\d+.\\d+.\\d+ \\d+:\\d+$");
     private static final String DATE_TIME_FORMAT = "dd.MM.yyyy HH:mm";
     private static final String PARAMETER_FORMAT = "parseFormat";
+    private static final String EMPTY_VALUE_MODE = "mode";
     static final String DATE_FORMAT = "dd.MM.yyyy";
 
     public FormatDateHelper() {
@@ -49,7 +50,7 @@ public class FormatDateHelper extends AbstractHelper<Object> {
         if (context instanceof CharSequence) {
             return apply(context.toString(), options);
         }
-        return format(new Date(), options);
+        return apply(options);
     }
 
     private CharSequence apply(Number context, Options options) {
@@ -78,6 +79,16 @@ public class FormatDateHelper extends AbstractHelper<Object> {
         }
     }
 
+    private CharSequence apply(Options options) {
+        FormatDateMode mode = FormatDateMode.getMode(options.hash.get(EMPTY_VALUE_MODE));
+        if (mode == FormatDateMode.STRICT) {
+            throw new IllegalArgumentException("For current field were enabled strict mode, but no value got");
+        } else if (mode == FormatDateMode.GENERATE) {
+            return format(new Date(), options);
+        }
+        return "";
+    }
+
     private String format(Date date, Options options) {
         String format = options.param(0, "");
         if (format.trim().length() == 0) {
@@ -85,5 +96,22 @@ public class FormatDateHelper extends AbstractHelper<Object> {
         }
 
         return new SimpleDateFormat(format).format(date);
+    }
+
+    private enum FormatDateMode {
+        NORMAL, STRICT, GENERATE;
+
+        static FormatDateMode getMode(Object mode) {
+            if (mode == null) {
+                return NORMAL;
+            }
+            String upperCaseMode = mode.toString().toUpperCase();
+            if (upperCaseMode.equals(STRICT.name())) {
+                return STRICT;
+            } else if (upperCaseMode.equals(GENERATE.name())) {
+                return GENERATE;
+            }
+            return NORMAL;
+        }
     }
 }

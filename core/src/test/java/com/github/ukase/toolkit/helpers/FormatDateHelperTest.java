@@ -44,11 +44,32 @@ public class FormatDateHelperTest {
     }
 
     @Test
-    public void testNullCommonFormat() throws Exception {
+    public void testNullGenerateMode() throws Exception {
         Options options = getOptions(null, FormatDateHelper.DATE_FORMAT);
+        options.hash.put("mode", "generate");
         CharSequence result = HELPER.apply(null, options);
         assertNotNull(REASON_WRONG, result);
         assertEquals(REASON_WRONG, STRING_DATE.length(), result.length());
+    }
+
+    @Test
+    public void testNullStrictMode() throws Exception {
+        Options options = getOptions(null, FormatDateHelper.DATE_FORMAT);
+        options.hash.put("mode", "strict");
+        try {
+            HELPER.apply(null, options);
+            throw new IllegalStateException("should fail with IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            //all ok
+        }
+    }
+
+    @Test
+    public void testNullCommonMode() throws Exception {
+        Options options = getOptions(null, FormatDateHelper.DATE_FORMAT);
+        CharSequence result = HELPER.apply(null, options);
+        assertNotNull(REASON_WRONG, result);
+        assertEquals(REASON_WRONG, result, "");
     }
 
     @Test
