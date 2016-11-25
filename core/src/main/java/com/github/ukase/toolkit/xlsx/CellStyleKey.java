@@ -20,6 +20,7 @@
 package com.github.ukase.toolkit.xlsx;
 
 import lombok.Data;
+import lombok.NonNull;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
@@ -33,10 +34,14 @@ import java.util.function.Supplier;
 
 @Data
 class CellStyleKey {
-    private BorderStyle borderTop;
-    private BorderStyle borderRight;
-    private BorderStyle borderBottom;
-    private BorderStyle borderLeft;
+    @NonNull
+    private BorderStyle borderTop = BorderStyle.NONE;
+    @NonNull
+    private BorderStyle borderRight = BorderStyle.NONE;
+    @NonNull
+    private BorderStyle borderBottom = BorderStyle.NONE;
+    @NonNull
+    private BorderStyle borderLeft = BorderStyle.NONE;
     private HorizontalAlignment horizontalAlignment;
     private VerticalAlignment verticalAlignment;
     private boolean wordWrap;
@@ -74,7 +79,7 @@ class CellStyleKey {
     }
 
     private void applyFont(XSSFCellStyle style, Supplier<Font> fontSupplier) {
-        if (!bold && fontSize == null) {
+        if ((bold == null || !bold) && fontSize == null) {
             return;
         }
         Font font = fontSupplier.get();
