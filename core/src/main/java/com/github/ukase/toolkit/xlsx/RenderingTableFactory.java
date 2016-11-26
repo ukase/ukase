@@ -19,26 +19,25 @@
 
 package com.github.ukase.toolkit.xlsx;
 
-import java.util.regex.Pattern;
+import com.github.ukase.toolkit.xlsx.translators.Translator;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.w3c.dom.Element;
+import org.xhtmlrenderer.render.BlockBox;
 
-final class XlsxUtil {
-    private static final Pattern IS_NUMBER = Pattern.compile("^[0-9]+$");
+import java.util.Collection;
 
-    private XlsxUtil() {
+@Component
+public class RenderingTableFactory {
+    private final Collection<Translator> translators;
+
+    @Autowired
+    public RenderingTableFactory(Collection<Translator> translators) {
+        this.translators = translators;
     }
 
-    static int intValue(String data, int defaultValue) {
-        if (data != null
-                && IS_NUMBER.matcher(data).matches()) {
-            return Integer.parseInt(data);
-        }
-        return defaultValue;
-    }
-
-    static int greaterInt(Integer first, int second) {
-        if (first != null && first >= second) {
-            return first;
-        }
-        return second;
+    public RenderingTable build(Workbook wb, BlockBox box, Element table) {
+        return new RenderingTable(wb, table, box, translators);
     }
 }

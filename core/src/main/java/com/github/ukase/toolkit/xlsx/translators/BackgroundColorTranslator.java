@@ -20,45 +20,24 @@
 package com.github.ukase.toolkit.xlsx.translators;
 
 import com.github.ukase.toolkit.xlsx.CellStyleKey;
-import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.springframework.stereotype.Component;
 import org.xhtmlrenderer.css.constants.CSSName;
+import org.xhtmlrenderer.css.parser.FSColor;
+import org.xhtmlrenderer.css.parser.FSRGBColor;
 import org.xhtmlrenderer.css.style.CalculatedStyle;
 import org.xhtmlrenderer.css.style.FSDerivedValue;
-
-import java.util.Arrays;
+import org.xhtmlrenderer.css.style.derived.ColorValue;
 
 @Component
-public class VerticalAlignmentTranslator implements Translator {
-
+public class BackgroundColorTranslator implements Translator {
     @Override
     public void translateCssToXlsx(CalculatedStyle style, CellStyleKey key) {
-        FSDerivedValue value = style.valueByName(CSSName.VERTICAL_ALIGN);
-        key.setVerticalAlignment(Alignment.translate(value));
-    }
-
-    private enum Alignment {
-        TOP(VerticalAlignment.TOP), MIDDLE(VerticalAlignment.CENTER), BOTTOM(VerticalAlignment.BOTTOM);
-
-        private final VerticalAlignment alignment;
-
-        Alignment(VerticalAlignment xssfAlignment) {
-            this.alignment = xssfAlignment;
-        }
-
-        private VerticalAlignment getAlignment() {
-            return alignment;
-        }
-
-        static VerticalAlignment translate(Object value) {
-            if (value == null) {
-                return VerticalAlignment.BOTTOM;
+        FSDerivedValue value = style.valueByName(CSSName.BACKGROUND_COLOR);
+        if (value != null && value instanceof ColorValue) {
+            FSColor color = value.asColor();
+            if (color instanceof FSRGBColor) {
+                key.setBackgroundColor(color);
             }
-            String upperCaseValue = value.toString().toUpperCase();
-            return Arrays.stream(values())
-                    .filter(alignment -> alignment.name().equals(upperCaseValue))
-                    .map(Alignment::getAlignment)
-                    .findAny().orElse(VerticalAlignment.BOTTOM);
         }
     }
 }

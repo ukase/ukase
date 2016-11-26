@@ -21,14 +21,11 @@ package com.github.ukase.toolkit.xlsx;
 
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.hamcrest.core.IsNot;
 import org.junit.Test;
-
-import java.util.function.Consumer;
 
 import static org.mockito.Mockito.*;
 
-public class CellStyleKeyTest {
+public class CellStyleKeyTest extends MockedTests {
     @Test
     public void failOnSetNullBorder() {
         CellStyleKey cellStyleKey = new CellStyleKey();
@@ -37,6 +34,14 @@ public class CellStyleKeyTest {
         trySetNull(cellStyleKey::setBorderBottom);
         trySetNull(cellStyleKey::setBorderLeft);
         trySetNull(cellStyleKey::setBorderRight);
+    }
+
+    @Test
+    public void failOnSetNullAlignment() {
+        CellStyleKey cellStyleKey = new CellStyleKey();
+
+        trySetNull(cellStyleKey::setHorizontalAlignment);
+        trySetNull(cellStyleKey::setVerticalAlignment);
     }
 
     @Test
@@ -71,28 +76,4 @@ public class CellStyleKeyTest {
         cellStyleKey.applyToStyle(mockedStyle, null);
     }
 
-    private static <T> void trySetNull(Consumer<T> consumer) {
-        try {
-            consumer.accept(null);
-            throw new IllegalStateException("Null were successfully consumed - but shouldn't!");
-        } catch (NullPointerException e) {
-            //all ok;
-        }
-    }
-
-    private static <T> void onlyValue(T value, Consumer<T> consumer, Object mock) {
-        String wrongArgument = "Wrong argument - wait for " + value + " but got another";
-        doNothing().when(mock);
-        consumer.accept(value);
-        doThrow(exception(wrongArgument)).when(mock);
-        consumer.accept(not(value));
-    }
-
-    private static <T> T not(T object) {
-        return argThat(IsNot.not(object));
-    }
-
-    private static IllegalArgumentException exception(String message) {
-        return new IllegalArgumentException(message);
-    }
 }

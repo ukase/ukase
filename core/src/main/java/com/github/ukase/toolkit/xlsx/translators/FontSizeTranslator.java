@@ -20,45 +20,33 @@
 package com.github.ukase.toolkit.xlsx.translators;
 
 import com.github.ukase.toolkit.xlsx.CellStyleKey;
-import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.springframework.stereotype.Component;
 import org.xhtmlrenderer.css.constants.CSSName;
 import org.xhtmlrenderer.css.style.CalculatedStyle;
 import org.xhtmlrenderer.css.style.FSDerivedValue;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 @Component
-public class VerticalAlignmentTranslator implements Translator {
-
+public class FontSizeTranslator implements Translator {
     @Override
     public void translateCssToXlsx(CalculatedStyle style, CellStyleKey key) {
-        FSDerivedValue value = style.valueByName(CSSName.VERTICAL_ALIGN);
-        key.setVerticalAlignment(Alignment.translate(value));
+        FSDerivedValue fontSize = style.valueByName(CSSName.FONT_SIZE);
+        if (isFontSizeSet(fontSize)) {
+            key.setFontSize(fontSizePt(fontSize));
+        }
     }
 
-    private enum Alignment {
-        TOP(VerticalAlignment.TOP), MIDDLE(VerticalAlignment.CENTER), BOTTOM(VerticalAlignment.BOTTOM);
+    private short fontSizePt(FSDerivedValue fontSize) {
+        String ptSize = fontSize.asString();
+        ptSize = ptSize.substring(0, ptSize.length() - 2);
+        return Short.parseShort(ptSize);
+    }
 
-        private final VerticalAlignment alignment;
-
-        Alignment(VerticalAlignment xssfAlignment) {
-            this.alignment = xssfAlignment;
-        }
-
-        private VerticalAlignment getAlignment() {
-            return alignment;
-        }
-
-        static VerticalAlignment translate(Object value) {
-            if (value == null) {
-                return VerticalAlignment.BOTTOM;
-            }
-            String upperCaseValue = value.toString().toUpperCase();
-            return Arrays.stream(values())
-                    .filter(alignment -> alignment.name().equals(upperCaseValue))
-                    .map(Alignment::getAlignment)
-                    .findAny().orElse(VerticalAlignment.BOTTOM);
-        }
+    private boolean isFontSizeSet(FSDerivedValue fontSize) {
+        //currently we supports only pt value type
+        return fontSize != null && fontSize.asString().endsWith("pt");
     }
 }

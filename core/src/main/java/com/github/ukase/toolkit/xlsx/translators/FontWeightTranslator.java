@@ -19,13 +19,18 @@
 
 package com.github.ukase.toolkit.xlsx.translators;
 
+import com.github.ukase.toolkit.xlsx.CellStyleKey;
+import org.springframework.stereotype.Component;
+import org.xhtmlrenderer.css.constants.CSSName;
+import org.xhtmlrenderer.css.style.CalculatedStyle;
 import org.xhtmlrenderer.css.style.FSDerivedValue;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
-public class FontTranslator {
+@Component
+public class FontWeightTranslator implements Translator {
     private static final Collection<String> BOLD_VALUES;
     static {
         Collection<String> boldValues = new ArrayList<>();
@@ -33,22 +38,19 @@ public class FontTranslator {
         BOLD_VALUES = Collections.unmodifiableCollection(boldValues);
     }
 
-    public static boolean isBold(FSDerivedValue fontWeight) {
+    @Override
+    public void translateCssToXlsx(CalculatedStyle style, CellStyleKey key) {
+        FSDerivedValue fontWeight = style.valueByName(CSSName.FONT_WEIGHT);
+        if (isFontWeightSet(fontWeight)) {
+            key.setBold(isBold(fontWeight));
+        }
+    }
+
+    private boolean isBold(FSDerivedValue fontWeight) {
         return BOLD_VALUES.contains(fontWeight.asString().toLowerCase());
     }
 
-    public static short fontSizePt(FSDerivedValue fontSize) {
-        String ptSize = fontSize.asString();
-        ptSize = ptSize.substring(0, ptSize.length() - 2);
-        return Short.parseShort(ptSize);
-    }
-
-    public static boolean isFontSizeSet(FSDerivedValue fontSize) {
-        //currently we supports only pt value type
-        return fontSize != null && fontSize.asString().endsWith("pt");
-    }
-
-    public static boolean isFontWeightSet(FSDerivedValue fontWeight) {
+    private boolean isFontWeightSet(FSDerivedValue fontWeight) {
         return fontWeight != null;
     }
 }

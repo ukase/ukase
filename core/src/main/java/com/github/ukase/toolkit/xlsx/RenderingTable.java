@@ -19,27 +19,23 @@
 
 package com.github.ukase.toolkit.xlsx;
 
-import com.github.ukase.toolkit.xlsx.translators.FontTranslator;
-import com.github.ukase.toolkit.xlsx.translators.VerticalAlignmentTranslator;
+import com.github.ukase.toolkit.xlsx.translators.Translator;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xhtmlrenderer.css.constants.CSSName;
 import org.xhtmlrenderer.css.style.CalculatedStyle;
-import org.xhtmlrenderer.css.style.FSDerivedValue;
-import org.xhtmlrenderer.css.style.derived.BorderPropertySet;
-import org.xhtmlrenderer.css.style.derived.ColorValue;
 import org.xhtmlrenderer.newtable.TableCellBox;
 import org.xhtmlrenderer.newtable.TableRowBox;
 import org.xhtmlrenderer.render.BlockBox;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -54,19 +50,20 @@ public class RenderingTable implements Runnable {
     private static final String TAG_TH = "th";
     private static final String ATTR_COL_SPAN = "colspan";
     private static final String ATTR_ROW_SPAN = "rowspan";
-    private static final String CSS_VALUE_WORD_WRAP_ENABLE = "break-word";
     private final Workbook wb;
     private final Sheet sheet;
     private final BlockBox box;
     private final Element table;
+    private final Collection<Translator> translators;
     private final List<CellMerge> mergedCells;
     private final ConcurrentMap<Integer, Integer> cellSizes;
     private final ConcurrentMap<CellStyleKey, XSSFCellStyle> cachedStyles;
 
-    RenderingTable(Workbook wb, Element table, BlockBox box) {
+    RenderingTable(Workbook wb, Element table, BlockBox box, Collection<Translator> translators) {
         this.wb = wb;
         this.box = getBlockBoxFor(table, box);
         this.table = table;
+        this.translators = translators;
         this.mergedCells = new ArrayList<>();
         this.cellSizes = new ConcurrentHashMap<>();
         this.cachedStyles = new ConcurrentHashMap<>();
@@ -95,17 +92,6 @@ public class RenderingTable implements Runnable {
         new ElementList(tr.getChildNodes()).stream()
                 .filter(this::isTableCellTag)
                 .forEach(td -> processCell(row, td, rowBox));
-
-        updateRowStyle(row, rowBox);
-    }
-
-    private void updateRowStyle(Row row, TableRowBox rowBox) {
-        XSSFCellStyle cellStyle = (XSSFCellStyle)wb.createCellStyle();
-        CalculatedStyle style = rowBox.getStyle();
-
-        cellStyle.setAlignment(prepareAlignment(style.getIdent(CSSName.TEXT_ALIGN)));
-
-        row.setRowStyle(cellStyle);
     }
 
     private boolean isTableCellTag(Element tag) {
@@ -146,19 +132,7 @@ public class RenderingTable implements Runnable {
     private CellStyle prepareCellStyle(CalculatedStyle style) {
         CellStyleKey key = new CellStyleKey();
 
-        BorderPropertySet border = style.getBorder(null);
-        key.setBorderTop(prepareTopBorder(border));
-        key.setBorderRight(prepareRightBorder(border));
-        key.setBorderBottom(prepareBottomBorder(border));
-        key.setBorderLeft(prepareLeftBorder(border));
-
-        key.setHorizontalAlignment(prepareAlignment(style.getIdent(CSSName.TEXT_ALIGN)));
-
-        key.setWordWrap(translateCss(style, CSSName.WORD_WRAP, CSS_VALUE_WORD_WRAP_ENABLE));
-
-        tryApplyCustomFont(style, key);
-        trySetVerticalAlignment(style, key);
-        trySetBackgroundColor(style.valueByName(CSSName.BACKGROUND_COLOR), key);
+        translators.forEach(translator -> translator.translateCssToXlsx(style, key));
 
         return cachedStyles.computeIfAbsent(key, this::getNewStyle);
     }
@@ -167,17 +141,6 @@ public class RenderingTable implements Runnable {
         XSSFCellStyle style = (XSSFCellStyle)wb.createCellStyle();
         key.applyToStyle(style, wb::createFont);
         return style;
-    }
-
-    private void tryApplyCustomFont(CalculatedStyle style, CellStyleKey key) {
-        FSDerivedValue fontWeight = style.valueByName(CSSName.FONT_WEIGHT);
-        FSDerivedValue fontSize = style.valueByName(CSSName.FONT_SIZE);
-        if (FontTranslator.isFontWeightSet(fontWeight)) {
-            key.setBold(FontTranslator.isBold(fontWeight));
-        }
-        if (FontTranslator.isFontSizeSet(fontSize)) {
-            key.setFontSize(FontTranslator.fontSizePt(fontSize));
-        }
     }
 
     private void calculateColumnWidth(int cellNumber, CalculatedStyle style) {
@@ -189,28 +152,6 @@ public class RenderingTable implements Runnable {
             cellSizes.compute(cellNumber,
                     (num, w) -> greaterInt(w, width));
         }
-    }
-
-    private boolean translateCss(CalculatedStyle style, CSSName cssProperty, String trueValue) {
-        String cssValue = style.getIdent(cssProperty).asString();
-        return cssValue.equals(trueValue);
-    }
-
-    private void trySetVerticalAlignment(CalculatedStyle css, CellStyleKey key) {
-        VerticalAlignment verticalAlignment =
-                VerticalAlignmentTranslator.translate(css.valueByName(CSSName.VERTICAL_ALIGN));
-        if (verticalAlignment != null) {
-            key.setVerticalAlignment(verticalAlignment);
-        } else {
-            key.setVerticalAlignment(VerticalAlignment.BOTTOM);
-        }
-    }
-
-    private void trySetBackgroundColor(FSDerivedValue value, CellStyleKey key) {
-        if (value == null || !(value instanceof ColorValue)) {
-            return;
-        }
-        key.setBackgroundColor(value.asColor());
     }
 
     private BlockBox getBlockBoxFor(Element element, BlockBox source) {

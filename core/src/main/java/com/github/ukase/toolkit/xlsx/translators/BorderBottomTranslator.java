@@ -17,22 +17,18 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.ukase.toolkit.xlsx;
+package com.github.ukase.toolkit.xlsx.translators;
 
-import org.apache.poi.ss.usermodel.Workbook;
-import org.w3c.dom.Element;
-import org.xhtmlrenderer.render.BlockBox;
+import com.github.ukase.toolkit.xlsx.CellStyleKey;
+import org.springframework.stereotype.Component;
+import org.xhtmlrenderer.css.style.CalculatedStyle;
+import org.xhtmlrenderer.css.style.derived.BorderPropertySet;
 
-public class RenderingTableBuilder {
-    private final Workbook wb;
-    private final BlockBox box;
-
-    public RenderingTableBuilder(Workbook wb, BlockBox box) {
-        this.wb = wb;
-        this.box = box;
-    }
-
-    public RenderingTable build(Element table) {
-        return new RenderingTable(wb, table, box);
+@Component
+public class BorderBottomTranslator extends BorderTranslator {
+    @Override
+    public void translateCssToXlsx(CalculatedStyle style, CellStyleKey key) {
+        BorderPropertySet border = style.getBorder(null);
+        key.setBorderBottom(prepareBorder(border.bottom(), border.bottomStyle()));
     }
 }

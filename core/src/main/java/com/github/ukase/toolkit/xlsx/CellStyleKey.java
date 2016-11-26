@@ -33,7 +33,7 @@ import org.xhtmlrenderer.css.parser.FSRGBColor;
 import java.util.function.Supplier;
 
 @Data
-class CellStyleKey {
+public class CellStyleKey {
     @NonNull
     private BorderStyle borderTop = BorderStyle.NONE;
     @NonNull
@@ -42,8 +42,10 @@ class CellStyleKey {
     private BorderStyle borderBottom = BorderStyle.NONE;
     @NonNull
     private BorderStyle borderLeft = BorderStyle.NONE;
-    private HorizontalAlignment horizontalAlignment;
-    private VerticalAlignment verticalAlignment;
+    @NonNull
+    private HorizontalAlignment horizontalAlignment = HorizontalAlignment.CENTER;
+    @NonNull
+    private VerticalAlignment verticalAlignment = VerticalAlignment.BOTTOM;
     private boolean wordWrap;
     private FSColor backgroundColor;
     private Boolean bold;

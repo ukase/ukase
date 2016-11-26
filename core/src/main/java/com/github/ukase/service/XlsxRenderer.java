@@ -22,7 +22,7 @@ package com.github.ukase.service;
 import com.github.ukase.toolkit.ResourceProvider;
 import com.github.ukase.toolkit.xlsx.ElementList;
 import com.github.ukase.toolkit.xlsx.RenderingTable;
-import com.github.ukase.toolkit.xlsx.RenderingTableBuilder;
+import com.github.ukase.toolkit.xlsx.RenderingTableFactory;
 import lombok.extern.log4j.Log4j;
 import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
@@ -41,10 +41,12 @@ public class XlsxRenderer {
     private static final String TAG_TABLE = "table";
 
     private final ResourceProvider provider;
+    private final RenderingTableFactory factory;
 
     @Autowired
-    public XlsxRenderer(ResourceProvider provider) {
+    public XlsxRenderer(ResourceProvider provider, RenderingTableFactory factory) {
         this.provider = provider;
+        this.factory = factory;
         // for some xlsx-files default secure ratio can cause IOException "Zip bomb detected!"
         // for more information see ZipSecureFile:advance
         ZipSecureFile.setMinInflateRatio(0.002d);
@@ -59,12 +61,11 @@ public class XlsxRenderer {
         ITextRenderer renderer = provider.getRenderer(html);
         Document document = renderer.getDocument();
         BlockBox box = renderer.getRootBox();
-        RenderingTableBuilder builder = new RenderingTableBuilder(wb, box);
 
         log.info("Renderer prepared");
 
         new ElementList(document.getElementsByTagName(TAG_TABLE)).stream()
-                .map(builder::build)
+                .map(element -> factory.build(wb, box, element))
                 .forEach(RenderingTable::run);
 
         wb.write(baos);

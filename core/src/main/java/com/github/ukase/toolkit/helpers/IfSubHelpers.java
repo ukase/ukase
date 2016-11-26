@@ -25,8 +25,8 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.Arrays;
 
-public abstract class IfSubHelpers<T> extends AbstractHelper<T> {
-    public IfSubHelpers(String name) {
+abstract class IfSubHelpers<T> extends AbstractHelper<T> {
+    IfSubHelpers(String name) {
         super(name);
     }
 
@@ -76,8 +76,8 @@ public abstract class IfSubHelpers<T> extends AbstractHelper<T> {
         }
     }
 
-    public static abstract class ComparableSubHelper<T> extends IfSubHelpers<Object> {
-        public ComparableSubHelper(String name) {
+    static abstract class ComparableSubHelper<T> extends IfSubHelpers<T> {
+        ComparableSubHelper(String name) {
             super(name);
         }
 

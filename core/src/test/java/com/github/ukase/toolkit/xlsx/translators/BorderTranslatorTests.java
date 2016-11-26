@@ -17,28 +17,18 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.ukase.toolkit.xlsx;
+package com.github.ukase.toolkit.xlsx.translators;
 
-import java.util.regex.Pattern;
+import com.github.ukase.toolkit.xlsx.MockedTests;
+import org.xhtmlrenderer.css.constants.IdentValue;
+import org.xhtmlrenderer.newtable.CollapsedBorderValue;
 
-final class XlsxUtil {
-    private static final Pattern IS_NUMBER = Pattern.compile("^[0-9]+$");
+abstract class BorderTranslatorTests extends MockedTests {
+    static final CollapsedBorderValue NONE_BORDER = getBorderValue(IdentValue.NONE);
+    static final CollapsedBorderValue DASHED = getBorderValue(IdentValue.DASHED);
+    static final CollapsedBorderValue DOTTED = getBorderValue(IdentValue.DOTTED);
 
-    private XlsxUtil() {
-    }
-
-    static int intValue(String data, int defaultValue) {
-        if (data != null
-                && IS_NUMBER.matcher(data).matches()) {
-            return Integer.parseInt(data);
-        }
-        return defaultValue;
-    }
-
-    static int greaterInt(Integer first, int second) {
-        if (first != null && first >= second) {
-            return first;
-        }
-        return second;
+    private static CollapsedBorderValue getBorderValue(IdentValue ident) {
+        return new CollapsedBorderValue(ident, 0, null, 0);
     }
 }

@@ -17,28 +17,18 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.ukase.toolkit.xlsx;
+package com.github.ukase.toolkit.xlsx.translators;
 
-import java.util.regex.Pattern;
+import com.github.ukase.toolkit.xlsx.CellStyleKey;
+import org.springframework.stereotype.Component;
+import org.xhtmlrenderer.css.style.CalculatedStyle;
+import org.xhtmlrenderer.css.style.derived.BorderPropertySet;
 
-final class XlsxUtil {
-    private static final Pattern IS_NUMBER = Pattern.compile("^[0-9]+$");
-
-    private XlsxUtil() {
-    }
-
-    static int intValue(String data, int defaultValue) {
-        if (data != null
-                && IS_NUMBER.matcher(data).matches()) {
-            return Integer.parseInt(data);
-        }
-        return defaultValue;
-    }
-
-    static int greaterInt(Integer first, int second) {
-        if (first != null && first >= second) {
-            return first;
-        }
-        return second;
+@Component
+public class BorderRightTranslator extends BorderTranslator {
+    @Override
+    public void translateCssToXlsx(CalculatedStyle style, CellStyleKey key) {
+        BorderPropertySet border = style.getBorder(null);
+        key.setBorderRight(prepareBorder(border.right(), border.rightStyle()));
     }
 }
