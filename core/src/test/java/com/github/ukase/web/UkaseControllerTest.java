@@ -38,6 +38,17 @@ import com.github.ukase.toolkit.fs.FileSource;
 import com.github.ukase.toolkit.helpers.FormatDateHelper;
 import com.github.ukase.toolkit.helpers.FormatNumberHelper;
 import com.github.ukase.toolkit.jar.JarSource;
+import com.github.ukase.toolkit.xlsx.RenderingTableFactory;
+import com.github.ukase.toolkit.xlsx.translators.BackgroundColorTranslator;
+import com.github.ukase.toolkit.xlsx.translators.BorderBottomTranslator;
+import com.github.ukase.toolkit.xlsx.translators.BorderLeftTranslator;
+import com.github.ukase.toolkit.xlsx.translators.BorderRightTranslator;
+import com.github.ukase.toolkit.xlsx.translators.BorderTopTranslator;
+import com.github.ukase.toolkit.xlsx.translators.FontSizeTranslator;
+import com.github.ukase.toolkit.xlsx.translators.FontWeightTranslator;
+import com.github.ukase.toolkit.xlsx.translators.HorizontalAlignmentTranslator;
+import com.github.ukase.toolkit.xlsx.translators.VerticalAlignmentTranslator;
+import com.github.ukase.toolkit.xlsx.translators.WordWrapTranslator;
 import com.github.ukase.web.validation.HtmlTemplateLocationExistsValidator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -76,7 +87,17 @@ import static org.junit.Assert.*;
         RenderTaskBuilder.class,
         ResourceProvider.class,
         HtmlTemplateLocationExistsValidator.class,
-
+        RenderingTableFactory.class,
+        BackgroundColorTranslator.class,
+        BorderBottomTranslator.class,
+        BorderLeftTranslator.class,
+        BorderRightTranslator.class,
+        BorderTopTranslator.class,
+        FontSizeTranslator.class,
+        FontWeightTranslator.class,
+        HorizontalAlignmentTranslator.class,
+        VerticalAlignmentTranslator.class,
+        WordWrapTranslator.class,
 })
 @WebMvcTest(controllers = {UkaseController.class, UkaseExceptionHandler.class})
 public class UkaseControllerTest {
