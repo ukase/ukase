@@ -22,6 +22,7 @@ package com.github.ukase.toolkit;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.ukase.config.UkaseSettings;
 import com.github.ukase.toolkit.helpers.AbstractHelper;
+import com.github.ukase.toolkit.pdf.PdfSaucerRenderer;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.pdf.BaseFont;
 import lombok.extern.log4j.Log4j;
@@ -29,9 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
-import org.xhtmlrenderer.layout.SharedContext;
 import org.xhtmlrenderer.pdf.ITextFontResolver;
-import org.xhtmlrenderer.pdf.ITextRenderer;
 import org.xhtmlrenderer.util.XRRuntimeException;
 import org.xml.sax.SAXParseException;
 
@@ -90,9 +89,8 @@ public class ResourceProvider {
         return engine;
     }
 
-    public ITextRenderer getRenderer(String htmlDocument) {
-        ITextRenderer renderer = new ITextRenderer();
-        initSharedContext(renderer);
+    public PdfSaucerRenderer getRenderer(String htmlDocument) {
+        PdfSaucerRenderer renderer = new PdfSaucerRenderer(source);
 
         try {
             initFonts(renderer.getFontResolver());
@@ -117,11 +115,6 @@ public class ResourceProvider {
         for (String font: source.getFontsUrls()) {
             fontResolver.addFont(font, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
         }
-    }
-
-    private void initSharedContext(ITextRenderer renderer) {
-        SharedContext sharedContext = renderer.getSharedContext();
-        sharedContext.setUserAgentCallback(new WrappedUserAgentCallback(source, sharedContext));
     }
 
     private String filterHtml5Document(String html5PossibleDocument) {

@@ -20,6 +20,7 @@
 package com.github.ukase.service;
 
 import com.github.ukase.config.WaterMarkSettings;
+import com.github.ukase.toolkit.pdf.PdfSaucerRenderer;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.DocumentException;
 import com.github.ukase.toolkit.ResourceProvider;
@@ -34,7 +35,6 @@ import com.itextpdf.text.pdf.PdfStamper;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.xhtmlrenderer.pdf.ITextRenderer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -56,16 +56,16 @@ public class PdfRenderer {
         this.font = new Font(baseFont, waterMark.getSize(), 0, BaseColor.LIGHT_GRAY);
     }
 
-    public byte[] render(String html, boolean sample) throws DocumentException, IOException, URISyntaxException {
+    public byte[] render(String html, boolean sample)
+            throws DocumentException, IOException, URISyntaxException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ITextRenderer renderer = provider.getRenderer(html);
+        PdfSaucerRenderer renderer = provider.getRenderer(html);
 
-        char pdfVersion = renderer.getPDFVersion();
-        renderer.createPDF(baos, true);
+        renderer.createPDF(baos);
         renderer.finishPDF();
 
         if (sample) {
-            addSampleWatermark(baos, pdfVersion);
+            addSampleWatermark(baos, renderer.getPDFVersion());
         }
 
         return baos.toByteArray();

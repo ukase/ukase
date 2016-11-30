@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Konstantin Lepa <konstantin+ukase@lepabox.net>
+ * Copyright (c) 2016 Konstantin Lepa <konstantin+ukase@lepabox.net>
  *
  * This file is part of Ukase.
  *
@@ -17,15 +17,15 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.ukase.toolkit;
+package com.github.ukase.toolkit.pdf;
 
+import com.github.ukase.toolkit.Source;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Image;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StreamUtils;
 import org.xhtmlrenderer.extend.UserAgentCallback;
-import org.xhtmlrenderer.layout.SharedContext;
 import org.xhtmlrenderer.pdf.ITextFSImage;
 import org.xhtmlrenderer.resource.CSSResource;
 import org.xhtmlrenderer.resource.ImageResource;
@@ -41,12 +41,12 @@ class WrappedUserAgentCallback implements UserAgentCallback {
 
     private final UserAgentCallback delegate;
     private final Source source;
-    private final SharedContext context;
+    private final int dotsPerPixel;
 
-    WrappedUserAgentCallback(Source source, SharedContext context) {
+    WrappedUserAgentCallback(Source source, int dotsPerPixel, UserAgentCallback delegate) {
         this.source = source;
-        this.context = context;
-        this.delegate = context.getUserAgentCallback();
+        this.dotsPerPixel = dotsPerPixel;
+        this.delegate = delegate;
     }
 
     @Override
@@ -144,6 +144,9 @@ class WrappedUserAgentCallback implements UserAgentCallback {
 
         URI resolvingUri;
         try {
+            if (uri.startsWith("/")) {
+                uri = uri.substring(1);
+            }
             resolvingUri = new URI(uri);
         } catch (URISyntaxException e) {
             log.warn("Incorrect uri transferred to resolver", e);
@@ -153,7 +156,7 @@ class WrappedUserAgentCallback implements UserAgentCallback {
     }
 
     private void scaleToOutputResolution(Image image) {
-        float factor = context.getDotsPerPixel();
+        float factor = dotsPerPixel;
         if (factor != 1.0f) {
             image.scaleAbsolute(image.getPlainWidth() * factor, image.getPlainHeight() * factor);
         }
