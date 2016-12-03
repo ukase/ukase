@@ -54,7 +54,7 @@ import java.io.Writer;
 import java.util.function.Consumer;
 
 public class PdfSaucerRenderer extends ITextRenderer {
-    private static final String DIRECTIVE_MIMIMAL_PAGES_COUNT_START = "<!--== @mimimalPagesCount=";
+    private static final String DIRECTIVE_MINIMAL_PAGES_COUNT_START = "<!--== @minimalPagesCount=";
     private static final String DIRECTIVE_END = "==-->";
 
     private BlockBox root;
@@ -294,7 +294,7 @@ public class PdfSaucerRenderer extends ITextRenderer {
     }
 
     private int resolveMinimalPagesCount(String htmlDocument) {
-        int start = htmlDocument.indexOf(DIRECTIVE_MIMIMAL_PAGES_COUNT_START);
+        int start = htmlDocument.indexOf(DIRECTIVE_MINIMAL_PAGES_COUNT_START);
         if (start == -1) {
             return 0;
         }
@@ -302,7 +302,7 @@ public class PdfSaucerRenderer extends ITextRenderer {
         if (end == -1) {
             return 0;
         }
-        String count = htmlDocument.substring(start + DIRECTIVE_MIMIMAL_PAGES_COUNT_START.length(), end);
+        String count = htmlDocument.substring(start + DIRECTIVE_MINIMAL_PAGES_COUNT_START.length(), end);
         return Integer.parseInt(count.trim());
     }
 
