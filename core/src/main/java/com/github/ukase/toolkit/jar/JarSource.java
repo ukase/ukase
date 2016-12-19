@@ -35,6 +35,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -67,9 +68,9 @@ public class JarSource implements Source {
             Properties properties = new Properties();
             props.stream().
                     map(templateLoader::getResource).
-                    filter(entry -> entry != null).
+                    filter(Objects::nonNull).
                     map(this::mapZipEntry).
-                    filter(stream -> stream != null).
+                    filter(Objects::nonNull).
                     forEach(stream -> loadStreamToProperties(stream, properties));
             properties.forEach(this::registerHelper);
 

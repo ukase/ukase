@@ -24,6 +24,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Objects;
 
 abstract class IfSubHelpers<T> extends AbstractHelper<T> {
     IfSubHelpers(String name) {
@@ -152,7 +153,7 @@ abstract class IfSubHelpers<T> extends AbstractHelper<T> {
 
         @Override
         public boolean test(Object context, Options options) throws IOException {
-            boolean testParameters = Arrays.stream(options.params).allMatch(parameter -> parameter != null);
+            boolean testParameters = Arrays.stream(options.params).allMatch(Objects::nonNull);
             return testParameters || context != null;
         }
     }
@@ -165,7 +166,7 @@ abstract class IfSubHelpers<T> extends AbstractHelper<T> {
 
         @Override
         public boolean test(Object context, Options options) throws IOException {
-            boolean testParameters = Arrays.stream(options.params).anyMatch(parameter -> parameter != null);
+            boolean testParameters = Arrays.stream(options.params).anyMatch(Objects::nonNull);
             return testParameters || context != null;
         }
     }
