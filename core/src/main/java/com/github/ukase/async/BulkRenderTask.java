@@ -17,9 +17,10 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.ukase.bulk;
+package com.github.ukase.async;
 
-import com.github.ukase.toolkit.RenderTask;
+import com.github.ukase.toolkit.render.RenderException;
+import com.github.ukase.toolkit.render.RenderTask;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.PageSize;
@@ -31,95 +32,110 @@ import lombok.extern.log4j.Log4j;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 @Log4j
-public class BulkRenderTask {
-    private final String id;
+class BulkRenderTask implements AsyncTask {
     private final List<SingleRenderTask> subTasks;
+    private List<Future<byte[]>> taskOrder;
     private final CountDownLatch latch;
-    private final Consumer<String> errorConsumer;
-    private final BiConsumer<String, byte[]> dataConsumer;
-    private byte[] pdf;
+    private final AsyncRequest request;
+    private byte[] data;
 
-    public BulkRenderTask(List<RenderTask> payloads,
-                          BiConsumer<String, byte[]> dataConsumer,
-                          Consumer<String> errorConsumer) {
-        this.dataConsumer = dataConsumer;
-        this.errorConsumer = errorConsumer;
-        this.id = UUID.randomUUID().toString();
+    BulkRenderTask(List<RenderTask> payloads, AsyncRequest request) {
+        this.request = request;
         subTasks = payloads.stream().map(this::createSubTask).collect(Collectors.toList());
         latch = new CountDownLatch(subTasks.size() + 1);
     }
 
+    @Override
     public String getId() {
-        return id;
+        return request.getUuid();
     }
 
-    public List<RenderTask> getSubTasks() {
-        return Collections.unmodifiableList(subTasks);
-    }
-
-    public byte[] getResult() throws InterruptedException, IOException {
-        latch.await();
-        if (pdf == null) {
-            throw new IOException("Bulk were failed to be rendered");
+    @Override
+    public synchronized BulkRenderTask startOnExecutor(ExecutorService service) {
+        if (taskOrder != null) {
+            return this;
         }
-        return pdf;
+        try {
+            taskOrder = service.invokeAll(subTasks);
+        } catch (InterruptedException e) {
+            reject();
+        }
+        return this;
     }
 
-    void childProcessed() {
+    @Override
+    public byte[] getResult() throws InterruptedException {
+        latch.await();
+        if (data == null) {
+            throw new RenderException("Bulk were failed to be rendered", "build bulk pdf");
+        }
+        return data;
+    }
+
+    private void childResult(Boolean renderResult) {
+        if (!renderResult) {
+            reject();
+            return;
+        }
         latch.countDown();
         if (latch.getCount() == 1) {
-            mergeSubTasksPdfs();
+            mergeSubTasks();
         }
     }
 
-    private void mergeSubTasksPdfs() {
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+    private synchronized void reject() {
+        if (taskOrder != null) {
+            taskOrder.forEach(future -> future.cancel(true));
+        }
+        request.error();
+    }
+
+    private void mergeSubTasks() {
+        try (ByteArrayOutputStream bAOS = new ByteArrayOutputStream()) {
             Document document = new Document(PageSize.A4);
-            PdfWriter writer = PdfWriter.getInstance(document, baos);
+            PdfWriter writer = PdfWriter.getInstance(document, bAOS);
             document.open();
             PdfContentByte cb = writer.getDirectContent();
 
-            appendPdfs(document, writer, cb);
+            appendPdf(document, writer, cb);
 
             document.close();
-            pdf = baos.toByteArray();
+            data = bAOS.toByteArray();
         } catch (IOException | DocumentException e) {
-            log.warn("Cannot bulk pdfs", e);
+            log.warn("Cannot bulk PDFs", e);
         } finally {
             registerResult();
         }
     }
 
     private void registerResult() {
-        if (pdf != null) {
-            dataConsumer.accept(id, pdf);
+        if (data != null) {
+            request.saveData(data);
         } else {
-            errorConsumer.accept(id);
+            request.error();
         }
         latch.countDown();
     }
 
-    private void appendPdfs(Document document, PdfWriter writer, PdfContentByte cb) throws IOException {
-        for (SingleRenderTask task: subTasks) {
-            if (task.getPdf() == null) {
+    private void appendPdf(Document document, PdfWriter writer, PdfContentByte cb) throws IOException {
+        for (SingleRenderTask task : subTasks) {
+            if (task.getData() == null) {
                 throw new IOException("Some of pdf were failed: " + task.getTemplateName());
             }
-            appendPdf(document, writer, cb, task.getPdf());
+            appendPdf(document, writer, cb, task.getData());
         }
     }
 
     private void appendPdf(Document document, PdfWriter writer, PdfContentByte cb, byte[] pdf) throws IOException {
         PdfReader reader = new PdfReader(pdf);
-        for (int i = 1 ; i <= reader.getNumberOfPages() ; i++) {
+        for (int i = 1; i <= reader.getNumberOfPages(); i++) {
             PdfImportedPage page = writer.getImportedPage(reader, i);
             document.newPage();
             cb.addTemplate(page, 0, 0);
@@ -127,6 +143,6 @@ public class BulkRenderTask {
     }
 
     private SingleRenderTask createSubTask(RenderTask task) {
-        return new SingleRenderTask(task, this);
+        return new SingleRenderTask(task, this::childResult);
     }
 }

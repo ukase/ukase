@@ -17,8 +17,12 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.ukase.bulk;
+package com.github.ukase.toolkit.render;
 
-public enum BulkStatus {
-    ORDERED, PROCESSED, ERROR
+import java.util.concurrent.Callable;
+
+public interface RenderTask extends Callable<byte[]> {
+    @Override
+    byte[] call() throws RenderException;
+    String getTemplateName();
 }

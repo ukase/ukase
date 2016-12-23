@@ -17,16 +17,26 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.ukase.toolkit;
+package com.github.ukase.toolkit.render;
 
-import com.itextpdf.text.DocumentException;
+import com.github.ukase.web.UkasePayload;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.concurrent.Callable;
+public class RenderException extends RuntimeException {
+    @Getter
+    @Setter
+    private UkasePayload payload;
+    @Getter
+    private final String renderStep;
 
-public interface RenderTask extends Callable<byte[]> {
-    @Override
-    byte[] call() throws IOException, DocumentException, URISyntaxException;
-    String getTemplateName();
+    public RenderException(String message, Throwable cause, String renderStep) {
+        super(message, cause);
+        this.renderStep = renderStep;
+    }
+
+    public RenderException(String message, String renderStep) {
+        super(message);
+        this.renderStep = renderStep;
+    }
 }

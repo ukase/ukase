@@ -19,16 +19,15 @@
 
 package com.github.ukase.web;
 
-import com.github.ukase.bulk.BulkStatus;
+import com.github.ukase.async.AsyncStatus;
 import com.github.ukase.config.BulkConfig;
-import com.github.ukase.service.BulkRenderer;
+import com.github.ukase.async.AsyncManager;
 import com.github.ukase.service.HtmlRenderer;
 import com.github.ukase.service.XlsxRenderer;
 import com.github.ukase.toolkit.CompoundSource;
-import com.github.ukase.toolkit.RenderTaskBuilder;
+import com.github.ukase.toolkit.render.RenderTaskBuilder;
 import com.github.ukase.toolkit.SourceListener;
 import com.github.ukase.toolkit.StaticUtils;
-import com.itextpdf.text.DocumentException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -39,14 +38,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.WebRequest;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.util.List;
 
 @Slf4j
@@ -69,7 +63,7 @@ class UkaseController {
 
     private HtmlRenderer htmlRenderer;
     private CompoundSource source;
-    private BulkRenderer bulkRenderer;
+    private AsyncManager asyncManager;
     private BulkConfig bulkConfig;
     private XlsxRenderer xlsxRenderer;
     private RenderTaskBuilder taskBuilder;
@@ -77,98 +71,82 @@ class UkaseController {
     @Autowired
     public UkaseController(HtmlRenderer htmlRenderer,
                            CompoundSource source,
-                           BulkRenderer bulkRenderer,
+                           AsyncManager asyncManager,
                            BulkConfig bulkConfig,
                            XlsxRenderer xlsxRenderer,
                            RenderTaskBuilder taskBuilder) {
         this.htmlRenderer = htmlRenderer;
         this.source = source;
-        this.bulkRenderer = bulkRenderer;
+        this.asyncManager = asyncManager;
         this.bulkConfig = bulkConfig;
         this.xlsxRenderer = xlsxRenderer;
         this.taskBuilder = taskBuilder;
     }
 
+    //<editor-fold desc="State API method">
     /*================================================================================================================
-     ==============================================   API controllers   ==============================================
+     ==============================================  State API controllers   =========================================
      =================================================================================================================*/
-
-    @RequestMapping(value = "/html", method = RequestMethod.POST)
-    public ResponseEntity<String> generateHtml(@RequestBody @Valid UkasePayload payload,
-                                               HttpServletRequest request,
-                                               WebRequest webRequest) throws IOException {
-        webRequest.setAttribute(RequestData.ATTRIBUTE_NAME,
-                new RequestData(request, payload),
-                RequestAttributes.SCOPE_REQUEST);
-        String result = htmlRenderer.render(payload.getIndex(), payload.getData());
-        return ResponseEntity.ok(result);
-    }
-
-    @RequestMapping(value = "/pdf", method = RequestMethod.POST, produces = "application/pdf")
-    public ResponseEntity<byte[]> generatePdf(@RequestBody @Valid UkasePayload payload,
-                                              HttpServletRequest request,
-                                              WebRequest webRequest)
-            throws IOException, DocumentException, URISyntaxException {
-        webRequest.setAttribute(RequestData.ATTRIBUTE_NAME,
-                new RequestData(request, payload),
-                RequestAttributes.SCOPE_REQUEST);
-        log.debug("Generate PDF POST for '{}' :\n{}\n", payload.getIndex(), payload.getData());
-        return ResponseEntity.ok(taskBuilder.build(payload).call());
-    }
-
     @RequestMapping(value = "/pdf/{template}", method = RequestMethod.HEAD)
-    public @ResponseBody DeferredState checkTemplate(@PathVariable String template) throws IOException {
+    public @ResponseBody DeferredState checkTemplate(@PathVariable String template) {
         DeferredState state = new DeferredState();
         SourceListener listener = SourceListener.templateListener(template,
                 test -> state.setResult(translateState(test)));
         source.registerListener(listener);
         return state;
     }
+    //</editor-fold>
+
+    //<editor-fold desc="Sync render API methods">
+    /*================================================================================================================
+     ==============================================  Renderer API controllers  =======================================
+     =================================================================================================================*/
+    @RequestMapping(value = "/html", method = RequestMethod.POST)
+    public ResponseEntity<String> generateHtml(@RequestBody @Valid UkasePayload payload) {
+        String result = htmlRenderer.render(payload);
+        return ResponseEntity.ok(result);
+    }
+
+    @RequestMapping(value = "/pdf", method = RequestMethod.POST, produces = "application/pdf")
+    public ResponseEntity<byte[]> generatePdf(@RequestBody @Valid UkasePayload payload) {
+        log.debug("Generate PDF POST for '{}' :\n{}\n", payload.getIndex(), payload.getData());
+        return ResponseEntity.ok(taskBuilder.build(payload).call());
+    }
 
     @RequestMapping(value = "/xlsx", method = RequestMethod.POST,
             produces = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-    public ResponseEntity<byte[]> generateXlsx(@RequestBody @Valid UkasePayload payload,
-                                               HttpServletRequest request,
-                                               WebRequest webRequest) throws IOException {
-        webRequest.setAttribute(RequestData.ATTRIBUTE_NAME,
-                new RequestData(request, payload),
-                RequestAttributes.SCOPE_REQUEST);
+    public ResponseEntity<byte[]> generateXlsx(@RequestBody @Valid UkasePayload payload) {
         log.debug("Generate XLSX POST for '{}' :\n{}\n", payload.getIndex(), payload.getData());
-        String html = htmlRenderer.render(payload.getIndex(), payload.getData());
+        String html = htmlRenderer.render(payload);
         log.debug("Prepared xhtml:\n{}\n", html);
         return ResponseEntity.ok(xlsxRenderer.render(html));
     }
+    //</editor-fold>
 
+    //<editor-fold desc="pdf bulk/async API methods">
     /*================================================================================================================
-     ============================================== BulkAPI controllers ==============================================
+     ============================================== bulk/async API controllers =======================================
      =================================================================================================================*/
+    @RequestMapping(value = "/xlsx/async", method = RequestMethod.POST)
+    public ResponseEntity<String> startRenderXlsx(@RequestBody @Valid UkasePayload payload) {
+        return ResponseEntity.ok(asyncManager.putXlsxTaskInOrder(payload));
+    }
 
     @RequestMapping(value = "/bulk", method = RequestMethod.POST,
             consumes = {"text/json", "text/json;charset=UTF-8", "application/json"})
-    public @ResponseBody String postBulkInOrder(@RequestBody List<UkasePayload> payloads,
-                                                HttpServletRequest request,
-                                                WebRequest webRequest) throws IOException {
-        webRequest.setAttribute(RequestData.ATTRIBUTE_NAME,
-                new RequestData(request, payloads),
-                RequestAttributes.SCOPE_REQUEST);
-        return bulkRenderer.putTaskInOrder(payloads);
+    public @ResponseBody String postBulkInOrder(@RequestBody List<UkasePayload> payloads) {
+        return asyncManager.putTaskInOrder(payloads);
     }
 
     @RequestMapping(value = "/bulk/sync", method = RequestMethod.POST,
             produces = "application/pdf", consumes = "text/json")
-    public ResponseEntity<byte[]> renderBulk(@RequestBody List<UkasePayload> payloads,
-                                             HttpServletRequest request,
-                                             WebRequest webRequest)
-            throws IOException, InterruptedException {
-        webRequest.setAttribute(RequestData.ATTRIBUTE_NAME,
-                new RequestData(request, payloads),
-                RequestAttributes.SCOPE_REQUEST);
-        return ResponseEntity.ok(bulkRenderer.processOrder(payloads));
+    public ResponseEntity<byte[]> renderBulk(@RequestBody List<UkasePayload> payloads) throws InterruptedException {
+        return ResponseEntity.ok(asyncManager.processOrder(payloads));
     }
 
     @RequestMapping(value = "/bulk/{uuid}", method = RequestMethod.GET, produces = "application/pdf")
-    public ResponseEntity<byte[]> getBulk(@PathVariable String uuid) throws IOException {
-        byte[] bulk = bulkRenderer.getOrder(uuid);
+    public ResponseEntity<byte[]> getBulk(@PathVariable String uuid) {
+        byte[] bulk = asyncManager.getOrder(uuid);
         if (bulk == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
@@ -176,8 +154,8 @@ class UkaseController {
     }
 
     @RequestMapping(value = "/bulk/status/{uuid}", method = RequestMethod.GET)
-    public ResponseEntity<String> getBulkState(@PathVariable String uuid) throws IOException {
-        BulkStatus status = bulkRenderer.checkStatus(uuid);
+    public ResponseEntity<String> getBulkState(@PathVariable String uuid) {
+        AsyncStatus status = asyncManager.checkStatus(uuid);
         switch (status) {
             case PROCESSED:
                 return ResponseEntity.status(bulkConfig.statusProcessed()).body(BULK_RESPONSE_READY);
@@ -186,11 +164,12 @@ class UkaseController {
         }
         return ResponseEntity.status(bulkConfig.statusError()).body(BULK_RESPONSE_ERROR);
     }
+    //</editor-fold>
 
+    //<editor-fold desc="Private utility methods">
     /*================================================================================================================
      ==============================================  private utilities  ==============================================
      =================================================================================================================*/
-
     private ResponseEntity<Object> translateState(boolean selectedTemplateUpdated) {
         if (selectedTemplateUpdated) {
             return new ResponseEntity<>("updated", HttpStatus.OK);
@@ -198,4 +177,5 @@ class UkaseController {
             return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
         }
     }
+    //</editor-fold>
 }

@@ -17,8 +17,12 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.ukase.bulk;
+package com.github.ukase.async;
 
-public class BulkTaskData {
+import java.util.concurrent.ExecutorService;
 
+public interface AsyncTask {
+    String getId();
+    byte[] getResult() throws InterruptedException;
+    AsyncTask startOnExecutor(ExecutorService service);
 }

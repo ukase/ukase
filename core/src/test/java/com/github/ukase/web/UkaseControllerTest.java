@@ -26,13 +26,14 @@ import com.github.ukase.config.BulkConfig;
 import com.github.ukase.config.UkaseSettings;
 import com.github.ukase.config.WaterMarkSettings;
 import com.github.ukase.config.WebConfig;
-import com.github.ukase.service.BulkRenderer;
+import com.github.ukase.async.AsyncManager;
 import com.github.ukase.service.HtmlRenderer;
 import com.github.ukase.service.PdfRenderer;
+import com.github.ukase.service.PdfWatermarkRenderer;
 import com.github.ukase.service.XlsxRenderer;
 import com.github.ukase.toolkit.CompoundSource;
 import com.github.ukase.toolkit.CompoundTemplateLoader;
-import com.github.ukase.toolkit.RenderTaskBuilder;
+import com.github.ukase.toolkit.render.RenderTaskBuilder;
 import com.github.ukase.toolkit.ResourceProvider;
 import com.github.ukase.toolkit.fs.FileSource;
 import com.github.ukase.toolkit.helpers.FormatDateHelper;
@@ -74,9 +75,10 @@ import static org.junit.Assert.*;
         WebConfig.class,
         WaterMarkSettings.class,
         BulkConfig.class,
-        BulkRenderer.class,
+        AsyncManager.class,
         HtmlRenderer.class,
         PdfRenderer.class,
+        PdfWatermarkRenderer.class,
         XlsxRenderer.class,
         FileSource.class,
         FormatDateHelper.class,

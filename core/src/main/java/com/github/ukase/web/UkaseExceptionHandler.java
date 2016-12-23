@@ -20,9 +20,11 @@
 package com.github.ukase.web;
 
 import com.github.jknack.handlebars.HandlebarsException;
-import com.github.ukase.toolkit.RenderException;
+import com.github.ukase.toolkit.render.RenderException;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.ObjectError;
@@ -30,8 +32,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.WebRequest;
 
 import java.io.IOException;
 import java.util.List;
@@ -42,8 +42,8 @@ import java.util.stream.Collectors;
 public class UkaseExceptionHandler {
     @ExceptionHandler(IOException.class)
     @ResponseBody
-    public ResponseEntity<ExceptionMessage> handleIOException(IOException e, WebRequest request) {
-        logRequest((RequestData) request.getAttribute(RequestData.ATTRIBUTE_NAME, RequestAttributes.SCOPE_REQUEST));
+    public ResponseEntity<ExceptionMessage> handleIOException(IOException e) {
+        log.error("shouldn't be thrown away", e);
 
         HttpStatus status = HttpStatus.BAD_REQUEST;
         ExceptionMessage message = new ExceptionMessage(e.getMessage(), status.value());
@@ -62,10 +62,7 @@ public class UkaseExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseBody
-    public ResponseEntity<List<ValidationError>> handleValidationException(MethodArgumentNotValidException e,
-                                                                           WebRequest request) {
-        logRequest((RequestData) request.getAttribute(RequestData.ATTRIBUTE_NAME, RequestAttributes.SCOPE_REQUEST));
-
+    public ResponseEntity<List<ValidationError>> handleValidationException(MethodArgumentNotValidException e) {
         List<ObjectError> allErrors = e.getBindingResult().getAllErrors();
         List<ValidationError> mappedErrors = allErrors.stream().map(ValidationError::new).collect(Collectors.toList());
         log.warn("\nValidation errors: {}", mappedErrors);
@@ -74,20 +71,21 @@ public class UkaseExceptionHandler {
 
     @ExceptionHandler(HandlebarsException.class)
     @ResponseBody
-    public ResponseEntity<String> handleHandlebarsException(HandlebarsException e, WebRequest request) {
-        logRequest((RequestData) request.getAttribute(RequestData.ATTRIBUTE_NAME, RequestAttributes.SCOPE_REQUEST));
-
-        log.error("\nSome grand error caused in template mechanism", e);
+    public ResponseEntity<String> handleHandlebarsException(HandlebarsException e) {
+        log.error("shouldn't be thrown away", e);
         return new ResponseEntity<>("Some error caused in template mechanism", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(RenderException.class)
     @ResponseBody
-    public ResponseEntity<String> handleRenderException(RenderException e, WebRequest request) {
-        logRequest((RequestData) request.getAttribute(RequestData.ATTRIBUTE_NAME, RequestAttributes.SCOPE_REQUEST));
+    public ResponseEntity<String> handleRenderException(RenderException e, HttpRequest request) {
+        log.warn("Failed render for {} request to {}\nPayload data: {}",
+                request.getMethod(), request.getURI(), e.getPayload());
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("X-error-info", "Render step");
 
         log.warn("\nRendering: " + e.getMessage(), e.getCause());
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(e.getMessage(), headers, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler()
@@ -95,18 +93,6 @@ public class UkaseExceptionHandler {
     public ResponseEntity<String> handleException(Exception e) {
         log.warn("\nCommon rendering problem: {}", e);
         return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-
-
-    private void logRequest(RequestData data) {
-        if (data == null) {
-            log.warn("Failed load request data");
-        } else if (data.getData() != null) {
-            log.warn("\nFailed {} request {} with data\n{}\n", data.getMethod(), data.getFullUri(), data.getJsonData());
-        } else {
-            log.warn("\nFailed {} request {}.\n", data.getMethod(), data.getFullUri());
-        }
     }
 
     @Data

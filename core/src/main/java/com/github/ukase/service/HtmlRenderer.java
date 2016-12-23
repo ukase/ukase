@@ -20,15 +20,17 @@
 package com.github.ukase.service;
 
 import com.github.jknack.handlebars.Handlebars;
+import com.github.jknack.handlebars.HandlebarsException;
 import com.github.jknack.handlebars.Template;
+import com.github.ukase.toolkit.render.RenderException;
+import com.github.ukase.web.UkasePayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.Map;
 
 @Service
-public class HtmlRenderer {
+public class HtmlRenderer implements Renderer<UkasePayload, String> {
     private Handlebars handlebars;
 
     @Autowired
@@ -36,8 +38,13 @@ public class HtmlRenderer {
         this.handlebars = handlebars;
     }
 
-    public String render(String templateName, Map<String, Object> params) throws IOException {
-        Template template = handlebars.compile(templateName);
-        return template.apply(params);
+    @Override
+    public String render(UkasePayload data) throws RenderException {
+        try {
+            Template template = handlebars.compile(data.getIndex());
+            return template.apply(data.getData());
+        } catch (IOException|HandlebarsException e) {
+            throw new RenderException("Cannot produce html", e, "html");
+        }
     }
 }

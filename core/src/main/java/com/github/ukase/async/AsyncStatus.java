@@ -17,10 +17,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.ukase.toolkit;
+package com.github.ukase.async;
 
-public class RenderException extends RuntimeException {
-    RenderException(String message, Throwable cause) {
-        super(message, cause);
-    }
+public enum AsyncStatus {
+    ORDERED, PROCESSED, ERROR
 }

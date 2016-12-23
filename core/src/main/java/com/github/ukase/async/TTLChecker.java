@@ -17,9 +17,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.ukase.bulk;
+package com.github.ukase.async;
 
-import com.github.ukase.service.BulkRenderer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,13 +30,12 @@ public class TTLChecker implements Runnable {
     private final Thread currentThread;
     private boolean flag = true;
 
-    private final BulkRenderer renderer;
+    private final AsyncManager manager;
 
     @Autowired
-    public TTLChecker(BulkRenderer renderer) {
-        this.renderer = renderer;
-        currentThread = new Thread(this);
-        currentThread.setName("PDF bulks TTL checker");
+    public TTLChecker(AsyncManager manager) {
+        this.manager = manager;
+        currentThread = new Thread(this, "PDF bulks TTL checker");
     }
 
     @PostConstruct
@@ -59,7 +57,7 @@ public class TTLChecker implements Runnable {
             } catch (InterruptedException e) {
                 //ignore
             }
-            renderer.clearOldPDFs();
+            manager.clearOldPDFs();
         }
     }
 }

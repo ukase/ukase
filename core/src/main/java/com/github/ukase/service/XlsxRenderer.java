@@ -20,6 +20,7 @@
 package com.github.ukase.service;
 
 import com.github.ukase.toolkit.ResourceProvider;
+import com.github.ukase.toolkit.render.RenderException;
 import com.github.ukase.toolkit.xlsx.ElementList;
 import com.github.ukase.toolkit.xlsx.RenderingTable;
 import com.github.ukase.toolkit.xlsx.RenderingTableFactory;
@@ -37,7 +38,7 @@ import java.io.IOException;
 
 @Service
 @Log4j
-public class XlsxRenderer {
+public class XlsxRenderer implements Renderer<String, byte[]> {
     private static final String TAG_TABLE = "table";
 
     private final ResourceProvider provider;
@@ -52,26 +53,30 @@ public class XlsxRenderer {
         ZipSecureFile.setMinInflateRatio(0.002d);
     }
 
-    public byte[] render(String html) throws IOException {
-        log.info("-------------------------------");
-        log.info("Start rendering xlsx from html with size of " + html.length());
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        SXSSFWorkbook wb = new SXSSFWorkbook(-1);
+    public byte[] render(String html) throws RenderException {
+        try {
+            log.info("-------------------------------");
+            log.info("Start rendering xlsx from html with size of " + html.length());
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            SXSSFWorkbook wb = new SXSSFWorkbook(-1);
 
-        ITextRenderer renderer = provider.getRenderer(html);
-        Document document = renderer.getDocument();
-        BlockBox box = renderer.getRootBox();
+            ITextRenderer renderer = provider.getRenderer(html);
+            Document document = renderer.getDocument();
+            BlockBox box = renderer.getRootBox();
 
-        log.info("Renderer prepared");
+            log.info("Renderer prepared");
 
-        new ElementList(document.getElementsByTagName(TAG_TABLE)).stream()
-                .map(element -> factory.build(wb, box, element))
-                .forEach(RenderingTable::run);
+            new ElementList(document.getElementsByTagName(TAG_TABLE)).stream()
+                    .map(element -> factory.build(wb, box, element))
+                    .forEach(RenderingTable::run);
 
-        wb.write(baos);
-        wb.dispose();
+            wb.write(baos);
+            wb.dispose();
 
-        log.info("xlsx rendered");
-        return baos.toByteArray();
+            log.info("xlsx rendered");
+            return baos.toByteArray();
+        } catch (IOException e) {
+            throw new RenderException("Cannot render xlsx", e, "xlsx");
+        }
     }
 }

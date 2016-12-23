@@ -17,24 +17,22 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.ukase.service;
+package com.github.ukase.async;
 
-import com.github.ukase.bulk.BulkRenderTask;
-import com.github.ukase.bulk.BulkStatus;
-import com.github.ukase.toolkit.RenderTask;
-import com.github.ukase.toolkit.RenderTaskBuilder;
+import com.github.ukase.toolkit.render.RenderTask;
+import com.github.ukase.toolkit.render.RenderTaskBuilder;
 import com.github.ukase.web.UkasePayload;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
@@ -42,11 +40,10 @@ import java.util.stream.Collectors;
 
 @Service
 @Log4j
-public class BulkRenderer {
-    private static final String PDF_EXT = ".pdf";
+public class AsyncManager {
     private static final int SUB_DIR_NAME_LENGTH = 8;
 
-    private final ConcurrentMap<String, Long> renderedPDFs = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, AsyncRequest> renderedPDFs = new ConcurrentHashMap<>();
 
     private ExecutorService executor;
     private RenderTaskBuilder builder;
@@ -54,7 +51,7 @@ public class BulkRenderer {
     private File path;
 
     @Autowired
-    public BulkRenderer(ExecutorService executor, RenderTaskBuilder builder, Long ttl, File path) {
+    public AsyncManager(ExecutorService executor, RenderTaskBuilder builder, Long ttl, File path) {
         this.executor = executor;
         this.builder = builder;
         this.ttl = ttl;
@@ -62,41 +59,39 @@ public class BulkRenderer {
         checkDataDirectory();
     }
 
-    public String putTaskInOrder(List<UkasePayload> payloads) throws IOException {
-        return startProcessing(payloads).getId();
+    public String putTaskInOrder(List<UkasePayload> payloads) {
+        return startProcessingPdf(payloads).getId();
     }
 
-    public byte[] processOrder(List<UkasePayload> payloads) throws IOException, InterruptedException {
-        return startProcessing(payloads).getResult();
+    public String putXlsxTaskInOrder(UkasePayload payload) {
+        return startProcessingXlsx(payload).getId();
     }
 
-    public BulkStatus checkStatus(String id) {
-        Long rendered = renderedPDFs.get(id);
-        if (rendered == null) {
-            return BulkStatus.ERROR;
-        } else if (rendered.equals(Long.MAX_VALUE)) {
-            return BulkStatus.ORDERED;
-        }
-        return BulkStatus.PROCESSED;
+    public byte[] processOrder(List<UkasePayload> payloads) throws InterruptedException {
+        return startProcessingPdf(payloads).getResult();
+    }
+
+    public AsyncStatus checkStatus(String id) {
+        return renderedPDFs.get(id).getStatus();
     }
 
     public byte[] getOrder(String id) {
-        if (checkStatus(id) == BulkStatus.PROCESSED) {
+        if (checkStatus(id) == AsyncStatus.PROCESSED) {
             return getFileData(id);
         }
         return null;
     }
 
-    public void clearOldPDFs() {
+    void clearOldPDFs() {
         renderedPDFs.forEach(this::checkTTL);
     }
 
-    private void checkTTL(String id, Long created) {
-        if (created == null || created == Long.MAX_VALUE) {
+    private void checkTTL(String id, AsyncRequest request) {
+        if (request == null || request.getStatus() == AsyncStatus.ORDERED || request.getBuildTime() == null) {
             return;
         }
-        if (System.currentTimeMillis() - created > ttl) {
-            File pdf = getPdfFile(id);
+        if (System.currentTimeMillis() - request.getBuildTime() > ttl) {
+            File pdf = request.getDataFile();
             if (!pdf.delete()) {
                 log.warn("PDF for " + id + " weren't deleted");
             }
@@ -113,35 +108,20 @@ public class BulkRenderer {
         }
     }
 
-    private BulkRenderTask startProcessing(List<UkasePayload> payloads) throws IOException {
-        List<RenderTask> tasks = payloads.stream().map(builder::build).collect(Collectors.toList());
-        BulkRenderTask task = new BulkRenderTask(tasks, this::registerProcessedData, this::registerFail);
-        task.getSubTasks().forEach(executor::submit);
-        renderedPDFs.put(task.getId(), Long.MAX_VALUE);
-
-        return task;
+    private AsyncTask startProcessingXlsx(UkasePayload payload) {
+        RenderTask renderTask = builder.buildXlsx(payload);
+        AsyncTask task = new AsyncRenderTask(renderTask, nextRequest());
+        return task.startOnExecutor(executor);
     }
 
-    private void registerProcessedData(String id, byte[] data) {
-        File subDir = getSubDir(id);
-        if (!subDir.isDirectory()) {
-            if (!subDir.mkdir()) {
-                log.warn("Something wrong with creating pdf's subdir: " + subDir.getAbsolutePath());
-            }
-        }
-        File pdfFile = getPdfFile(id, subDir);
-        try (FileOutputStream fos = new FileOutputStream(pdfFile, false)) {
-            fos.write(data);
-            fos.flush();
-            renderedPDFs.put(id, System.currentTimeMillis());
-        } catch (IOException e) {
-            log.error("Cannot create pdf file " + pdfFile.getName(), e);
-            registerFail(id);
-        }
-    }
+    private AsyncTask startProcessingPdf(List<UkasePayload> payloads) {
+        List<RenderTask> tasks = payloads.stream()
+                .map(builder::build)
+                .collect(Collectors.toList());
+        AsyncRequest request = nextRequest();
 
-    private void registerFail(String id) {
-        renderedPDFs.remove(id);
+        BulkRenderTask task = new BulkRenderTask(tasks, request);
+        return task.startOnExecutor(executor);
     }
 
     private void checkDataDirectory() {
@@ -154,24 +134,28 @@ public class BulkRenderer {
 
     private void checkSubDirectories(File subDir) {
         if (subDir.isDirectory() && subDir.getName().length() == SUB_DIR_NAME_LENGTH) {
-            File[] pdfs = subDir.listFiles();
-            if (pdfs == null) {
+            File[] files = subDir.listFiles();
+            if (files == null) {
                 return;
             }
-            Arrays.stream(pdfs).forEach(this::registerPdf);
+            Arrays.stream(files).forEach(this::registerDataFile);
         }
     }
 
-    private void registerPdf(File pdf) {
-        String fileName = pdf.getName();
-        if (pdf.isFile() && fileName.endsWith(PDF_EXT)) {
-            String id = fileName.substring(0, fileName.length() - 4);
-            renderedPDFs.put(id, pdf.lastModified());
+    private void registerDataFile(File dataFile) {
+        String fileName = dataFile.getName();
+        if (dataFile.isFile()) {
+            String id = fileName;
+            if (id.endsWith(".pdf")) {
+                id = id.substring(0, id.length() - 4);
+            }
+            renderedPDFs.computeIfAbsent(id,
+                    uuid -> new AsyncRequest(dataFile, uuid, dataFile.lastModified()));
         }
     }
 
     private byte[] getFileData(String id) {
-        File pdf = getPdfFile(id);
+        File pdf = getDataFile(id);
         Path pdfPath = pdf.getAbsoluteFile().toPath();
         try {
             return Files.readAllBytes(pdfPath);
@@ -189,11 +173,26 @@ public class BulkRenderer {
         return id.substring(0, SUB_DIR_NAME_LENGTH);
     }
 
-    private File getPdfFile(String id) {
-        return getPdfFile(id, getSubDir(id));
+    private File getDataFile(String id) {
+        return getDataFile(id, getSubDir(id));
     }
 
-    private File getPdfFile(String id, File subDir) {
-        return new File(subDir, id + PDF_EXT);
+    private File getDataFile(String id, File subDir) {
+        return new File(subDir, id);
+    }
+
+
+    private AsyncRequest nextRequest() {
+        String uuid = nextUUID();
+        AsyncRequest request = new AsyncRequest();
+        while (renderedPDFs.putIfAbsent(uuid, request) != null) {
+            uuid = nextUUID();
+        }
+        request.setUuid(uuid);
+        request.setDataFile(getDataFile(request.getUuid()));
+        return request;
+    }
+    private String nextUUID() {
+        return UUID.randomUUID().toString();
     }
 }

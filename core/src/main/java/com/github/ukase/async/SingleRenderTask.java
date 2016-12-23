@@ -17,44 +17,46 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.ukase.bulk;
+package com.github.ukase.async;
 
-import com.github.ukase.toolkit.RenderTask;
-import com.itextpdf.text.DocumentException;
+import com.github.ukase.toolkit.render.RenderException;
+import com.github.ukase.toolkit.render.RenderTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
+import java.util.function.Consumer;
 
 class SingleRenderTask implements RenderTask {
     private static final Logger log = LoggerFactory.getLogger(SingleRenderTask.class);
 
     private final RenderTask task;
-    private final BulkRenderTask parentTask;
-    private byte[] pdf;
+    private final Consumer<Boolean> resultConsumer;
+    private byte[] data;
 
-    SingleRenderTask(RenderTask task, BulkRenderTask parentTask) {
+    SingleRenderTask(RenderTask task, Consumer<Boolean> resultConsumer) {
         this.task = task;
-        this.parentTask = parentTask;
+        this.resultConsumer = resultConsumer;
     }
 
     @Override
     public byte[] call() {
         try {
-            pdf = task.call();
-            if (parentTask != null) {
-                parentTask.childProcessed();
+            data = task.call();
+            if (resultConsumer != null) {
+                resultConsumer.accept(true);
             }
-            return pdf;
-        } catch (IOException | DocumentException | URISyntaxException e) {
-            log.warn("Cannot produce pdf", e);
+            return data;
+        } catch (RenderException e) {
+            if (resultConsumer != null) {
+                resultConsumer.accept(false);
+            }
+            log.warn("Cannot produce data", e);
         }
-        return pdf;
+        return data;
     }
 
-    public byte[] getPdf() {
-        return pdf;
+    public byte[] getData() {
+        return data;
     }
 
     @Override

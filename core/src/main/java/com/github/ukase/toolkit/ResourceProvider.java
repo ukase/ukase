@@ -23,6 +23,7 @@ import com.github.jknack.handlebars.Handlebars;
 import com.github.ukase.config.UkaseSettings;
 import com.github.ukase.toolkit.helpers.AbstractHelper;
 import com.github.ukase.toolkit.pdf.PdfSaucerRenderer;
+import com.github.ukase.toolkit.render.RenderException;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.pdf.BaseFont;
 import lombok.extern.log4j.Log4j;
@@ -101,7 +102,7 @@ public class ResourceProvider {
             log.error("Some problem in font loading");
         } catch (XRRuntimeException e) {
             logErrorInLine(htmlDocument, e);
-            throw new RenderException("Error in xhtml file processing", e);
+            throw new RenderException("Error in xhtml file processing", e, "pdf");
         }
 
         return renderer;

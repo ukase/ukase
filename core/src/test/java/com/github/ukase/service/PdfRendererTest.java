@@ -41,6 +41,8 @@ public class PdfRendererTest {
     private PdfRenderer renderer;
     @Autowired
     private UkaseSettings settings;
+    @Autowired
+    private PdfWatermarkRenderer watermarkRenderer;
 
     //TODO:
     // check if there are any method to compare pdf files without their metadata (like creation date)
@@ -49,23 +51,27 @@ public class PdfRendererTest {
     @Test
     public void testParseHtml() throws Exception {
         byte[] pdf = getFile("basic.pdf");
-        String html = getHtmlData("basic.html");
+        String html = getHtmlData();
         assertNotNull(html);
         assertNotNull(pdf);
-        savePdf(renderer.render(html, false), "render");
+        savePdf(renderer.render(html));
     }
 
     @Test
     public void testParseSampleHtml() throws Exception {
         byte[] pdf = getFile("basic.pdf");
-        String html = getHtmlData("basic.html");
+        String html = getHtmlData();
         assertNotNull(html);
         assertNotNull(pdf);
-        savePdf(renderer.render(html, true), "render");
+
+        byte[] render = renderer.render(html);
+        render = watermarkRenderer.render(render);
+
+        savePdf(render);
     }
 
-    private String getHtmlData(String fileName) throws IOException {
-        byte[] data = getFile(fileName);
+    private String getHtmlData() throws IOException {
+        byte[] data = getFile("basic.html");
         if (data == null) {
             return null;
         }
@@ -80,7 +86,7 @@ public class PdfRendererTest {
         return Files.readAllBytes(dataFile.toPath());
     }
 
-    private void savePdf(byte[] data, String name) throws IOException {
-        Files.write(new File(settings.getResources(), name + ".pdf").toPath(), data);
+    private void savePdf(byte[] data) throws IOException {
+        Files.write(new File(settings.getResources(), "render.pdf").toPath(), data);
     }
 }
