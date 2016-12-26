@@ -36,19 +36,6 @@ refresh pdf in view at any updates.
 In case of `ANY` template name - it works for every template and resources.
 In case of specified template name - it works for only specified template (no updates on partials) and resources.
 
-# POST /api/bulk
-
-body: array of [UkasePayload](#ukasepayload)
-
-return type: UUID in string mode
-
-return code:
-- 200 Ok - task were applied to work
-- 400 Bad Request - request were failed to be added to queue 
-
-Asynchronous method to add task (building pdf bulk) in queue. Answers contains string with UUID that assigned
-to the task.
-
 # POST /api/bulk/sync
 
 body: array of [UkasePayload](#ukasepayload)
@@ -61,38 +48,6 @@ return code:
 - 500 Internal Server Error - request were interrupted (possible that server stopped at moment) 
 
 Synchronous method to process bulk of PDFs.
-
-# GET /api/bulk/status/{id}
-
-{id} - UUID of queued task
-
-body: none
-
-return type: [Status](#status)
-
-return code:
-* in case of option 'ukase.bulk.statusCodes' {true}:
-  - 200 Ok - pdf file generated
-  - 404 Not Found - pdf bulk request added to queue or started processing 
-  - 400 Bad Request - pdf bulk request were failed for some reason 
-* in case of option 'ukase.bulk.statusCodes' {false}:
-  - 200 Ok - status provided only in answer body
-
-Check status for task in queue 
-
-# GET /api/bulk/{id}
-
-{id} - UUID of queued task
-
-body: none
-
-return type: byte array of bundled pdf
-
-return code:
-- 200 Ok - pdf file generated
-- 400 Bad Request - pdf bulk request not ready yet or already failed 
-
-Return byte array if pdf already rendered.
 
 # POST /api/xlsx :new:
 
@@ -107,6 +62,71 @@ Processes request in order:
 * parse xthml and css styles to DOM (powered by Flying Saucer)
 * render xlsx file (powered by Apache POI:SXSSF)
 * return rendered xlsx as bytes array
+
+# Async API
+
+## POST /api/async/pdf/bulk
+ moved at 4.0 from `POST /api/bulk`
+
+body: array of [UkasePayload](#ukasepayload)
+
+return type: UUID in string mode
+
+return code:
+- 200 Ok - task were applied to work
+- 400 Bad Request - request were failed to be added to queue 
+
+Asynchronous method to add task (building pdf bulk) in queue. Answers contains string with UUID that assigned
+to the task.
+
+## POST /api/async/xlsx
+since 4.0
+
+body: array of [UkasePayload](#ukasepayload)
+
+return type: UUID in string mode
+
+return code:
+- 200 Ok - task were applied to work
+- 400 Bad Request - request were failed to be added to queue 
+
+Asynchronous method to add task (building pdf bulk) in queue. Answers contains string with UUID that assigned
+to the task.
+
+## GET /api/async/{id}/status
+ moved at 4.0 from `GET /api/bulk/status/{id}`
+ 
+`{id}` - UUID of queued task
+
+body: none
+
+return type: [Status](#status)
+
+return code:
+* in case of option 'ukase.bulk.statusCodes' {true}:
+  - 200 Ok - task finished
+  - 404 Not Found - task not finished yet 
+  - 400 Bad Request - task were failed 
+* in case of option 'ukase.bulk.statusCodes' {false}:
+  - 200 Ok - status provided only in answer body
+
+Check status for task in queue 
+
+## GET /api/async/{id}
+moved at 4.0 from `GET /api/bulk/{id}`
+
+`{id}` - UUID of queued task
+
+body: none
+
+return type: rendered in task byte array
+
+return code:
+- 200 Ok - pdf file generated
+- 400 Bad Request - pdf bulk request not ready yet or already failed 
+
+Return byte array if pdf already rendered.
+
 
 # Defined types
 

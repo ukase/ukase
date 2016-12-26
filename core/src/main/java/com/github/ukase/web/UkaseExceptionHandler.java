@@ -24,7 +24,6 @@ import com.github.ukase.toolkit.render.RenderException;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.ObjectError;
@@ -33,6 +32,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -78,9 +78,9 @@ public class UkaseExceptionHandler {
 
     @ExceptionHandler(RenderException.class)
     @ResponseBody
-    public ResponseEntity<String> handleRenderException(RenderException e, HttpRequest request) {
+    public ResponseEntity<String> handleRenderException(RenderException e, HttpServletRequest request) {
         log.warn("Failed render for {} request to {}\nPayload data: {}",
-                request.getMethod(), request.getURI(), e.getPayload());
+                request.getMethod(), request.getRequestURL(), e.getPayload());
         HttpHeaders headers = new HttpHeaders();
         headers.add("X-error-info", "Render step");
 

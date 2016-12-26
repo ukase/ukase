@@ -54,11 +54,14 @@ Short list [(more)](docs/api.md):
 * [POST /api/html](docs/api.md#post-apihtml)
 * [POST /api/pdf](docs/api.md#post-apipdf)
 * [GET /api/pdf/{templateName}](docs/api.md#get-apipdftemplatename)
-* [POST /api/bulk](docs/api.md#post-apibulk)
 * [POST /api/bulk/sync](docs/api.md#post-apibulksync)
-* [GET /api/bulk/status/{id}](docs/api.md#get-apibulkstatusid)
-* [GET /api/bulk/{id}](docs/api.md#get-apibulkid)
 * [POST /api/xlsx](docs/api.md#post-apixlsx-new)
+Async API
+* [POST /api/async/xlsx](docs/api.md#post-apiasyncxlsx)
+* [POST /api/async/pdf/bulk](docs/api.md#post-apiasyncpdfbulk)
+* [GET /api/async/{id}/status](docs/api.md#get-apiasyncidstatus)
+* [GET /api/async/{id}](docs/api.md#get-apiasyncid)
+
 
 ## License :scroll:
 Ukase is available over GNU Affero General Public License ([see more information here](http://www.gnu.org/licenses/));
