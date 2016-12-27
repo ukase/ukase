@@ -39,8 +39,8 @@ public class BulkConfig {
     private File path;
 
     private HttpStatus processed = HttpStatus.OK;
-    private HttpStatus ordered = HttpStatus.NOT_FOUND;
-    private HttpStatus error = HttpStatus.BAD_REQUEST;
+    private HttpStatus ordered = HttpStatus.OK;
+    private HttpStatus error = HttpStatus.OK;
 
     @Bean
     public ExecutorService provideExecutor() {
@@ -69,8 +69,10 @@ public class BulkConfig {
 
     public void setStatusCodes(boolean codes) {
         statusCodes = codes;
-        if (!statusCodes) {
-            processed = ordered = error = HttpStatus.OK;
+        if (statusCodes) {
+            processed = HttpStatus.OK;
+            ordered = HttpStatus.NOT_FOUND;
+            error = HttpStatus.BAD_REQUEST;
         }
     }
 

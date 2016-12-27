@@ -53,15 +53,14 @@ class AsyncRequest {
             }
         } else if (!parent.isDirectory()) {
             error();
-        } else {
-            try (FileOutputStream fos = new FileOutputStream(dataFile, false)) {
-                fos.write(data);
-                fos.flush();
-                success();
-            } catch (IOException e) {
-                log.error("Cannot create pdf file " + dataFile.getName(), e);
-                error();
-            }
+        }
+        try (FileOutputStream fos = new FileOutputStream(dataFile, false)) {
+            fos.write(data);
+            fos.flush();
+            success();
+        } catch (IOException e) {
+            log.error("Cannot create pdf file " + dataFile.getName(), e);
+            error();
         }
     }
 

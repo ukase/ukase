@@ -61,18 +61,17 @@ public class AsyncController {
     }
 
     @RequestMapping(value = "/xlsx", method = RequestMethod.POST)
-    public ResponseEntity<String> startRenderXlsx(@RequestBody @Valid UkasePayload payload) {
-        return ResponseEntity.ok(asyncManager.putXlsxTaskInOrder(payload));
+    public @ResponseBody String startRenderXlsx(@RequestBody @Valid UkasePayload payload) {
+        return asyncManager.putXlsxTaskInOrder(payload);
     }
 
     @RequestMapping(value = "/pdf/bulk", method = RequestMethod.POST,
             consumes = {"text/json", "text/json;charset=UTF-8", "application/json"})
-    public @ResponseBody
-    String postBulkInOrder(@RequestBody List<UkasePayload> payloads) {
+    public @ResponseBody String postBulkInOrder(@RequestBody List<UkasePayload> payloads) {
         return asyncManager.putTaskInOrder(payloads);
     }
 
-    @RequestMapping(value = "/{uuid}", method = RequestMethod.GET, produces = "octet/stream")
+    @RequestMapping(value = "/{uuid}", method = RequestMethod.GET, produces = "application/octet-stream")
     public ResponseEntity<byte[]> getBulk(@PathVariable String uuid) {
         byte[] bulk = asyncManager.getOrder(uuid);
         if (bulk == null) {
