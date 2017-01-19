@@ -26,6 +26,7 @@ import com.github.jknack.handlebars.io.TemplateLoader;
 import com.github.jknack.handlebars.io.TemplateSource;
 import com.github.ukase.config.UkaseSettings;
 import com.github.ukase.toolkit.jar.ZipTemplateSource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -41,6 +42,7 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+@Slf4j
 @Component
 public class CompoundTemplateLoader extends AbstractTemplateLoader {
     private static final String IMAGE_AS_PAGE = "default - image as page";
@@ -60,6 +62,8 @@ public class CompoundTemplateLoader extends AbstractTemplateLoader {
 
     @Autowired
     public CompoundTemplateLoader(UkaseSettings settings) throws IOException {
+        log.info("Starting with settings: ", settings);
+        log.info(settings.toString(), settings);
         File templates = settings.getTemplates();
         externalLoader =  templates == null ? null : new FileTemplateLoader(templates);
 
