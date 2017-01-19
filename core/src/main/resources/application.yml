@@ -19,7 +19,7 @@ ukase:
     y: 400
   bulk:
     threads: 10
-    statusCodes: true
+    statusCodes: false
     ttl: 60
     path: pdfs
 ---
@@ -39,7 +39,7 @@ ukase:
   jar:
   bulk:
     threads: 10
-    statusCodes: true
+    statusCodes: false
     ttl: 1
 
 ---
