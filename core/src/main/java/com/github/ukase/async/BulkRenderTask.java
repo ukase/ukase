@@ -64,6 +64,9 @@ class BulkRenderTask implements AsyncTask {
         }
         try {
             taskOrder = service.invokeAll(subTasks);
+            if (subTasks.size() == 0) {
+                latch.countDown();
+            }
         } catch (InterruptedException e) {
             reject();
         }

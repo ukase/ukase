@@ -46,11 +46,18 @@ public class RenderTaskBuilder {
     }
 
     public RenderTask build(UkasePayload payload) {
-        return new PdfRenderTask(payload, htmlRenderer, pdfRenderer, watermarkRenderer);
+        if (payload.getIndex() == null) {
+            return buildAccept(payload);
+        } else {
+            return new PdfRenderTask(payload, htmlRenderer, pdfRenderer, watermarkRenderer);
+        }
     }
 
     public RenderTask buildXlsx(UkasePayload payload) {
         return new XlsxRendererTask(payload, htmlRenderer, xlsxRenderer);
     }
 
+    private RenderTask buildAccept(UkasePayload payload) {
+        return new PdfAcceptTask(payload.getBinary());
+    }
 }

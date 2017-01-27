@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Konstantin Lepa <konstantin+ukase@lepabox.net>
+ * Copyright (c) 2017 Konstantin Lepa <konstantin+ukase@lepabox.net>
  *
  * This file is part of Ukase.
  *
@@ -17,23 +17,22 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.ukase.web;
+package com.github.ukase.toolkit.render;
 
-import com.github.ukase.web.validation.HtmlTemplateLocationExists;
-import lombok.Data;
+public class PdfAcceptTask implements RenderTask {
+    private byte[] data;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import java.util.HashMap;
-import java.util.Map;
+    PdfAcceptTask(byte[] data) {
+        this.data = data;
+    }
 
-@Data
-public class UkasePayload {
-    @HtmlTemplateLocationExists
-    @NotNull
-    @Valid
-    private String index;
-    private Map<String, Object> data = new HashMap<>();
-    private byte[] binary;
-    private boolean sample;
+    @Override
+    public byte[] call() throws RenderException {
+        return data;
+    }
+
+    @Override
+    public String getTemplateName() {
+        return null;
+    }
 }
