@@ -25,7 +25,12 @@
 
     <groupId>com.github.ukase</groupId>
     <artifactId>ukase-parent</artifactId>
-    <version>4.1</version>
+    <version>4.2</version>
+
+    <modules>
+        <module>ui</module>
+        <module>core</module>
+    </modules>
 
     <packaging>pom</packaging>
 
@@ -54,11 +59,6 @@
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>1.4.2.RELEASE</version>
     </parent>
-
-    <modules>
-        <module>ui</module>
-        <module>core</module>
-    </modules>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
