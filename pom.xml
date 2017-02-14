@@ -25,7 +25,7 @@
 
     <groupId>com.github.ukase</groupId>
     <artifactId>ukase-parent</artifactId>
-    <version>4.2</version>
+    <version>4.3</version>
 
     <modules>
         <module>ui</module>
@@ -110,6 +110,12 @@
                 <groupId>org.xhtmlrenderer</groupId>
                 <artifactId>flying-saucer-pdf-itext5</artifactId>
                 <version>${flying-saucer.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.zxing</groupId>
+                <artifactId>core</artifactId>
+                <version>3.3.0</version>
             </dependency>
 
             <dependency>
