@@ -54,7 +54,7 @@ public class BarcodeHelper extends AbstractHelper<Object> {
     }
 
     public BarcodeHelper() {
-        super("barcode");
+        super("$barcode");
     }
 
     @Override
