@@ -20,6 +20,7 @@
 package com.github.ukase.toolkit.helpers;
 
 import com.github.jknack.handlebars.Options;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -154,7 +155,10 @@ abstract class IfSubHelpers<T> extends AbstractHelper<T> {
         @Override
         public boolean test(Object context, Options options) throws IOException {
             boolean testParameters = Arrays.stream(options.params).allMatch(Objects::nonNull);
-            return testParameters || context != null;
+            if (context instanceof CharSequence) {
+                 return testParameters && StringUtils.isNotBlank((CharSequence)context);
+            }
+            return testParameters && context != null;
         }
     }
 
@@ -167,6 +171,9 @@ abstract class IfSubHelpers<T> extends AbstractHelper<T> {
         @Override
         public boolean test(Object context, Options options) throws IOException {
             boolean testParameters = Arrays.stream(options.params).anyMatch(Objects::nonNull);
+            if (context instanceof CharSequence) {
+                return testParameters || StringUtils.isNotBlank((CharSequence)context);
+            }
             return testParameters || context != null;
         }
     }
