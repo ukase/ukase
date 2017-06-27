@@ -25,7 +25,7 @@
 
     <groupId>com.github.ukase</groupId>
     <artifactId>ukase-parent</artifactId>
-    <version>4.3</version>
+    <version>4.4</version>
 
     <modules>
         <module>ui</module>
@@ -70,7 +70,7 @@
         <itextpdf.version>5.5.8</itextpdf.version>
 
         <junit.version>4.12</junit.version>
-        <flying-saucer.version>9.0.8</flying-saucer.version>
+        <flying-saucer.version>9.1.2</flying-saucer.version>
     </properties>
 
     <dependencyManagement>
