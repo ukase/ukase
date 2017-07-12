@@ -38,7 +38,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
 
 @Component
 public class JarSource implements Source {
@@ -68,8 +67,6 @@ public class JarSource implements Source {
             Properties properties = new Properties();
             props.stream().
                     map(templateLoader::getResource).
-                    filter(Objects::nonNull).
-                    map(this::mapZipEntry).
                     filter(Objects::nonNull).
                     forEach(stream -> loadStreamToProperties(stream, properties));
             properties.forEach(this::registerHelper);
@@ -113,7 +110,7 @@ public class JarSource implements Source {
 
     @Override
     public InputStream getResource(String url) throws IOException {
-        return templateLoader.getResource(templateLoader.getResource(url));
+        return templateLoader.getResource(url);
     }
 
     @Override
@@ -133,14 +130,6 @@ public class JarSource implements Source {
 
     private void registerHelper(Object name, Object className) {
         helpers.put((String) name, (String) className);
-    }
-
-    private InputStream mapZipEntry(ZipEntry entry) {
-        try {
-            return templateLoader.getResource(entry);
-        } catch (IOException e) {
-            throw new IllegalStateException("Wrong configuration", e);
-        }
     }
 
     private void loadStreamToProperties(InputStream stream, Properties properties) {

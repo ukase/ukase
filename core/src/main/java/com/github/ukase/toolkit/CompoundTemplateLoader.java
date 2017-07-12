@@ -30,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -46,18 +47,22 @@ import java.util.zip.ZipFile;
 @Component
 public class CompoundTemplateLoader extends AbstractTemplateLoader {
     private static final String IMAGE_AS_PAGE = "default - image as page";
+    private static final String UPLOADED_RESOURCES_PREFIX = "upload://";
     private static final TemplateSource IMAGE_AS_PAGE_TEMPLATE;
+    private static final String TEMPLATE_POSTFIX = ".hbs";
+
     static {
         IMAGE_AS_PAGE_TEMPLATE =
-                new StringTemplateSource(IMAGE_AS_PAGE, StaticUtils.readStringFile(getStream("image-as-page.hbs")));
+                new StringTemplateSource(IMAGE_AS_PAGE, StaticUtils.readStringFile(getStream()));
     }
 
-    private static InputStream getStream(String fileName) {
-        return CompoundTemplateLoader.class.getResourceAsStream(fileName);
+    private static InputStream getStream() {
+        return CompoundTemplateLoader.class.getResourceAsStream("image-as-page.hbs");
     }
 
     private final ZipFile zip;
     private final Map<String, ZipEntry> resources = new HashMap<>();
+    private final Map<String, UploadedTemplateSource> uploadedResources = new HashMap<>();
     private final TemplateLoader externalLoader;
 
     @Autowired
@@ -82,6 +87,9 @@ public class CompoundTemplateLoader extends AbstractTemplateLoader {
             //TODO extract loader for default templates (if there were more than 1)
             return IMAGE_AS_PAGE_TEMPLATE;
         }
+        if (isUploadedResource(location)) {
+            return uploadedResources.get(location + TEMPLATE_POSTFIX);
+        }
         try {
             if (externalLoader == null) {
                 return getTemplateSource(location, null);
@@ -105,19 +113,43 @@ public class CompoundTemplateLoader extends AbstractTemplateLoader {
     }
 
     public boolean hasResource(String location) {
+        if (isUploadedResource(location)) {
+            return uploadedResources.containsKey(location);
+        }
         return resources.containsKey(location);
     }
 
-    public ZipEntry getResource(String location) {
-        return resources.get(location);
-    }
+    public InputStream getResource(String location) throws IllegalStateException {
+        if (isUploadedResource(location)) {
+            String value = uploadedResources.get(location).content();
+            if (value == null) {
+                return null;
+            }
+            return new ByteArrayInputStream(value.getBytes());
+        }
 
-    public InputStream getResource(ZipEntry resource) throws IOException {
-        return zip.getInputStream(resource);
+        ZipEntry resource = resources.get(location);
+        if (resource == null) {
+            return null;
+        }
+        try {
+            return getResource(resource);
+        } catch (IOException e) {
+            throw new IllegalStateException("Wrong configuration", e);
+        }
     }
 
     public Collection<String> getResources(Predicate<String> filter) {
         return resources.keySet().stream().filter(filter).collect(Collectors.toList());
+    }
+
+    public void uploadResource(String resourceName, String resource) {
+        UploadedTemplateSource template = new UploadedTemplateSource(resource, resourceName);
+        uploadedResources.put(UPLOADED_RESOURCES_PREFIX + resourceName + TEMPLATE_POSTFIX, template);
+    }
+
+    private InputStream getResource(ZipEntry resource) throws IOException {
+        return zip.getInputStream(resource);
     }
 
     private void registerResource(ZipEntry entry) {
@@ -139,4 +171,34 @@ public class CompoundTemplateLoader extends AbstractTemplateLoader {
         return new ZipTemplateSource(zip, entry);
     }
 
+    private boolean isUploadedResource(String location) {
+        return location != null && location.startsWith(UPLOADED_RESOURCES_PREFIX);
+    }
+
+    private static class UploadedTemplateSource implements TemplateSource {
+        private final String content;
+        private final String name;
+        private final long lastModified;
+
+        UploadedTemplateSource(String content, String name) {
+            this.content = content;
+            this.name = name;
+            this.lastModified = System.currentTimeMillis();
+        }
+
+        @Override
+        public String content() {
+            return content;
+        }
+
+        @Override
+        public String filename() {
+            return name;
+        }
+
+        @Override
+        public long lastModified() {
+            return lastModified;
+        }
+    }
 }

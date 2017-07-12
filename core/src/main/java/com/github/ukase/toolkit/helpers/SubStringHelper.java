@@ -37,8 +37,8 @@ public class SubStringHelper extends AbstractHelper<String> {
         if (context == null) {
             return "";
         }
-        Integer start = options.param(0, null);
-        Integer end = options.param(1, null);
+        Integer start = start(options.param(0, null), context.length());
+        Integer end = end(options.param(1, null), context.length());
 
         if (isIncorrectParameters(context, start, end)) {
             return "";
@@ -55,5 +55,19 @@ public class SubStringHelper extends AbstractHelper<String> {
         return start == null
                 || start < 0
                 || end != null && (end > context.length() || end < start);
+    }
+
+    private int start(Integer start, int length) {
+        if (start == null || start < 0) {
+            return 0;
+        }
+        return Math.min(length, start);
+    }
+
+    private int end(Integer end, int length) {
+        if (end == null || end < 0) {
+            return 0;
+        }
+        return Math.min(length, end);
     }
 }
