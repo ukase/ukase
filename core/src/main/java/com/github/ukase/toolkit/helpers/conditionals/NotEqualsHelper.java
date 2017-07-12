@@ -25,8 +25,8 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 /**
- * Conditional helper to check 2 objects non-equality.<br/>
- * Equality is checking using {@link Object#equals}.<br/>
+ * Conditional helper to check 2 objects non-equality.<br>
+ * Equality is checking using {@link Object#equals}.<br>
  * If both of them are <code>null</code> then they are equal.
  * <pre>
  *   {{if (ne first second}}

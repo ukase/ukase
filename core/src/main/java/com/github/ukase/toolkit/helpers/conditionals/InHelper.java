@@ -27,8 +27,8 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * Conditional helper that checks if first passed object equals to any other.<br/>
- * Equality is checking using {@link Object#equals}.<br/>
+ * Conditional helper that checks if first passed object equals to any other.<br>
+ * Equality is checking using {@link Object#equals}.<br>
  * In case if <code>first</code> is <code>null</code> it will be checked if any other object is <code>null</code>.
  * <pre>
  *   {{if (in first second third fourth ...}}

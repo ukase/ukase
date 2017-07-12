@@ -22,7 +22,7 @@ package com.github.ukase.toolkit.helpers.conditionals;
 import org.springframework.stereotype.Component;
 
 /**
- * Conditional helper for comparable types (line numbers).<br/>
+ * Conditional helper for comparable types (line numbers).<br>
  * Checks if <code>first &gt;= second</code>
  * <pre>
  *   {{if (lt first second}}
