@@ -26,6 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -43,6 +44,13 @@ public class ResourceController {
     @RequestMapping("/upload/{name}")
     public ResponseEntity<?> uploadResource(@RequestBody String resource, @PathVariable("name") String resourceName) {
         loader.uploadResource(resourceName, resource);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @RequestMapping("/upload/")
+    public ResponseEntity<?> uploadResourcePath(@RequestBody String resource,
+                                                @RequestHeader("path") String resourcePath) {
+        loader.uploadResource(resourcePath, resource);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
