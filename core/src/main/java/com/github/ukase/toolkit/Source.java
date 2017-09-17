@@ -20,7 +20,6 @@
 package com.github.ukase.toolkit;
 
 import com.github.jknack.handlebars.Helper;
-import com.github.jknack.handlebars.io.TemplateLoader;
 
 import java.io.IOException;
 import java.io.InputStream;

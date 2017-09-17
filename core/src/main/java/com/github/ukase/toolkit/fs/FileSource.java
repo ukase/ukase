@@ -43,7 +43,6 @@ public class FileSource implements Source {
     private final File templates;
     private final FileUpdatesListener resourcesListener;
     private final FileUpdatesListener templatesListener;
-    private final Collection<String> fonts;
 
     @Autowired
     public FileSource(UkaseSettings settings) throws IOException {
@@ -57,11 +56,6 @@ public class FileSource implements Source {
             } else {
                 templatesListener = new FileUpdatesListener(templates);
             }
-
-            File[] fontsFiles = resources.listFiles((dir, fileName) -> IS_FONT.test(fileName));
-            fonts = Arrays.stream(fontsFiles)
-                    .map(File::getAbsolutePath)
-                    .collect(Collectors.toList());
         } else {
             resourcesListener = null;
             if (templates != null) {
@@ -69,7 +63,6 @@ public class FileSource implements Source {
             } else {
                 templatesListener = null;
             }
-            fonts = Collections.emptyList();
         }
     }
 
@@ -111,8 +104,17 @@ public class FileSource implements Source {
         return null;
     }
 
+    @Override
     public Collection<String> getFontsUrls() {
-        return Collections.unmodifiableCollection(fonts);
+        if (resources != null) {
+            File[] fontsFiles = resources.listFiles((dir, fileName) -> IS_FONT.test(fileName));
+            if (fontsFiles != null) {
+                return Arrays.stream(fontsFiles)
+                             .map(File::getAbsolutePath)
+                             .collect(Collectors.toList());
+            }
+        }
+        return Collections.emptyList();
     }
 
     @Override

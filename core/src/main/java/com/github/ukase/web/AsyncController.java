@@ -65,10 +65,16 @@ public class AsyncController {
         return asyncManager.putXlsxTaskInOrder(payload);
     }
 
+    @RequestMapping(value = "/pdf", method = RequestMethod.POST,
+            consumes = {"text/json", "text/json;charset=UTF-8", "application/json"})
+    public @ResponseBody String startRenderPdf(@RequestBody UkasePayload payload) {
+        return asyncManager.putPdfTaskInOrder(payload);
+    }
+
     @RequestMapping(value = "/pdf/bulk", method = RequestMethod.POST,
             consumes = {"text/json", "text/json;charset=UTF-8", "application/json"})
     public @ResponseBody String postBulkInOrder(@RequestBody List<UkasePayload> payloads) {
-        return asyncManager.putTaskInOrder(payloads);
+        return asyncManager.putBulkInOrder(payloads);
     }
 
     @RequestMapping(value = "/{uuid}", method = RequestMethod.GET, produces = "application/octet-stream")

@@ -46,7 +46,7 @@ public class JarSource implements Source {
     private final Map<String, String> helpers = new HashMap<>();
     private final Map<String, Helper<?>> helpersInstances = new HashMap<>();
     private final URLClassLoader classLoader;
-    private final Collection<String> fonts;
+    private final URL jar;
 
     @Autowired
     public JarSource(CompoundTemplateLoader templateLoader, UkaseSettings settings) {
@@ -54,26 +54,21 @@ public class JarSource implements Source {
 
         if (settings.getJar() == null) {
             classLoader = null;
-            fonts = Collections.emptyList();
-
+            jar = null;
             return;
         }
 
         try {
-            URL jar = settings.getJar().toURI().toURL();
+            jar = settings.getJar().toURI().toURL();
 
-            Collection<String> props = templateLoader.getResources(IS_HELPERS_CONFIGURATION);
+            Collection<String> helperConfigurationFiles = templateLoader.getResources(IS_HELPERS_CONFIGURATION);
 
             Properties properties = new Properties();
-            props.stream().
+            helperConfigurationFiles.stream().
                     map(templateLoader::getResource).
                     filter(Objects::nonNull).
                     forEach(stream -> loadStreamToProperties(stream, properties));
             properties.forEach(this::registerHelper);
-
-            fonts = templateLoader.getResources(IS_FONT).parallelStream()
-                    .map(font -> "jar:" + jar + "!/" + font)
-                    .collect(Collectors.toList());
 
             if (hasHelpers()) {
                 URL[] jars = new URL[] {jar};
@@ -115,7 +110,12 @@ public class JarSource implements Source {
 
     @Override
     public Collection<String> getFontsUrls() {
-        return Collections.unmodifiableCollection(fonts);
+        if (jar != null) {
+            return templateLoader.getResources(IS_FONT).stream()
+                                 .map(font -> "jar:" + jar + "!/" + font)
+                                 .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
     }
 
     private Helper<?> getHelper(String className) {

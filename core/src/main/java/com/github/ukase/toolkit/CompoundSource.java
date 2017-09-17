@@ -22,37 +22,40 @@ package com.github.ukase.toolkit;
 import com.github.jknack.handlebars.Helper;
 import com.github.ukase.toolkit.fs.FileSource;
 import com.github.ukase.toolkit.jar.JarSource;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 @Service
-public class CompoundSource implements Source{
+public class CompoundSource implements Source {
     private final JarSource jarSource;
     private final FileSource fileSource;
-    private final Collection<String> fonts = new CopyOnWriteArraySet<>();
+    @Getter
+    private final Collection<String> fontsUrls;
 
     @Autowired
     public CompoundSource(JarSource jarSource, FileSource fileSource) {
         this.jarSource = jarSource;
         this.fileSource = fileSource;
+
+        Collection<String> fonts = new HashSet<>(jarSource.getFontsUrls());
+        fonts.addAll(fileSource.getFontsUrls());
+        addLiberationFonts(fonts);
+        this.fontsUrls = Collections.unmodifiableCollection(fonts);
     }
 
     @Override
     public void registerListener(SourceListener listener) {
         fileSource.registerListener(listener);
-    }
-
-    @Override
-    public Collection<String> getFontsUrls() {
-        fonts.addAll(fileSource.getFontsUrls());
-        fonts.addAll(jarSource.getFontsUrls());
-        return fonts;
     }
 
     @Override
@@ -82,5 +85,28 @@ public class CompoundSource implements Source{
     @Override
     public Map<String, Helper<?>> getHelpers() {
         return jarSource.getHelpers();
+    }
+
+    String getDefaultFontUrl() {
+        return getFontsUrls().stream()
+                .filter(this::isRegularFont)
+                .findAny().orElse(null);
+    }
+
+    private void addLiberationFonts(Collection<String> fonts) {
+        ClassLoader loader = getClass().getClassLoader();
+        Stream.of("LiberationSerif-Regular.ttf",
+                  "LiberationSerif-Bold.ttf",
+                  "LiberationSerif-Italic.ttf",
+                  "LiberationSerif-BoldItalic.ttf")
+                .map(loader::getResource)
+                .filter(Objects::nonNull)
+                .map(Object::toString)
+                .forEach(fonts::add);
+    }
+
+    private boolean isRegularFont(String fontName) {
+        String name = fontName.toLowerCase();
+        return !(name.contains("bold") || name.contains("italic"));
     }
 }

@@ -71,9 +71,7 @@ public class ResourceProvider {
         this.source = source;
         this.templateLoader = templateLoader;
         this.resourcesPath = resolvePath(settings.getResources());
-        this.defaultFont = this.source.getFontsUrls().stream()
-                .filter(name -> !(name.contains("Bold")) && !(name.contains("Italic")))
-                .findAny().orElse(null);
+        this.defaultFont = this.source.getDefaultFontUrl();
     }
 
     @Bean
@@ -83,9 +81,9 @@ public class ResourceProvider {
         if (source.hasHelpers()) {
             source.getHelpers().forEach(engine::registerHelper);
         }
-        context.getBeansOfType(AbstractHelper.class).values().forEach(
-                helper -> engine.registerHelper(helper.getName(), helper)
-        );
+        for (AbstractHelper<?> helper: context.getBeansOfType(AbstractHelper.class).values()) {
+            engine.registerHelper(helper.getName(), helper);
+        }
 
         return engine;
     }

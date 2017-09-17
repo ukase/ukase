@@ -51,7 +51,10 @@ public class AsyncManager {
     private File path;
 
     @Autowired
-    public AsyncManager(ExecutorService executor, RenderTaskBuilder builder, Long ttl, File path) {
+    public AsyncManager(ExecutorService executor,
+                        RenderTaskBuilder builder,
+                        Long ttl,
+                        File path) {
         this.executor = executor;
         this.builder = builder;
         this.ttl = ttl;
@@ -59,12 +62,16 @@ public class AsyncManager {
         checkDataDirectory();
     }
 
-    public String putTaskInOrder(List<UkasePayload> payloads) {
+    public String putBulkInOrder(List<UkasePayload> payloads) {
         return startProcessingPdf(payloads).getId();
     }
 
     public String putXlsxTaskInOrder(UkasePayload payload) {
         return startProcessingXlsx(payload).getId();
+    }
+
+    public String putPdfTaskInOrder(UkasePayload payload) {
+        return startProcessingPdf(payload).getId();
     }
 
     public byte[] processOrder(List<UkasePayload> payloads) throws InterruptedException {
@@ -110,6 +117,12 @@ public class AsyncManager {
 
     private AsyncTask startProcessingXlsx(UkasePayload payload) {
         RenderTask renderTask = builder.buildXlsx(payload);
+        AsyncTask task = new AsyncRenderTask(renderTask, nextRequest());
+        return task.startOnExecutor(executor);
+    }
+
+    private AsyncTask startProcessingPdf(UkasePayload payload) {
+        RenderTask renderTask = builder.build(payload);
         AsyncTask task = new AsyncRenderTask(renderTask, nextRequest());
         return task.startOnExecutor(executor);
     }
