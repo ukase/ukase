@@ -36,7 +36,7 @@ public class PdfRenderer implements Renderer<String, byte[]> {
     private final ResourceProvider provider;
 
     @Autowired
-    private PdfRenderer(ResourceProvider provider) {
+    public PdfRenderer(ResourceProvider provider) {
         this.provider = provider;
     }
 

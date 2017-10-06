@@ -20,44 +20,35 @@
 package com.github.ukase.service;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.profile.GCProfiler;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.concurrent.TimeUnit;
 
-@RunWith(SpringRunner.class)
-@ActiveProfiles({"test", "test-performance"})
-@SpringBootTest()
 public class BenchmarkStarter {
-    @Autowired
-    private HtmlRenderer htmlRenderer;
-
     @Test
     public void testX() throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(HtmlRenderPerformanceTest.class.getName())
                 // Set the following options as needed
                 .mode(Mode.AverageTime)
-                .timeUnit(TimeUnit.MICROSECONDS)
+                .timeUnit(TimeUnit.MILLISECONDS)
                 .warmupTime(TimeValue.seconds(1))
                 .warmupIterations(2)
                 .measurementTime(TimeValue.seconds(1))
-                .measurementIterations(2)
+                .measurementIterations(3)
+                .jvmArgsAppend("-Xmx512m")
                 .threads(2)
+                .addProfiler(GCProfiler.class)
                 .forks(1)
                 .shouldFailOnError(true)
                 .shouldDoGC(true)
                 .build();
-        HtmlRenderPerformanceTest.htmlRenderer = this.htmlRenderer;
 
         new Runner(opt).run();
     }

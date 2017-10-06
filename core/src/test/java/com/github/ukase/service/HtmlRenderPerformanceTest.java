@@ -34,10 +34,14 @@ import java.util.Map;
 
 
 @State(Scope.Thread)
-public class HtmlRenderPerformanceTest {
-    public static HtmlRenderer htmlRenderer;
+public class HtmlRenderPerformanceTest extends AbstractNoSpringBenchmark {
+    private final HtmlRenderer htmlRenderer;
 
-    Map<String, Object> data;
+    public HtmlRenderPerformanceTest() {
+        this.htmlRenderer = new HtmlRenderer(getResourceProvider().getEngine());
+    }
+
+    private Map<String, Object> data;
 
     @Setup(Level.Trial)
     public void initialize() {
@@ -49,12 +53,12 @@ public class HtmlRenderPerformanceTest {
         List<Map<String, Object>> array = new ArrayList<>();
         data.put("array", array);
 
-        for(int i = 0 ; i < 1_000 ; i++) {
+        for(int i = 0 ; i < 30_000 ; i++) {
             Map<String, Object> subData = new HashMap<>();
             array.add(subData);
 
             for(int z = 1 ; z < 84 ; z++) {
-                subData.put("f" + z, z + "аыфваф" + i + " asdfas" + z);
+                subData.put("f" + z, z + "аыфваф" + i);
             }
         }
     }
@@ -63,7 +67,7 @@ public class HtmlRenderPerformanceTest {
     public void html(Blackhole blackhole) {
         UkasePayload data = new UkasePayload();
         data.setData(this.data);
-        data.setIndex("performance.pdf");
+        data.setIndex("templates/performance.pdf");
         blackhole.consume(htmlRenderer.render(data));
     }
 }

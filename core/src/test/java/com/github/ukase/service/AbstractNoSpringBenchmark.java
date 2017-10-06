@@ -1,0 +1,74 @@
+/*
+ * Copyright (c) 2017 Konstantin Lepa <konstantin+ukase@lepabox.net>
+ *
+ * This file is part of Ukase.
+ *
+ *  Ukase is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package com.github.ukase.service;
+
+import com.github.ukase.config.UkaseSettings;
+import com.github.ukase.toolkit.CompoundSource;
+import com.github.ukase.toolkit.CompoundTemplateLoader;
+import com.github.ukase.toolkit.ResourceProvider;
+import com.github.ukase.toolkit.fs.FileSource;
+import com.github.ukase.toolkit.jar.JarSource;
+import lombok.Getter;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.AbstractApplicationContext;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
+
+abstract class AbstractNoSpringBenchmark {
+    @Getter
+    private final ResourceProvider resourceProvider;
+
+    AbstractNoSpringBenchmark() {
+        ResourceProvider resourceProvider = null;
+        try {
+            ApplicationContext context = new NoSpringApplicationContext();
+            UkaseSettings settings = new UkaseSettings();
+            settings.setTemplates("target/test-classes/");
+            settings.setResources("target/test-classes/");
+            CompoundTemplateLoader templateLoader = new CompoundTemplateLoader(settings);
+            JarSource jarSource = new JarSource(templateLoader, settings);
+            FileSource fileSource = new FileSource(settings);
+            CompoundSource compoundSource = new CompoundSource(jarSource, fileSource);
+            resourceProvider = new ResourceProvider(context, compoundSource, templateLoader, settings);
+        } catch (IOException e) {
+            //ignore
+        }
+        this.resourceProvider = resourceProvider;
+    }
+
+
+    private static class NoSpringApplicationContext extends AbstractApplicationContext {
+        @Override
+        protected void refreshBeanFactory() throws BeansException, IllegalStateException {/*do nothing*/}
+        @Override
+        protected void closeBeanFactory() {/*do nothing*/}
+        @Override
+        public ConfigurableListableBeanFactory getBeanFactory() throws IllegalStateException {return null;}
+
+        @Override
+        public <T> Map<String, T> getBeansOfType(Class<T> type) throws BeansException {
+            return Collections.emptyMap();
+        }
+    }
+}
