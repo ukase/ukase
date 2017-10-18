@@ -20,6 +20,9 @@
 package com.github.ukase.service;
 
 import com.github.ukase.web.UkasePayload;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Scope;
@@ -29,27 +32,46 @@ import org.openjdk.jmh.infra.Blackhole;
 
 import java.util.Map;
 
-
-@State(Scope.Thread)
-public class HtmlRenderPerformanceTest extends AbstractNoSpringBenchmark {
+@Ignore("For manual start only")
+public class PdfRenderTimeTest extends AbstractNoSpringBenchmark {
     private final HtmlRenderer htmlRenderer;
+    private final PdfRenderer pdfRenderer;
 
-    public HtmlRenderPerformanceTest() {
+    public PdfRenderTimeTest() {
         this.htmlRenderer = new HtmlRenderer(getResourceProvider().getEngine());
+        this.pdfRenderer = new PdfRenderer(getResourceProvider());
     }
 
-    private Map<String, Object> data;
-
-    @Setup(Level.Trial)
-    public void initialize() {
-        data = prepareData(5_000, 84);
+    @Test
+    public void pdf05k() {
+        test(5_000);
     }
 
-    @Benchmark
-    public void html(Blackhole blackhole) {
+    @Test
+    public void pdf10k() {
+        test(10_000);
+    }
+
+    @Test
+    public void pdf12k() {
+        test(12_000);
+    }
+
+    @Test
+    public void pdf15k() {
+        test(15_000);
+    }
+
+    private void test(int count) {
         UkasePayload data = new UkasePayload();
-        data.setData(this.data);
+        data.setData(prepareData(count, 84));
         data.setIndex("templates/performance.pdf");
-        blackhole.consume(htmlRenderer.render(data));
+
+        System.out.println("Start rendering " + count + ":");
+        long start = System.currentTimeMillis();
+        String html = htmlRenderer.render(data);
+        System.out.println("html " + count + ", ms: " + (System.currentTimeMillis() - start));
+        System.out.println(pdfRenderer.render(html).length);
+        System.out.println("total, ms: " + (System.currentTimeMillis() - start));
     }
 }

@@ -31,11 +31,13 @@ import java.util.Map;
 
 
 @State(Scope.Thread)
-public class HtmlRenderPerformanceTest extends AbstractNoSpringBenchmark {
+public class PdfRenderPerformanceTest extends AbstractNoSpringBenchmark {
     private final HtmlRenderer htmlRenderer;
+    private final PdfRenderer pdfRenderer;
 
-    public HtmlRenderPerformanceTest() {
+    public PdfRenderPerformanceTest() {
         this.htmlRenderer = new HtmlRenderer(getResourceProvider().getEngine());
+        this.pdfRenderer = new PdfRenderer(getResourceProvider());
     }
 
     private Map<String, Object> data;
@@ -46,10 +48,11 @@ public class HtmlRenderPerformanceTest extends AbstractNoSpringBenchmark {
     }
 
     @Benchmark
-    public void html(Blackhole blackhole) {
+    public void pdf(Blackhole blackhole) {
         UkasePayload data = new UkasePayload();
         data.setData(this.data);
         data.setIndex("templates/performance.pdf");
-        blackhole.consume(htmlRenderer.render(data));
+        String html = htmlRenderer.render(data);
+        blackhole.consume(pdfRenderer.render(html));
     }
 }

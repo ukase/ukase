@@ -32,7 +32,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.AbstractApplicationContext;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 abstract class AbstractNoSpringBenchmark {
@@ -70,5 +73,25 @@ abstract class AbstractNoSpringBenchmark {
         public <T> Map<String, T> getBeansOfType(Class<T> type) throws BeansException {
             return Collections.emptyMap();
         }
+    }
+
+    static Map<String, Object> prepareData(int count, int columns) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("index0", "паывапцуйукапйуцкрпй");
+        data.put("index1", "ппрйупйуцкп");
+        data.put("index2", "gqwrgqwerhqerg");
+        data.put("index3", "gewrhgwerhwerheруццукрцук пуцкп уцкп уцкп ");
+        List<Map<String, Object>> array = new ArrayList<>();
+        data.put("array", array);
+
+        for(int i = 0 ; i < count ; i++) {
+            Map<String, Object> subData = new HashMap<>();
+            array.add(subData);
+
+            for(int z = 1 ; z < columns ; z++) {
+                subData.put("f" + z, z + "аыфваф" + i);
+            }
+        }
+        return data;
     }
 }

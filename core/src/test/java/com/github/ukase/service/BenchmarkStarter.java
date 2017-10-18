@@ -19,6 +19,7 @@
 
 package com.github.ukase.service;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.profile.GCProfiler;
@@ -30,20 +31,54 @@ import org.openjdk.jmh.runner.options.TimeValue;
 
 import java.util.concurrent.TimeUnit;
 
+@Ignore("For manual start only")
 public class BenchmarkStarter {
     @Test
-    public void testX() throws RunnerException {
+    public void test512Html() throws RunnerException {
+        runTest("512", HtmlRenderPerformanceTest.class);
+    }
+    @Test
+    public void test512Pdf() throws RunnerException {
+        runTest("512", PdfRenderPerformanceTest.class);
+    }
+    @Test
+    public void test1024Html() throws RunnerException {
+        runTest("1024", HtmlRenderPerformanceTest.class);
+    }
+    @Test
+    public void test1024Pdf() throws RunnerException {
+        runTest("1024", PdfRenderPerformanceTest.class);
+    }
+    @Test
+    public void test1536Html() throws RunnerException {
+        runTest("1536", HtmlRenderPerformanceTest.class);
+    }
+    @Test
+    public void test1536Pdf() throws RunnerException {
+        runTest("1536", PdfRenderPerformanceTest.class);
+    }
+    @Test
+    public void test2048Html() throws RunnerException {
+        runTest("2048", HtmlRenderPerformanceTest.class);
+    }
+    @Test
+    public void test2048Pdf() throws RunnerException {
+        runTest("2048", PdfRenderPerformanceTest.class);
+    }
+
+    private void runTest(String heapSize, Class<?> clazz) throws RunnerException {
         Options opt = new OptionsBuilder()
-                .include(HtmlRenderPerformanceTest.class.getName())
+                .include(clazz.getName())
                 // Set the following options as needed
                 .mode(Mode.AverageTime)
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .warmupTime(TimeValue.seconds(1))
                 .warmupIterations(2)
                 .measurementTime(TimeValue.seconds(1))
-                .measurementIterations(3)
-                .jvmArgsAppend("-Xmx512m")
-                .threads(2)
+                .measurementIterations(1)
+                .jvmArgsAppend("-Xmx" + heapSize + "m")
+                .jvmArgsAppend("-Xms" + heapSize + "m")
+                .threads(1)
                 .addProfiler(GCProfiler.class)
                 .forks(1)
                 .shouldFailOnError(true)
