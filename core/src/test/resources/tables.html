@@ -1,5 +1,5 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html lang="ru" xml:lang="ru" xmlns="http://www.w3.org/1999/xhtml">
+<html lang="ru" xml:lang="ru" xmlns="http://www.w3.org/1999/xhtml" xmlns:ukase="urn:ukase:xlsx">
 <head>
     <meta content="text/html"/>
     <meta charset="utf-8"/>
@@ -51,17 +51,17 @@
             <th>Кол1</th>
             <th>лок2</th>
             <th>Ока3</th>
-            <th>Покр4</th>
+            <th numeric="numeric">123</th>
         </tr>
         <tr>
-            <td colspan="2">-+---</td>
-            <td>--+--</td>
-            <td>---+-</td>
+            <td colspan="2" ukase:data-type="numeric">101</td>
+            <td ukase:data-type="numeric">102</td>
+            <td ukase:data-type="numeric">103</td>
         </tr>
         <tr>
             <td rowspan="2">---+-</td>
             <td colspan="2">--+--</td>
-            <td>-+---</td>
+            <td>203</td>
         </tr>
         <tr>
             <td>--+--</td>

@@ -50,6 +50,9 @@ public class RenderingTable implements Runnable {
     private static final String TAG_TH = "th";
     private static final String ATTR_COL_SPAN = "colspan";
     private static final String ATTR_ROW_SPAN = "rowspan";
+    private static final String XLSX_NAMESPACE = "urn:ukase:xlsx";
+    private static final String DATA_TYPE_ATTR = "data-type";
+    private static final String TYPE_NUMERIC = "numeric";
     private final Workbook wb;
     private final Sheet sheet;
     private final BlockBox box;
@@ -109,7 +112,13 @@ public class RenderingTable implements Runnable {
 
         int cellNumber = row.getPhysicalNumberOfCells();
         Cell cell = row.createCell(cellNumber);
-        cell.setCellValue(td.getTextContent());
+        String type = td.getAttributeNS(XLSX_NAMESPACE, DATA_TYPE_ATTR);
+        if (TYPE_NUMERIC.equals(type)) {
+            cell.setCellValue(Double.parseDouble(td.getTextContent()));
+            cell.setCellType(Cell.CELL_TYPE_NUMERIC);
+        } else {
+            cell.setCellValue(td.getTextContent());
+        }
         cell.setCellStyle(style);
 
         mergeCells(row, td, cellNumber, style);
