@@ -22,6 +22,7 @@ package com.github.ukase.toolkit.xlsx;
 import com.github.ukase.toolkit.xlsx.translators.Translator;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataFormat;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -50,9 +51,11 @@ public class RenderingTable implements Runnable {
     private static final String TAG_TH = "th";
     private static final String ATTR_COL_SPAN = "colspan";
     private static final String ATTR_ROW_SPAN = "rowspan";
-    private static final String XLSX_NAMESPACE = "urn:ukase:xlsx";
-    private static final String DATA_TYPE_ATTR = "data-type";
+    private static final String NAMESPACE_XLSX = "urn:ukase:xlsx";
+    private static final String ATTR_DATA_TYPE = "data-type";
+    private static final String ATTR_NUMBER_FORMAT = "format-number";
     private static final String TYPE_NUMERIC = "numeric";
+
     private final Workbook wb;
     private final Sheet sheet;
     private final BlockBox box;
@@ -61,6 +64,7 @@ public class RenderingTable implements Runnable {
     private final List<CellMerge> mergedCells;
     private final ConcurrentMap<Integer, Integer> cellSizes;
     private final ConcurrentMap<CellStyleKey, XSSFCellStyle> cachedStyles;
+    private final short numberFormat;
 
     RenderingTable(Workbook wb, Element table, BlockBox box, Collection<Translator> translators) {
         this.wb = wb;
@@ -71,6 +75,9 @@ public class RenderingTable implements Runnable {
         this.cellSizes = new ConcurrentHashMap<>();
         this.cachedStyles = new ConcurrentHashMap<>();
         this.sheet = prepareSheet();
+        String format = table.getAttributeNS(NAMESPACE_XLSX, ATTR_NUMBER_FORMAT);
+        DataFormat cellFormat = wb.createDataFormat();
+        this.numberFormat = cellFormat.getFormat(format);
     }
 
     @Override
@@ -104,7 +111,10 @@ public class RenderingTable implements Runnable {
 
     private void processCell(Row row, Element td, TableRowBox rowBox) {
         TableCellBox cellBox = (TableCellBox)getBlockBoxFor(td, rowBox);
-        CellStyle style = prepareCellStyle(cellBox.getStyle());
+        String type = td.getAttributeNS(NAMESPACE_XLSX, ATTR_DATA_TYPE);
+        boolean isNumeric = TYPE_NUMERIC.equals(type);
+        short format = isNumeric ? numberFormat : 0;
+        CellStyle style = prepareCellStyle(cellBox.getStyle(), format);
 
         mergedCells.stream()
                 .filter(merge -> merge.isApplicable(row))
@@ -112,8 +122,7 @@ public class RenderingTable implements Runnable {
 
         int cellNumber = row.getPhysicalNumberOfCells();
         Cell cell = row.createCell(cellNumber);
-        String type = td.getAttributeNS(XLSX_NAMESPACE, DATA_TYPE_ATTR);
-        if (TYPE_NUMERIC.equals(type)) {
+        if (isNumeric) {
             cell.setCellValue(Double.parseDouble(td.getTextContent()));
             cell.setCellType(Cell.CELL_TYPE_NUMERIC);
         } else {
@@ -138,9 +147,10 @@ public class RenderingTable implements Runnable {
         mergedCells.add(merge);
     }
 
-    private CellStyle prepareCellStyle(CalculatedStyle style) {
+    private CellStyle prepareCellStyle(CalculatedStyle style, short format) {
         CellStyleKey key = new CellStyleKey();
 
+        key.setFormat(format);
         translators.forEach(translator -> translator.translateCssToXlsx(style, key));
 
         return cachedStyles.computeIfAbsent(key, this::getNewStyle);

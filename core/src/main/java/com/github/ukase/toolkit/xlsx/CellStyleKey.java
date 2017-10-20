@@ -50,6 +50,7 @@ public class CellStyleKey {
     private FSColor backgroundColor;
     private Boolean bold;
     private Short fontSize;
+    private short format;
 
     void applyToStyle(XSSFCellStyle style, Supplier<Font> fontSupplier) {
         applyBorders(style);
@@ -57,6 +58,7 @@ public class CellStyleKey {
         applyFont(style, fontSupplier);
         applyTextWrap(style);
         applyBackgroundColor(style);
+        style.setDataFormat(format);
     }
 
     private void applyBackgroundColor(XSSFCellStyle style) {
