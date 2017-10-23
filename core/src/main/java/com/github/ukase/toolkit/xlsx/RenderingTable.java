@@ -122,11 +122,17 @@ public class RenderingTable implements Runnable {
 
         int cellNumber = row.getPhysicalNumberOfCells();
         Cell cell = row.createCell(cellNumber);
+        String textContent = td.getTextContent();
         if (isNumeric) {
-            cell.setCellValue(Double.parseDouble(td.getTextContent()));
-            cell.setCellType(Cell.CELL_TYPE_NUMERIC);
+            try {
+                double numberValue = Double.parseDouble(textContent);
+                cell.setCellValue(numberValue);
+                cell.setCellType(Cell.CELL_TYPE_NUMERIC);
+            } catch (NumberFormatException e) {
+                cell.setCellValue(textContent);
+            }
         } else {
-            cell.setCellValue(td.getTextContent());
+            cell.setCellValue(textContent);
         }
         cell.setCellStyle(style);
 
