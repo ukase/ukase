@@ -54,7 +54,7 @@ public class RenderingTable implements Runnable {
     private static final String NAMESPACE_XLSX = "urn:ukase:xlsx";
     private static final String ATTR_DATA_TYPE = "data-type";
     private static final String ATTR_NUMBER_FORMAT = "format-number";
-    private static final String TYPE_NUMERIC = "numeric";
+    private static final String FORMAT_TEXT = "@";
 
     private final Workbook wb;
     private final Sheet sheet;
@@ -65,6 +65,7 @@ public class RenderingTable implements Runnable {
     private final ConcurrentMap<Integer, Integer> cellSizes;
     private final ConcurrentMap<CellStyleKey, XSSFCellStyle> cachedStyles;
     private final short numberFormat;
+    private final short textFormat;
 
     RenderingTable(Workbook wb, Element table, BlockBox box, Collection<Translator> translators) {
         this.wb = wb;
@@ -78,6 +79,7 @@ public class RenderingTable implements Runnable {
         String format = table.getAttributeNS(NAMESPACE_XLSX, ATTR_NUMBER_FORMAT);
         DataFormat cellFormat = wb.createDataFormat();
         this.numberFormat = cellFormat.getFormat(format);
+        this.textFormat = cellFormat.getFormat(FORMAT_TEXT);
     }
 
     @Override
@@ -112,32 +114,56 @@ public class RenderingTable implements Runnable {
     private void processCell(Row row, Element td, TableRowBox rowBox) {
         TableCellBox cellBox = (TableCellBox)getBlockBoxFor(td, rowBox);
         String type = td.getAttributeNS(NAMESPACE_XLSX, ATTR_DATA_TYPE);
-        boolean isNumeric = TYPE_NUMERIC.equals(type);
-        short format = isNumeric ? numberFormat : 0;
-        CellStyle style = prepareCellStyle(cellBox.getStyle(), format);
+        CellType cellType = CellType.fromString(type);
+        CellStyle style = prepareCellStyle(cellBox.getStyle(), getFormat(cellType));
 
         mergedCells.stream()
                 .filter(merge -> merge.isApplicable(row))
                 .forEach(merge -> merge.fillRow(row));
 
         int cellNumber = row.getPhysicalNumberOfCells();
-        Cell cell = row.createCell(cellNumber);
-        String textContent = td.getTextContent();
-        if (isNumeric) {
-            try {
-                double numberValue = Double.parseDouble(textContent);
-                cell.setCellValue(numberValue);
-                cell.setCellType(Cell.CELL_TYPE_NUMERIC);
-            } catch (NumberFormatException e) {
-                cell.setCellValue(textContent);
-            }
-        } else {
-            cell.setCellValue(textContent);
-        }
+        Cell cell = createCell(cellType, row, td, cellNumber);
         cell.setCellStyle(style);
 
         mergeCells(row, td, cellNumber, style);
         calculateColumnWidth(cellNumber, cellBox.getStyle());
+    }
+
+    private Cell createCell(CellType type, Row row, Element td, int cellNumber) {
+        Cell cell = row.createCell(cellNumber, type.getXssfType());
+        String textContent = td.getTextContent();
+
+        switch (type) {
+            case NUMERIC:
+                setNumericValue(cell, textContent);
+                break;
+            default:
+                cell.setCellValue(textContent);
+        }
+        return cell;
+    }
+
+    private void setNumericValue(Cell cell, String textContent) {
+        if (textContent == null || textContent.length() == 0) {
+            return;
+        }
+        try {
+            double numberValue = Double.parseDouble(textContent);
+            cell.setCellValue(numberValue);
+        } catch (NumberFormatException e) {
+            cell.setCellType(CellType.DEFAULT.getXssfType());
+            cell.setCellValue(textContent);
+        }
+    }
+
+    private short getFormat(CellType type) {
+        switch (type) {
+            case NUMERIC:
+                return numberFormat;
+            case STRING:
+                return textFormat;
+        }
+        return 0;
     }
 
     private void mergeCells(Row row, Element td, int cellNumber, CellStyle style) {

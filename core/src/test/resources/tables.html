@@ -8,42 +8,17 @@
     <link type="text/css" href="table-test.css" rel="stylesheet"/>
 </head>
 <body>
-    <table>
+    <table  ukase:format-number="#,###">
         <tr>
-            <td>-----</td>
-            <td>-----</td>
-            <td>-----</td>
+            <td ukase:data-type="string">-----</td>
+            <td ukase:data-type="numeric">-----</td>
+            <td ukase:data-type="numeric"></td>
         </tr>
         <tr>
             <td>-+---</td>
             <td>--+--</td>
-            <td>---+-</td>
+            <td ukase:data-type="numeric">1</td>
         </tr>
-    </table>
-    <table>
-        <caption>Табличко</caption>
-        <thead><tr>
-            <th>Кол1</th>
-            <th>лок2</th>
-            <th>Ока3</th>
-        </tr></thead>
-        <tbody>
-            <tr>
-                <td>-+---</td>
-                <td>--+--</td>
-                <td>---+-</td>
-            </tr>
-            <tr>
-                <td>---+-</td>
-                <td>--+--</td>
-                <td>-+---</td>
-            </tr>
-            <tr>
-                <td>-+---</td>
-                <td>--+--</td>
-                <td>---+-</td>
-            </tr>
-        </tbody>
     </table>
     <table id="special" ukase:format-number="#,##0">
         <caption>Табличко#special</caption>
