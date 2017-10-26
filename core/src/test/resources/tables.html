@@ -8,19 +8,22 @@
     <link type="text/css" href="table-test.css" rel="stylesheet"/>
 </head>
 <body>
-    <table  ukase:format-number="#,###">
+    <table ukase:format-number="#,##0">
         <tr>
             <td ukase:data-type="string">-----</td>
             <td ukase:data-type="numeric">-----</td>
-            <td ukase:data-type="numeric"></td>
+            <td ukase:data-type="numeric">
+            </td>
         </tr>
         <tr>
-            <td>-+---</td>
+            <td ukase:data-type="date">
+                21.11.2023
+            </td>
             <td>--+--</td>
             <td ukase:data-type="numeric">1</td>
         </tr>
     </table>
-    <table id="special" ukase:format-number="#,##0">
+    <table id="special">
         <caption>Табличко#special</caption>
         <tr>
             <th>Кол1</th>

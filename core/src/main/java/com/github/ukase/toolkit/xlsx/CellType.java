@@ -26,6 +26,7 @@ import org.apache.poi.ss.usermodel.Cell;
 public enum CellType {
     STRING(Cell.CELL_TYPE_STRING, "string"),
     NUMERIC(Cell.CELL_TYPE_NUMERIC, "numeric"),
+    DATE(Cell.CELL_TYPE_STRING, "date"),
     DEFAULT(Cell.CELL_TYPE_BLANK, "common");
 
     private int xssfType;
@@ -40,11 +41,10 @@ public enum CellType {
         if (type == null || type.isEmpty()) {
             return DEFAULT;
         }
-        if (NUMERIC.stringValue.equals(type)) {
-            return NUMERIC;
-        }
-        if (STRING.stringValue.equals(type)) {
-            return STRING;
+        for (CellType cellType: values()) {
+            if (cellType.stringValue.equals(type)) {
+                return cellType;
+            }
         }
         return DEFAULT;
     }

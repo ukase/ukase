@@ -54,7 +54,10 @@ public class RenderingTable implements Runnable {
     private static final String NAMESPACE_XLSX = "urn:ukase:xlsx";
     private static final String ATTR_DATA_TYPE = "data-type";
     private static final String ATTR_NUMBER_FORMAT = "format-number";
-    private static final String FORMAT_TEXT = "@";
+    private static final String ATTR_DATE_FORMAT = "format-date";
+    private static final short FORMAT_TEXT_DEFAULT = 49;
+    private static final short FORMAT_DATE_DEFAULT = 14;
+    private static final short FORMAT_NUMBER_DEFAULT = 3;
 
     private final Workbook wb;
     private final Sheet sheet;
@@ -66,6 +69,7 @@ public class RenderingTable implements Runnable {
     private final ConcurrentMap<CellStyleKey, XSSFCellStyle> cachedStyles;
     private final short numberFormat;
     private final short textFormat;
+    private final short dateFormat;
 
     RenderingTable(Workbook wb, Element table, BlockBox box, Collection<Translator> translators) {
         this.wb = wb;
@@ -76,10 +80,10 @@ public class RenderingTable implements Runnable {
         this.cellSizes = new ConcurrentHashMap<>();
         this.cachedStyles = new ConcurrentHashMap<>();
         this.sheet = prepareSheet();
-        String format = table.getAttributeNS(NAMESPACE_XLSX, ATTR_NUMBER_FORMAT);
         DataFormat cellFormat = wb.createDataFormat();
-        this.numberFormat = cellFormat.getFormat(format);
-        this.textFormat = cellFormat.getFormat(FORMAT_TEXT);
+        this.numberFormat = getNumberFormat(table, cellFormat);
+        this.dateFormat = getDateFormat(table, cellFormat);
+        this.textFormat = FORMAT_TEXT_DEFAULT;
     }
 
     @Override
@@ -131,7 +135,7 @@ public class RenderingTable implements Runnable {
 
     private Cell createCell(CellType type, Row row, Element td, int cellNumber) {
         Cell cell = row.createCell(cellNumber, type.getXssfType());
-        String textContent = td.getTextContent();
+        String textContent = td.getTextContent().trim();
 
         switch (type) {
             case NUMERIC:
@@ -144,7 +148,7 @@ public class RenderingTable implements Runnable {
     }
 
     private void setNumericValue(Cell cell, String textContent) {
-        if (textContent == null || textContent.length() == 0) {
+        if (textContent.isEmpty()) {
             return;
         }
         try {
@@ -162,6 +166,8 @@ public class RenderingTable implements Runnable {
                 return numberFormat;
             case STRING:
                 return textFormat;
+            case DATE:
+                return dateFormat;
         }
         return 0;
     }
@@ -213,5 +219,21 @@ public class RenderingTable implements Runnable {
             }
         }
         throw new IllegalStateException("Cannot found styles for element " + element);
+    }
+
+    private short getDateFormat(Element table, DataFormat cellFormat) {
+        String dFormat = table.getAttributeNS(NAMESPACE_XLSX, ATTR_DATE_FORMAT);
+        if (dFormat == null || dFormat.trim().isEmpty()) {
+            return FORMAT_DATE_DEFAULT;
+        }
+        return cellFormat.getFormat(dFormat);
+    }
+
+    private short getNumberFormat(Element table, DataFormat cellFormat) {
+        String nFormat = table.getAttributeNS(NAMESPACE_XLSX, ATTR_NUMBER_FORMAT);
+        if (nFormat == null || nFormat.trim().isEmpty()) {
+            return FORMAT_NUMBER_DEFAULT;
+        }
+        return cellFormat.getFormat(nFormat);
     }
 }
