@@ -24,6 +24,7 @@ import com.github.jknack.handlebars.Options;
 import com.github.jknack.handlebars.TagType;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.HashMap;
 
 import static org.junit.Assert.*;
@@ -117,6 +118,6 @@ public class FormatDateHelperTest {
                 null,
                 params,
                 new HashMap<>(),
-                null);
+                Collections.emptyList());
     }
 }
