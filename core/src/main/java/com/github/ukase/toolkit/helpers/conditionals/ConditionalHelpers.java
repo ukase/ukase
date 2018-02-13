@@ -34,7 +34,7 @@ abstract class ConditionalHelpers extends AbstractHelper<Object> {
     }
 
     @Override
-    public CharSequence apply(Object context, Options options) throws IOException {
+    public Object apply(Object context, Options options) throws IOException {
         return test(context, options) ? "true" : null;
     }
 

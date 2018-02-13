@@ -58,7 +58,7 @@ public class BarcodeHelper extends AbstractHelper<Object> {
     }
 
     @Override
-    public CharSequence apply(Object context, Options options) throws IOException {
+    public Object apply(Object context, Options options) throws IOException {
         if (context == null) {
             return "";
         }

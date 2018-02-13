@@ -34,7 +34,7 @@ public class MissingHelper extends AbstractHelper<Object> {
     }
 
     @Override
-    public CharSequence apply(Object context, Options options) throws IOException {
+    public Object apply(Object context, Options options) throws IOException {
         String helperName = options.helperName;
         if (options.handlebars.helper(helperName) != null) {
             logHelperError(helperName);

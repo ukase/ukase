@@ -25,48 +25,47 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 @Component
-public class SubStringHelper extends AbstractHelper<String> {
+public class SubStringHelper extends AbstractHelper<CharSequence> {
     private static final String HELPER_NAME = "substring";
+    private static final int NO_END = -1;
 
     public SubStringHelper() {
         super(HELPER_NAME);
     }
 
     @Override
-    public CharSequence apply(String context, Options options) throws IOException {
+    public Object apply(CharSequence context, Options options) throws IOException {
         if (context == null) {
             return "";
         }
-        Integer start = start(options.param(0, null), context.length());
-        Integer end = end(options.param(1, null), context.length());
+        String stringValue = context.toString();
+        int length = stringValue.length();
 
-        if (isIncorrectParameters(context, start, end)) {
-            return "";
+        int start = start(options.param(0, -1), length);
+        int end = end(options.param(1, -1), length);
+
+        if (end == NO_END) {
+            return stringValue.substring(start);
         }
 
-        if (end == null) {
-            return context.substring(start);
-        } else {
-            return context.substring(start, end);
+        if (start > end) {
+            int temp = start;
+            start = end;
+            end = temp;
         }
+        return stringValue.substring(start, end);
     }
 
-    private boolean isIncorrectParameters(String context, Integer start, Integer end) {
-        return start == null
-                || start < 0
-                || end != null && (end > context.length() || end < start);
-    }
-
-    private int start(Integer start, int length) {
-        if (start == null || start < 0) {
+    private int start(int start, int length) {
+        if (start < 0) {
             return 0;
         }
         return Math.min(length, start);
     }
 
-    private int end(Integer end, int length) {
-        if (end == null || end < 0) {
-            return 0;
+    private int end(int end, int length) {
+        if (end < 0) {
+            return NO_END;
         }
         return Math.min(length, end);
     }

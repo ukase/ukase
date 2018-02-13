@@ -35,9 +35,9 @@ public class SetVariableHelper extends AbstractHelper<Object> {
     }
 
     @Override
-    public CharSequence apply(Object context, Options options) throws IOException {
+    public Object apply(Object context, Options options) throws IOException {
         CharSequence generatedBlockData = options.fn();
-        if (options.isFalsy(generatedBlockData)) {
+        if (options.tagType.inline()) {
             setVariable(options, context);
         } else {
             setVariable(options, StringUtils.trimToEmpty(generatedBlockData.toString()));

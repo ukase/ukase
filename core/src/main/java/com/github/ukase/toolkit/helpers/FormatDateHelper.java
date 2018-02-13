@@ -43,7 +43,7 @@ public class FormatDateHelper extends AbstractHelper<Object> {
     }
 
     @Override
-    public CharSequence apply(Object context, Options options) throws IOException {
+    public Object apply(Object context, Options options) throws IOException {
         if (context instanceof Number) {
             return apply((Number) context, options);
         }
@@ -53,11 +53,11 @@ public class FormatDateHelper extends AbstractHelper<Object> {
         return apply(options);
     }
 
-    private CharSequence apply(Number context, Options options) {
+    private Object apply(Number context, Options options) {
         return format(new Date(context.longValue()), options);
     }
 
-    private CharSequence apply(String context, Options options) {
+    private Object apply(String context, Options options) {
         String parseFormat = options.hash(PARAMETER_FORMAT);
         if (parseFormat == null) {
             if (DATE_ONLY.matcher(context.trim()).matches()) {
@@ -79,7 +79,7 @@ public class FormatDateHelper extends AbstractHelper<Object> {
         }
     }
 
-    private CharSequence apply(Options options) {
+    private Object apply(Options options) {
         FormatDateMode mode = FormatDateMode.getMode(options.hash.get(EMPTY_VALUE_MODE));
         if (mode == FormatDateMode.STRICT) {
             throw new IllegalArgumentException("For current field were enabled strict mode, but no value got");

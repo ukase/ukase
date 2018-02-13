@@ -34,7 +34,7 @@ public class FormatNumberHelper extends AbstractHelper<Number> {
     }
 
     @Override
-    public CharSequence apply(Number context, Options options) throws IOException {
+    public Object apply(Number context, Options options) throws IOException {
         if (context == null) {
             return "";
         }
