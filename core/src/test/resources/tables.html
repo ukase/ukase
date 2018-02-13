@@ -8,11 +8,18 @@
     <link type="text/css" href="table-test.css" rel="stylesheet"/>
 </head>
 <body>
-    <table ukase:format-number="#,##0">
+    <table ukase:format-number="#,##0" ukase:format-currency="#,##0 руб.">
         <tr>
             <td ukase:data-type="string">-----</td>
             <td ukase:data-type="numeric">-----</td>
             <td ukase:data-type="numeric">
+            </td>
+        </tr>
+        <tr>
+            <td ukase:data-type="string">-----</td>
+            <td ukase:data-type="numeric">-----</td>
+            <td ukase:data-type="currency">
+                152315
             </td>
         </tr>
         <tr>
