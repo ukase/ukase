@@ -1,0 +1,45 @@
+spring:
+  main:
+    banner-mode: off
+server:
+  port: 10080
+logging:
+  config: classpath:logback-dev.xml
+
+ukase:
+  project-root: .
+  resources: .
+  templates: .
+  jar:
+  water-mark:
+    degree: 60
+    size: 180
+    text: Черновик
+    x: 350
+    y: 400
+  bulk:
+    threads: 10
+    statusCodes: false
+    ttl: 60
+    path: pdfs
+
+---
+
+spring:
+  profiles: test
+ukase:
+  resources: classpath:/
+  templates: classpath:/templates/
+  jar:
+  bulk:
+    threads: 10
+    statusCodes: false
+    ttl: 1
+
+---
+
+spring:
+  profiles: test-performance
+ukase:
+  bulk:
+    threads: 2
