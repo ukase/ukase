@@ -39,18 +39,18 @@ public class FormatDateHelperTest {
     @Test
     public void testNull() throws Exception {
         Options options = getOptions(null);
-        CharSequence result = HELPER.apply(null, options);
+        Object result = HELPER.apply(null, options);
         assertNotNull(REASON_WRONG, result);
-        assertEquals(REASON_WRONG, 0, result.length());
+        assertEquals(REASON_WRONG, 0, result.toString().length());
     }
 
     @Test
     public void testNullGenerateMode() throws Exception {
         Options options = getOptions(null, FormatDateHelper.DATE_FORMAT);
         options.hash.put("mode", "generate");
-        CharSequence result = HELPER.apply(null, options);
+        Object result = HELPER.apply(null, options);
         assertNotNull(REASON_WRONG, result);
-        assertEquals(REASON_WRONG, STRING_DATE.length(), result.length());
+        assertEquals(REASON_WRONG, STRING_DATE.length(), result.toString().length());
     }
 
     @Test
@@ -68,7 +68,7 @@ public class FormatDateHelperTest {
     @Test
     public void testNullCommonMode() throws Exception {
         Options options = getOptions(null, FormatDateHelper.DATE_FORMAT);
-        CharSequence result = HELPER.apply(null, options);
+        Object result = HELPER.apply(null, options);
         assertNotNull(REASON_WRONG, result);
         assertEquals(REASON_WRONG, result, "");
     }
