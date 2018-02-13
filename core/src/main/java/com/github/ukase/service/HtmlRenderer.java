@@ -24,12 +24,14 @@ import com.github.jknack.handlebars.HandlebarsException;
 import com.github.jknack.handlebars.Template;
 import com.github.ukase.toolkit.render.RenderException;
 import com.github.ukase.web.UkasePayload;
+import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 
 @Service
+@Log4j
 public class HtmlRenderer implements Renderer<UkasePayload, String> {
     private Handlebars handlebars;
 
@@ -41,9 +43,13 @@ public class HtmlRenderer implements Renderer<UkasePayload, String> {
     @Override
     public String render(UkasePayload data) throws RenderException {
         try {
+            log.debug("Start rendering html, template" + data.getIndex());
             Template template = handlebars.compile(data.getIndex());
-            return template.apply(data.getData());
-        } catch (IOException|HandlebarsException e) {
+            log.debug("Template " + data.getIndex() + " compiled, rendering");
+            String html = template.apply(data.getData());
+            log.debug("Html rendered with size:" + html.length());
+            return html;
+        } catch (IOException|HandlebarsException|NullPointerException e) {
             throw new RenderException("Cannot produce html", e, "html");
         }
     }
