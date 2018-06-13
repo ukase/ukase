@@ -60,10 +60,6 @@ public class CompoundSource {
         this.fontsUrls = Collections.unmodifiableCollection(fonts);
     }
 
-    private <T extends Source> T getSource(Class<T> tClass) {
-        return this.sources.stream().filter(tClass::isInstance).map(tClass::cast).findAny().orElse(null);
-    }
-
     public InputStream getResource(String url) {
         return sources.stream()
                 .filter(s -> s.hasResource(url))
@@ -116,5 +112,9 @@ public class CompoundSource {
         public int compare(Source o1, Source o2) {
             return o1.order() - o2.order();
         }
+    }
+
+    private <T extends Source> T getSource(Class<T> tClass) {
+        return this.sources.stream().filter(tClass::isInstance).map(tClass::cast).findAny().orElse(null);
     }
 }

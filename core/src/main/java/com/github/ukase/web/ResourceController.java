@@ -33,6 +33,9 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/resources")
@@ -62,11 +65,15 @@ public class ResourceController {
     )
     public ResponseEntity<?> uploadResourcePath(@RequestBody byte[] resource,
                                                 @RequestHeader("path") String resourcePath,
-                                                @RequestHeader(value = "isResource", required = false) Boolean isResource) {
+                                                @RequestHeader(value = "isResource", required = false) Boolean isResource,
+                                                @RequestHeader(value = "charset", required = false) String charset) {
         if (isResource != null && isResource) {
             resourcesLoader.uploadResource(resourcePath, resource);
         } else {
-            templatesLoader.uploadTemplate(resourcePath, new String(resource));
+            Charset templatesCharset = charset == null
+                    ? StandardCharsets.UTF_8
+                    : Charset.forName(charset);
+            templatesLoader.uploadTemplate(resourcePath, new String(resource, templatesCharset));
         }
         return new ResponseEntity<>(HttpStatus.OK);
     }
