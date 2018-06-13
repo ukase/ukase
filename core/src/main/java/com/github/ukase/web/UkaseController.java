@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Konstantin Lepa <konstantin+ukase@lepabox.net>
+ * Copyright (c) 2018 Pavel Uvarov <pauknone@yahoo.com>
  *
  * This file is part of Ukase.
  *
@@ -22,11 +22,11 @@ package com.github.ukase.web;
 import com.github.ukase.async.AsyncManager;
 import com.github.ukase.service.HtmlRenderer;
 import com.github.ukase.service.XlsxRenderer;
-import com.github.ukase.toolkit.CompoundSource;
+import com.github.ukase.toolkit.TemplateListenable;
 import com.github.ukase.toolkit.render.RenderTaskBuilder;
-import com.github.ukase.toolkit.SourceListener;
+import com.github.ukase.toolkit.TemplateListener;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,30 +37,19 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.Collection;
 import java.util.List;
 
 @Slf4j
 @RestController
 @RequestMapping("/api")
+@AllArgsConstructor
 class UkaseController {
-    private HtmlRenderer htmlRenderer;
-    private CompoundSource source;
-    private AsyncManager asyncManager;
-    private XlsxRenderer xlsxRenderer;
-    private RenderTaskBuilder taskBuilder;
-
-    @Autowired
-    public UkaseController(HtmlRenderer htmlRenderer,
-                           CompoundSource source,
-                           AsyncManager asyncManager,
-                           XlsxRenderer xlsxRenderer,
-                           RenderTaskBuilder taskBuilder) {
-        this.htmlRenderer = htmlRenderer;
-        this.source = source;
-        this.asyncManager = asyncManager;
-        this.xlsxRenderer = xlsxRenderer;
-        this.taskBuilder = taskBuilder;
-    }
+    private final HtmlRenderer htmlRenderer;
+    private final Collection<TemplateListenable> templateListenables;
+    private final AsyncManager asyncManager;
+    private final XlsxRenderer xlsxRenderer;
+    private final RenderTaskBuilder taskBuilder;
 
     //<editor-fold desc="State API method">
     /*================================================================================================================
@@ -69,9 +58,9 @@ class UkaseController {
     @RequestMapping(value = "/pdf/{template}", method = RequestMethod.HEAD)
     public @ResponseBody DeferredState checkTemplate(@PathVariable String template) {
         DeferredState state = new DeferredState();
-        SourceListener listener = SourceListener.templateListener(template,
+        TemplateListener listener = TemplateListener.templateListener(template,
                 test -> state.setResult(translateState(test)));
-        source.registerListener(listener);
+        templateListenables.forEach(l -> l.registerListener(listener));
         return state;
     }
     //</editor-fold>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Konstantin Lepa <konstantin+ukase@lepabox.net>
+ * Copyright (c) 2018 Pavel Uvarov <pauknone@yahoo.com>
  *
  * This file is part of Ukase.
  *
@@ -49,20 +49,23 @@ function ukasePdfService($http, $q, $log, $sce, poller, factory, $mdToast) {
             responseType: 'arraybuffer',
             accepts: 'application/pdf',
             url: encodeURI(requestUrl)
-        }).success(function (data) {
-            var file = new Blob([data], {type: 'application/pdf'}),
-                fileUrl = URL.createObjectURL(file);
-            $log.debug('success: ' + fileUrl);
-            defer.resolve($sce.trustAsResourceUrl(fileUrl));
-        }).error(function (error, code) {
-            var message = code === 406 ? 'Error in JSON data' : 'Error with rendering on server';
-            $mdToast.show({
-                template: '<md-toast><span flex>Error on load: ' + message + '</span></md-toast>',
-                position: 'top right'
-            });
-            $log.warn(message);
-            defer.reject(error);
-        });
+        }).then(
+            function success(data) {
+                var file = new Blob([data], {type: 'application/pdf'}),
+                    fileUrl = URL.createObjectURL(file);
+                $log.debug('success: ' + fileUrl);
+                defer.resolve($sce.trustAsResourceUrl(fileUrl));
+            },
+            function error(error, code) {
+                var message = code === 406 ? 'Error in JSON data' : 'Error with rendering on server';
+                $mdToast.show({
+                    template: '<md-toast><span flex>Error on load: ' + message + '</span></md-toast>',
+                    position: 'top right'
+                });
+                $log.warn(message);
+                defer.reject(error);
+            }
+        );
 
         return defer.promise;
     }
