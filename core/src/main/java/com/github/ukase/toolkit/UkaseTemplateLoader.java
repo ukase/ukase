@@ -19,24 +19,11 @@
 
 package com.github.ukase.toolkit;
 
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.function.Predicate;
-
-public interface Source {
+public interface UkaseTemplateLoader {
     int ORDER_UPLOAD = 0;
     int ORDER_FS = 1;
     int ORDER_JAR = 2;
 
-    Predicate<String> IS_FONT = fileName -> fileName.toLowerCase().endsWith("ttf");
-    Predicate<String> IS_HELPERS_CONFIGURATION = fileName ->
-                    fileName.startsWith("imported-handlers") &&
-                    fileName.endsWith(".properties");
-
-    boolean hasResource(String url);
-    InputStream getResource(String url);
+    boolean hasTemplate(String name);
     int order();
-
-    default Collection<String> getFontsUrls() {return Collections.emptyList();}
 }

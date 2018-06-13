@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Konstantin Lepa <konstantin+ukase@lepabox.net>
+ * Copyright (c) 2018 Pavel Uvarov <pauknone@yahoo.com>
  *
  * This file is part of Ukase.
  *
@@ -19,11 +19,12 @@
 
 package com.github.ukase.toolkit.fs;
 
-import com.github.jknack.handlebars.Helper;
-import com.github.ukase.toolkit.SourceListener;
+import com.github.ukase.toolkit.TemplateListenable;
+import com.github.ukase.toolkit.TemplateListener;
 import com.github.ukase.config.UkaseSettings;
 import com.github.ukase.toolkit.Source;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
@@ -34,56 +35,27 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
-public class FileSource implements Source {
+@ConditionalOnProperty(name = {"ukase.enabled-sources.fs"}, havingValue = "true")
+public class FileSource implements Source, TemplateListenable {
     private final File resources;
-    private final File templates;
     private final FileUpdatesListener resourcesListener;
-    private final FileUpdatesListener templatesListener;
 
     @Autowired
     public FileSource(UkaseSettings settings) throws IOException {
-        templates = settings.getTemplates();
         resources = settings.getResources();
 
-        if (resources != null) {
-            resourcesListener = new FileUpdatesListener(resources);
-            if (isSubDirectory(resources, templates)) {
-                templatesListener = null;
-            } else {
-                templatesListener = new FileUpdatesListener(templates);
-            }
-        } else {
-            resourcesListener = null;
-            if (templates != null) {
-                templatesListener = new FileUpdatesListener(templates);
-            } else {
-                templatesListener = null;
-            }
+        if (resources == null) {
+            throw new IllegalStateException("Cannot init fs resource loader while it's enabled");
         }
+        resourcesListener = new FileUpdatesListener(resources);
     }
 
     @PreDestroy
     public void stopFSListeners() {
-        if (resourcesListener != null) {
-            resourcesListener.stopNear();
-        }
-        if (templatesListener != null) {
-            templatesListener.stopNear();
-        }
-    }
-
-    @Override
-    public Map<String, Helper<?>> getHelpers() {
-        return Collections.emptyMap();
-    }
-
-    @Override
-    public boolean hasHelpers() {
-        return false;
+        resourcesListener.stopNear();
     }
 
     @Override
@@ -92,14 +64,13 @@ public class FileSource implements Source {
     }
 
     @Override
-    public boolean hasTemplate(String name) {
-        return templates != null && new File(templates, name + ".hbs").isFile();
-    }
-
-    @Override
-    public InputStream getResource(String url) throws IOException {
+    public InputStream getResource(String url) {
         if (hasResource(url)) {
-            return new FileInputStream(new File(resources, url));
+            try {
+                return new FileInputStream(new File(resources, url));
+            } catch (IOException e) {
+                throw new IllegalStateException("Cannot load file", e);
+            }
         }
         return null;
     }
@@ -118,25 +89,12 @@ public class FileSource implements Source {
     }
 
     @Override
-    public void registerListener(SourceListener listener) {
-        if (resourcesListener != null) {
-            resourcesListener.registerListener(listener);
-        }
-        if (templatesListener != null) {
-            templatesListener.registerListener(listener);
-        }
-        if (resourcesListener == null && templatesListener == null) {
-            listener.resourceUpdated(null);
-        }
+    public void registerListener(TemplateListener listener) {
+        resourcesListener.registerListener(listener);
     }
 
-    private boolean isSubDirectory(File dir, File kind) {
-        while (kind != null) {
-            if (kind.equals(dir)) {
-                return true;
-            }
-            kind = kind.getParentFile();
-        }
-        return false;
+    @Override
+    public int order() {
+        return ORDER_FS;
     }
 }

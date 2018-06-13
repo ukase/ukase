@@ -19,24 +19,20 @@
 
 package com.github.ukase.toolkit;
 
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.function.Predicate;
+import java.util.function.Consumer;
 
-public interface Source {
-    int ORDER_UPLOAD = 0;
-    int ORDER_FS = 1;
-    int ORDER_JAR = 2;
+public interface TemplateListener {
+    void resourceUpdated(String resourceName);
 
-    Predicate<String> IS_FONT = fileName -> fileName.toLowerCase().endsWith("ttf");
-    Predicate<String> IS_HELPERS_CONFIGURATION = fileName ->
-                    fileName.startsWith("imported-handlers") &&
-                    fileName.endsWith(".properties");
+    static TemplateListener templateListener(String templateName, Consumer<Boolean> consumer) {
+        Predicate<String> predicate;
+        if (templateName.equals("ANY")) {
+            predicate = resourceName -> true;
+        } else {
+            predicate = resourceName -> !resourceName.endsWith("hbs") || resourceName.equals(templateName + ".hbs");
+        }
 
-    boolean hasResource(String url);
-    InputStream getResource(String url);
-    int order();
-
-    default Collection<String> getFontsUrls() {return Collections.emptyList();}
+        return resourceName -> consumer.accept(predicate.test(resourceName));
+    }
 }

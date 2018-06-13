@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Konstantin Lepa <konstantin+ukase@lepabox.net>
+ * Copyright (c) 2018 Pavel Uvarov <pauknone@yahoo.com>
  *
  * This file is part of Ukase.
  *
@@ -19,21 +19,18 @@
 
 package com.github.ukase.web.validation;
 
-import com.github.ukase.toolkit.CompoundSource;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.github.ukase.toolkit.UkaseTemplateLoader;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
+import java.util.Collection;
 
 @Component
+@AllArgsConstructor
 public class HtmlTemplateLocationExistsValidator implements ConstraintValidator<HtmlTemplateLocationExists, String> {
-    private CompoundSource source;
-
-    @Autowired
-    public HtmlTemplateLocationExistsValidator(CompoundSource source) {
-        this.source = source;
-    }
+    private final Collection<UkaseTemplateLoader> templateLoaders;
 
     @Override
     public void initialize(HtmlTemplateLocationExists constraintAnnotation) {
@@ -41,6 +38,8 @@ public class HtmlTemplateLocationExistsValidator implements ConstraintValidator<
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        return source.hasTemplate(value);
+        return templateLoaders.stream()
+                .map(l -> l.hasTemplate(value))
+                .reduce((has1, has2) -> has1 || has2).orElse(false);
     }
 }

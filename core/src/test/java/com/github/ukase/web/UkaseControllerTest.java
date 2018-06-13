@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Konstantin Lepa <konstantin+ukase@lepabox.net>
+ * Copyright (c) 2018 Pavel Uvarov <pauknone@yahoo.com>
  *
  * This file is part of Ukase.
  *
@@ -33,6 +33,8 @@ import com.github.ukase.service.PdfWatermarkRenderer;
 import com.github.ukase.service.XlsxRenderer;
 import com.github.ukase.toolkit.CompoundSource;
 import com.github.ukase.toolkit.CompoundTemplateLoader;
+import com.github.ukase.toolkit.fs.FSTemplateLoader;
+import com.github.ukase.toolkit.jar.ZipTemplateLoader;
 import com.github.ukase.toolkit.render.RenderTaskBuilder;
 import com.github.ukase.toolkit.ResourceProvider;
 import com.github.ukase.toolkit.fs.FileSource;
@@ -100,6 +102,8 @@ import static org.junit.Assert.*;
         HorizontalAlignmentTranslator.class,
         VerticalAlignmentTranslator.class,
         WordWrapTranslator.class,
+        ZipTemplateLoader.class,
+        FSTemplateLoader.class,
 })
 @WebMvcTest(controllers = {UkaseController.class, UkaseExceptionHandler.class})
 public class UkaseControllerTest {

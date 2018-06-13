@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Konstantin Lepa <konstantin+ukase@lepabox.net>
+ * Copyright (c) 2018 Pavel Uvarov <pauknone@yahoo.com>
  *
  * This file is part of Ukase.
  *
@@ -78,9 +78,7 @@ public class ResourceProvider {
     public Handlebars getEngine() {
         Handlebars engine = new Handlebars(templateLoader);
 
-        if (source.hasHelpers()) {
-            source.getHelpers().forEach(engine::registerHelper);
-        }
+        source.getHelpers().forEach(engine::registerHelper);
         for (AbstractHelper<?> helper: context.getBeansOfType(AbstractHelper.class).values()) {
             engine.registerHelper(helper.getName(), helper);
         }

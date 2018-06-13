@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Konstantin Lepa <konstantin+ukase@lepabox.net>
+ * Copyright (c) 2018 Pavel Uvarov <pauknone@yahoo.com>
  *
  * This file is part of Ukase.
  *
@@ -20,71 +20,72 @@
 package com.github.ukase.toolkit;
 
 import com.github.jknack.handlebars.Helper;
-import com.github.ukase.toolkit.fs.FileSource;
 import com.github.ukase.toolkit.jar.JarSource;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
-public class CompoundSource implements Source {
-    private final JarSource jarSource;
-    private final FileSource fileSource;
+public class CompoundSource {
     @Getter
     private final Collection<String> fontsUrls;
+    private final JarSource jarSource;
+    private final List<Source> sources;
 
     @Autowired
-    public CompoundSource(JarSource jarSource, FileSource fileSource) {
-        this.jarSource = jarSource;
-        this.fileSource = fileSource;
+    public CompoundSource(List<Source> sources) {
+        this.sources = new ArrayList<>(sources);
+        this.sources.sort(new SourceComparator());
 
-        Collection<String> fonts = new HashSet<>(jarSource.getFontsUrls());
-        fonts.addAll(fileSource.getFontsUrls());
-        addLiberationFonts(fonts);
+        this.jarSource = getSource(JarSource.class);
+        sources = new ArrayList<>(3);
+
+        Collection<String> fonts = new HashSet<>();
+        for(Source source: sources) {
+            fonts.addAll(source.getFontsUrls());
+        }
+        fonts.addAll(getDefaultFonts());
         this.fontsUrls = Collections.unmodifiableCollection(fonts);
     }
 
-    @Override
-    public void registerListener(SourceListener listener) {
-        fileSource.registerListener(listener);
+    private <T extends Source> T getSource(Class<T> tClass) {
+        return this.sources.stream().filter(tClass::isInstance).map(tClass::cast).findAny().orElse(null);
     }
 
-    @Override
-    public InputStream getResource(String url) throws IOException {
-        InputStream stream = fileSource.getResource(url);
-        if (stream == null) {
-            stream = jarSource.getResource(url);
-        }
-        return stream;
+    public InputStream getResource(String url) {
+        return sources.stream()
+                .filter(s -> s.hasResource(url))
+                .map(s -> s.getResource(url))
+                .findFirst()
+                .orElse(null);
     }
 
-    @Override
-    public boolean hasTemplate(String name) {
-        return fileSource.hasTemplate(name) || jarSource.hasTemplate(name);
-    }
-
-    @Override
     public boolean hasResource(String url) {
-        return fileSource.hasResource(url) || jarSource.hasResource(url);
+        for (Source source: sources) {
+            if (source.hasResource(url)) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    @Override
-    public boolean hasHelpers() {
-        return jarSource.hasHelpers();
-    }
-
-    @Override
     public Map<String, Helper<?>> getHelpers() {
-        return jarSource.getHelpers();
+        if (jarSource != null) {
+            return jarSource.getHelpers();
+        }
+        return Collections.emptyMap();
     }
 
     String getDefaultFontUrl() {
@@ -93,20 +94,27 @@ public class CompoundSource implements Source {
                 .findAny().orElse(null);
     }
 
-    private void addLiberationFonts(Collection<String> fonts) {
+    private Collection<String> getDefaultFonts() {
         ClassLoader loader = getClass().getClassLoader();
-        Stream.of("LiberationSerif-Regular.ttf",
+        return Stream.of("LiberationSerif-Regular.ttf",
                   "LiberationSerif-Bold.ttf",
                   "LiberationSerif-Italic.ttf",
                   "LiberationSerif-BoldItalic.ttf")
                 .map(loader::getResource)
                 .filter(Objects::nonNull)
                 .map(Object::toString)
-                .forEach(fonts::add);
+                .collect(Collectors.toSet());
     }
 
     private boolean isRegularFont(String fontName) {
         String name = fontName.toLowerCase();
         return !(name.contains("bold") || name.contains("italic"));
+    }
+
+    private static class SourceComparator implements Comparator<Source> {
+        @Override
+        public int compare(Source o1, Source o2) {
+            return o1.order() - o2.order();
+        }
     }
 }

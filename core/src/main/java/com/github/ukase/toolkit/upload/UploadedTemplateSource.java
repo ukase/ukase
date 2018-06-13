@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Konstantin Lepa <konstantin+ukase@lepabox.net>
+ * Copyright (c) 2018 Pavel Uvarov <pauknone@yahoo.com>
  *
  * This file is part of Ukase.
  *
@@ -17,22 +17,33 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.ukase.toolkit;
+package com.github.ukase.toolkit.upload;
 
-import java.util.function.Predicate;
-import java.util.function.Consumer;
+import com.github.jknack.handlebars.io.TemplateSource;
 
-public interface SourceListener {
-    void resourceUpdated(String resourceName);
+public class UploadedTemplateSource implements TemplateSource {
+    private final String content;
+    private final String name;
+    private final long lastModified;
 
-    static SourceListener templateListener(String templateName, Consumer<Boolean> consumer) {
-        Predicate<String> predicate;
-        if (templateName.equals("ANY")) {
-            predicate = resourceName -> true;
-        } else {
-            predicate = resourceName -> !resourceName.endsWith("hbs") || resourceName.equals(templateName + ".hbs");
-        }
+    UploadedTemplateSource(String content, String name) {
+        this.content = content;
+        this.name = name;
+        this.lastModified = System.currentTimeMillis();
+    }
 
-        return resourceName -> consumer.accept(predicate.test(resourceName));
+    @Override
+    public String content() {
+        return content;
+    }
+
+    @Override
+    public String filename() {
+        return name;
+    }
+
+    @Override
+    public long lastModified() {
+        return lastModified;
     }
 }

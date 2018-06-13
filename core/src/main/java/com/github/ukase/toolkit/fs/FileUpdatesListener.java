@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Konstantin Lepa <konstantin+ukase@lepabox.net>
+ * Copyright (c) 2018 Pavel Uvarov <pauknone@yahoo.com>
  *
  * This file is part of Ukase.
  *
@@ -19,7 +19,7 @@
 
 package com.github.ukase.toolkit.fs;
 
-import com.github.ukase.toolkit.SourceListener;
+import com.github.ukase.toolkit.TemplateListener;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -50,7 +50,7 @@ class FileUpdatesListener {
     private final WatchService watcher;
     private final FileVisitor visitor;
     private boolean flag = true;
-    private final Queue<SourceListener> listeners = new ConcurrentLinkedQueue<>();
+    private final Queue<TemplateListener> listeners = new ConcurrentLinkedQueue<>();
 
     FileUpdatesListener(File root) throws IOException {
         this.keys = new HashMap<>();
@@ -60,7 +60,7 @@ class FileUpdatesListener {
         new Thread(new Watcher(), getClass().getName() + "-thread").start();
     }
 
-    void registerListener(SourceListener listener) {
+    void registerListener(TemplateListener listener) {
         listeners.add(listener);
     }
 
@@ -140,7 +140,7 @@ class FileUpdatesListener {
         }
 
         private void notifyListeners(String resourceName) {
-            SourceListener listener;
+            TemplateListener listener;
             while ((listener = listeners.poll()) != null) {
                 listener.resourceUpdated(resourceName);
             }

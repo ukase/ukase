@@ -8,6 +8,10 @@ logging:
 
 ukase:
   project-root: .
+  enabled-sources:
+    fs: true
+    jar: true
+    upload: false
   resources: classpath:/
   templates: classpath:/
   jar:

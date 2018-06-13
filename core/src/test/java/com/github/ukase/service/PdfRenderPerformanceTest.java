@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Konstantin Lepa <konstantin+ukase@lepabox.net>
+ * Copyright (c) 2018 Pavel Uvarov <pauknone@yahoo.com>
  *
  * This file is part of Ukase.
  *
@@ -20,6 +20,7 @@
 package com.github.ukase.service;
 
 import com.github.ukase.web.UkasePayload;
+import org.junit.Ignore;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Scope;
@@ -29,8 +30,8 @@ import org.openjdk.jmh.infra.Blackhole;
 
 import java.util.Map;
 
-
 @State(Scope.Thread)
+@Ignore("For manual start only")
 public class PdfRenderPerformanceTest extends AbstractNoSpringBenchmark {
     private final HtmlRenderer htmlRenderer;
     private final PdfRenderer pdfRenderer;

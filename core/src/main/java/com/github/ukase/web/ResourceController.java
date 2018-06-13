@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Konstantin Lepa <konstantin+ukase@lepabox.net>
+ * Copyright (c) 2018 Pavel Uvarov <pauknone@yahoo.com>
  *
  * This file is part of Ukase.
  *
@@ -19,11 +19,14 @@
 
 package com.github.ukase.web;
 
-import com.github.ukase.toolkit.CompoundTemplateLoader;
+import com.github.ukase.toolkit.upload.UploadSource;
+import com.github.ukase.toolkit.upload.UploadedTemplateLoader;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -33,24 +36,38 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @RequestMapping("/api/resources")
+@ConditionalOnProperty(name = {"ukase.enabled-sources.upload"}, havingValue = "true")
 public class ResourceController {
-    private final CompoundTemplateLoader loader;
+    private final UploadedTemplateLoader templatesLoader;
+    private final UploadSource resourcesLoader;
 
     @Autowired
-    public ResourceController(CompoundTemplateLoader loader) {
-        this.loader = loader;
+    public ResourceController(UploadedTemplateLoader templatesLoader, UploadSource resourcesLoader) {
+        this.templatesLoader = templatesLoader;
+        this.resourcesLoader = resourcesLoader;
     }
 
     @RequestMapping("/upload/{name}")
     public ResponseEntity<?> uploadResource(@RequestBody String resource, @PathVariable("name") String resourceName) {
-        loader.uploadResource(resourceName, resource);
+        templatesLoader.uploadTemplate(resourceName, resource);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @RequestMapping("/upload/")
-    public ResponseEntity<?> uploadResourcePath(@RequestBody String resource,
-                                                @RequestHeader("path") String resourcePath) {
-        loader.uploadResource(resourcePath, resource);
+    @RequestMapping(value = "/upload/",
+            consumes = {
+                    MimeTypeUtils.TEXT_PLAIN_VALUE,
+                    MimeTypeUtils.TEXT_PLAIN_VALUE + ";charset=UTF-8",
+                    MimeTypeUtils.APPLICATION_OCTET_STREAM_VALUE
+            }
+    )
+    public ResponseEntity<?> uploadResourcePath(@RequestBody byte[] resource,
+                                                @RequestHeader("path") String resourcePath,
+                                                @RequestHeader(value = "isResource", required = false) Boolean isResource) {
+        if (isResource != null && isResource) {
+            resourcesLoader.uploadResource(resourcePath, resource);
+        } else {
+            templatesLoader.uploadTemplate(resourcePath, new String(resource));
+        }
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

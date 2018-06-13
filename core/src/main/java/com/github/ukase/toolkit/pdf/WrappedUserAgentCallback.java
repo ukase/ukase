@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Konstantin Lepa <konstantin+ukase@lepabox.net>
+ * Copyright (c) 2018 Pavel Uvarov <pauknone@yahoo.com>
  *
  * This file is part of Ukase.
  *
@@ -19,7 +19,7 @@
 
 package com.github.ukase.toolkit.pdf;
 
-import com.github.ukase.toolkit.Source;
+import com.github.ukase.toolkit.CompoundSource;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Image;
 import org.slf4j.Logger;
@@ -40,10 +40,10 @@ class WrappedUserAgentCallback implements UserAgentCallback {
     private static final Logger log = LoggerFactory.getLogger(WrappedUserAgentCallback.class);
 
     private final UserAgentCallback delegate;
-    private final Source source;
+    private final CompoundSource source;
     private final int dotsPerPixel;
 
-    WrappedUserAgentCallback(Source source, int dotsPerPixel, UserAgentCallback delegate) {
+    WrappedUserAgentCallback(CompoundSource source, int dotsPerPixel, UserAgentCallback delegate) {
         this.source = source;
         this.dotsPerPixel = dotsPerPixel;
         this.delegate = delegate;
@@ -54,11 +54,7 @@ class WrappedUserAgentCallback implements UserAgentCallback {
         if (source.hasResource(uri)) {
             // this stream will be read and closed in other context - at actual access in render process...
             // out of scope for resource provider
-            try {
-                return new CSSResource(source.getResource(uri));
-            } catch (IOException e) {
-                log.error("Cannot read image [" + uri + "]", e);
-            }
+            return new CSSResource(source.getResource(uri));
         }
         return delegate.getCSSResource(uri);
     }

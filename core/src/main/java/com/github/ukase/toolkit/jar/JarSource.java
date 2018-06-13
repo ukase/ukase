@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Konstantin Lepa <konstantin+ukase@lepabox.net>
+ * Copyright (c) 2018 Pavel Uvarov <pauknone@yahoo.com>
  *
  * This file is part of Ukase.
  *
@@ -21,10 +21,9 @@ package com.github.ukase.toolkit.jar;
 
 import com.github.jknack.handlebars.Helper;
 import com.github.ukase.config.UkaseSettings;
-import com.github.ukase.toolkit.CompoundTemplateLoader;
-import lombok.Getter;
 import com.github.ukase.toolkit.Source;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -40,71 +39,53 @@ import java.util.Properties;
 import java.util.stream.Collectors;
 
 @Component
+@ConditionalOnProperty(name = {"ukase.enabled-sources.jar"}, havingValue = "true")
 public class JarSource implements Source {
-    @Getter
-    private final CompoundTemplateLoader templateLoader;
     private final Map<String, String> helpers = new HashMap<>();
     private final Map<String, Helper<?>> helpersInstances = new HashMap<>();
     private final URLClassLoader classLoader;
     private final URL jar;
+    private final ZipTemplateLoader templateLoader;
 
     @Autowired
-    public JarSource(CompoundTemplateLoader templateLoader, UkaseSettings settings) {
+    public JarSource(UkaseSettings settings, ZipTemplateLoader templateLoader) throws IOException {
         this.templateLoader = templateLoader;
 
         if (settings.getJar() == null) {
+            throw new IllegalStateException("Can't load jar file, while JarSource is enabled by configuration");
+        }
+
+        jar = settings.getJar().toURI().toURL();
+
+        Collection<String> helperConfigurationFiles = templateLoader.getResources(IS_HELPERS_CONFIGURATION);
+
+        Properties properties = new Properties();
+        helperConfigurationFiles.stream().
+                map(templateLoader::getResource).
+                filter(Objects::nonNull).
+                forEach(stream -> loadStreamToProperties(stream, properties));
+        properties.forEach(this::registerHelper);
+
+        if (hasHelpers()) {
+            URL[] jars = new URL[] {jar};
+            classLoader = new URLClassLoader(jars, getClass().getClassLoader());
+            helpers.forEach((name, className) -> helpersInstances.put(name, getHelper(className)));
+        } else {
             classLoader = null;
-            jar = null;
-            return;
-        }
-
-        try {
-            jar = settings.getJar().toURI().toURL();
-
-            Collection<String> helperConfigurationFiles = templateLoader.getResources(IS_HELPERS_CONFIGURATION);
-
-            Properties properties = new Properties();
-            helperConfigurationFiles.stream().
-                    map(templateLoader::getResource).
-                    filter(Objects::nonNull).
-                    forEach(stream -> loadStreamToProperties(stream, properties));
-            properties.forEach(this::registerHelper);
-
-            if (hasHelpers()) {
-                URL[] jars = new URL[] {jar};
-                classLoader = new URLClassLoader(jars, getClass().getClassLoader());
-                helpers.forEach((name, className) -> helpersInstances.put(name, getHelper(className)));
-            } else {
-                classLoader = null;
-            }
-
-        } catch (IOException e) {
-            throw new IllegalStateException("Wrong configuration", e);
         }
     }
 
-    @Override
     public Map<String, Helper<?>> getHelpers() {
-        return new HashMap<>(helpersInstances);
-    }
-
-    @Override
-    public boolean hasHelpers() {
-        return !helpers.isEmpty();
+        return Collections.unmodifiableMap(helpersInstances);
     }
 
     @Override
     public boolean hasResource(String url) {
-        return templateLoader.hasResource(url);
+        return getResource(url) != null;
     }
 
     @Override
-    public boolean hasTemplate(String name) {
-        return templateLoader.hasResource(name + ".hbs");
-    }
-
-    @Override
-    public InputStream getResource(String url) throws IOException {
+    public InputStream getResource(String url) {
         return templateLoader.getResource(url);
     }
 
@@ -116,6 +97,11 @@ public class JarSource implements Source {
                                  .collect(Collectors.toList());
         }
         return Collections.emptyList();
+    }
+
+    @Override
+    public int order() {
+        return ORDER_JAR;
     }
 
     private Helper<?> getHelper(String className) {
@@ -138,5 +124,9 @@ public class JarSource implements Source {
         } catch (IOException e) {
             throw new IllegalStateException("Wrong configuration", e);
         }
+    }
+
+    private boolean hasHelpers() {
+        return !helpers.isEmpty();
     }
 }

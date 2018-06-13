@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Konstantin Lepa <konstantin+ukase@lepabox.net>
+ * Copyright (c) 2018 Pavel Uvarov <pauknone@yahoo.com>
  *
  * This file is part of Ukase.
  *
@@ -23,8 +23,8 @@ import com.github.ukase.config.UkaseSettings;
 import com.github.ukase.toolkit.CompoundSource;
 import com.github.ukase.toolkit.CompoundTemplateLoader;
 import com.github.ukase.toolkit.ResourceProvider;
+import com.github.ukase.toolkit.fs.FSTemplateLoader;
 import com.github.ukase.toolkit.fs.FileSource;
-import com.github.ukase.toolkit.jar.JarSource;
 import lombok.Getter;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -49,10 +49,13 @@ abstract class AbstractNoSpringBenchmark {
             UkaseSettings settings = new UkaseSettings();
             settings.setTemplates("target/test-classes/");
             settings.setResources("target/test-classes/");
-            CompoundTemplateLoader templateLoader = new CompoundTemplateLoader(settings);
-            JarSource jarSource = new JarSource(templateLoader, settings);
+
+            FSTemplateLoader fsTemplateLoader = new FSTemplateLoader(settings);
             FileSource fileSource = new FileSource(settings);
-            CompoundSource compoundSource = new CompoundSource(jarSource, fileSource);
+
+            CompoundTemplateLoader templateLoader = new CompoundTemplateLoader(Collections.singletonList(fsTemplateLoader));
+
+            CompoundSource compoundSource = new CompoundSource(Collections.singletonList(fileSource));
             resourceProvider = new ResourceProvider(context, compoundSource, templateLoader, settings);
         } catch (IOException e) {
             //ignore

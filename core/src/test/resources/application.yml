@@ -11,6 +11,10 @@ ukase:
   resources: .
   templates: .
   jar:
+  enabled-sources:
+    fs: true
+    jar: false
+    upload: false
   water-mark:
     degree: 60
     size: 180
