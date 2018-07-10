@@ -19,6 +19,7 @@
 
 package com.github.ukase;
 
+import com.github.ukase.config.properties.FormatDateProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -26,7 +27,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.support.SpringBootServletInitializer;
 
 @SpringBootApplication
-@EnableConfigurationProperties
+@EnableConfigurationProperties({FormatDateProperties.class})
 public class UkaseApplication extends SpringBootServletInitializer {
 
     public static void main(String[] args) {

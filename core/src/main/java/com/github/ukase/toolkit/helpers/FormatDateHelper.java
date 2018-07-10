@@ -20,26 +20,50 @@
 package com.github.ukase.toolkit.helpers;
 
 import com.github.jknack.handlebars.Options;
+import com.github.ukase.config.properties.FormatDateProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoField;
 import java.util.regex.Pattern;
 
 @Component
 public class FormatDateHelper extends AbstractHelper<Object> {
     private static final String HELPER_NAME = "format_date";
-    private static final Pattern DATE_ONLY = Pattern.compile("^\\d+.\\d+.\\d+$");
-    private static final Pattern DATE_TIME = Pattern.compile("^\\d+.\\d+.\\d+ \\d+:\\d+$");
-    private static final String DATE_TIME_FORMAT = "dd.MM.yyyy HH:mm";
+    //private static final Pattern DATE_TIME = Pattern.compile("^\\d+.\\d+.\\d+ \\d+:\\d+$");
+    //private static final String DATE_TIME_FORMAT = "dd.MM.yyyy HH:mm";
     private static final String PARAMETER_FORMAT = "parseFormat";
     private static final String EMPTY_VALUE_MODE = "mode";
+
     static final String DATE_FORMAT = "dd.MM.yyyy";
 
-    public FormatDateHelper() {
+    private final Pattern datePattern;
+    private final DateTimeFormatter dateParser;
+    private final DateTimeFormatter dateFormatter;
+    private final boolean disablePatterns;
+
+    @Autowired
+    public FormatDateHelper(FormatDateProperties properties) {
         super(HELPER_NAME);
+
+        dateParser = new DateTimeFormatterBuilder()
+                .appendPattern(properties.getParseFormat())
+                .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
+                .toFormatter();
+        disablePatterns = properties.isDisablePatterns();
+        if (disablePatterns) {
+            datePattern = null;
+        } else {
+            datePattern = Pattern.compile(properties.getDatePattern());
+        }
+        dateFormatter = DateTimeFormatter.ofPattern(properties.getFormatDate());
     }
 
     @Override
@@ -54,27 +78,31 @@ public class FormatDateHelper extends AbstractHelper<Object> {
     }
 
     private Object apply(Number context, Options options) {
-        return format(new Date(context.longValue()), options);
+        Instant instant = Instant.ofEpochMilli(context.longValue());
+        LocalDateTime date = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+        return format(date, options);
     }
 
     private Object apply(String context, Options options) {
-        String parseFormat = options.hash(PARAMETER_FORMAT);
-        if (parseFormat == null) {
-            if (DATE_ONLY.matcher(context.trim()).matches()) {
-                parseFormat = DATE_FORMAT;
-            } else if (DATE_TIME.matcher(context.trim()).matches()) {
-                parseFormat = DATE_TIME_FORMAT;
-            }
-        }
-        if (parseFormat == null) {
-            return "";
+        String parameterFormat = options.hash(PARAMETER_FORMAT);
+        if (parameterFormat != null) {
+            parameterFormat = parameterFormat.trim();
         }
 
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(parseFormat);
+        DateTimeFormatter parseFormat;
+        if (parameterFormat == null || parameterFormat.isEmpty()) {
+            parseFormat = getConfigDateParseFormat(context);
+            if (parseFormat == null) {
+                return "";
+            }
+        } else {
+            parseFormat = DateTimeFormatter.ofPattern(parameterFormat);
+        }
+
         try {
-            Date date = simpleDateFormat.parse(context);
+            LocalDateTime date = parseFormat.parse(context, LocalDateTime::from);
             return format(date, options);
-        } catch (ParseException e) {
+        } catch (DateTimeParseException e) {
             return "";
         }
     }
@@ -84,18 +112,21 @@ public class FormatDateHelper extends AbstractHelper<Object> {
         if (mode == FormatDateMode.STRICT) {
             throw new IllegalArgumentException("For current field were enabled strict mode, but no value got");
         } else if (mode == FormatDateMode.GENERATE) {
-            return format(new Date(), options);
+            return format(LocalDateTime.now(), options);
         }
         return "";
     }
 
-    private String format(Date date, Options options) {
+    private String format(LocalDateTime date, Options options) {
         String format = options.param(0, "");
+        DateTimeFormatter formatter;
         if (format.trim().length() == 0) {
-            return "";
+            formatter = dateFormatter;
+        } else {
+            formatter = DateTimeFormatter.ofPattern(format);
         }
 
-        return new SimpleDateFormat(format).format(date);
+        return formatter.format(date);
     }
 
     private enum FormatDateMode {
@@ -113,5 +144,25 @@ public class FormatDateHelper extends AbstractHelper<Object> {
             }
             return NORMAL;
         }
+    }
+
+    private DateTimeFormatter getConfigDateParseFormat(String trimmedContext) {
+        if (trimmedContext == null) {
+            return null;
+        }
+        trimmedContext = trimmedContext.trim();
+        if (trimmedContext.isEmpty()) {
+            return null;
+        }
+        if (disablePatterns) {
+            return dateParser;
+        }
+        //if (datePattern.matcher(trimmedContext).matches()) {
+        //    return dateParser;
+        //} else
+        if (datePattern.matcher(trimmedContext).matches()) {
+            return dateParser;
+        }
+        return null;
     }
 }

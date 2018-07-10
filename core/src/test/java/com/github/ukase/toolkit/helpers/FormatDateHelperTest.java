@@ -22,6 +22,7 @@ package com.github.ukase.toolkit.helpers;
 import com.github.jknack.handlebars.Context;
 import com.github.jknack.handlebars.Options;
 import com.github.jknack.handlebars.TagType;
+import com.github.ukase.config.properties.FormatDateProperties;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -30,7 +31,14 @@ import java.util.HashMap;
 import static org.junit.Assert.*;
 
 public class FormatDateHelperTest {
-    private static final FormatDateHelper HELPER = new FormatDateHelper();
+    private static final FormatDateProperties PROPERTIES = new FormatDateProperties();
+    static {
+        PROPERTIES.setDatePattern("^\\d+.\\d+.\\d+( \\d+:\\d+$)?");
+        PROPERTIES.setParseFormat("dd.MM.yyyy[ HH:mm]");
+        PROPERTIES.setDisablePatterns(false);
+        PROPERTIES.setFormatDate("dd.MM.yyyy");
+    }
+    private static final FormatDateHelper HELPER = new FormatDateHelper(PROPERTIES);
     private static final String REASON_WRONG = "Wrong render";
     private static final Long LONG_DATE = 12312612341234L;
     private static final String STRING_DATE_TIME = "04.03.2360 05:05";
@@ -97,7 +105,7 @@ public class FormatDateHelperTest {
 
     @Test
     public void testStringCustomFormat() throws Exception {
-        String parseFormat = "yyyy.[MM].dd в HH:mm";//
+        String parseFormat = "yyyy.'['MM']'.dd' в 'HH:mm";//
         String context = "2360.[03].04 в 05:05";
         Options options = getOptions(context, FormatDateHelper.DATE_FORMAT);
         options.hash.put("parseFormat", parseFormat);

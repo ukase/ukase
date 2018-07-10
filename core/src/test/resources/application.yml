@@ -26,6 +26,12 @@ ukase:
     statusCodes: false
     ttl: 60
     path: pdfs
+  helpers:
+    format-date:
+      datePattern: ^\d+.\d+.\d+( \d+:\d+$)?
+      parseFormat: dd.MM.yyyy[ HH:mm]
+      disablePatterns: false
+      formatDate: dd.MM.yyyy
 
 ---
 
