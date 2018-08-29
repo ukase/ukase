@@ -25,7 +25,7 @@
 
     <groupId>com.github.ukase</groupId>
     <artifactId>ukase-parent</artifactId>
-    <version>6.1</version>
+    <version>6.2</version>
 
     <modules>
         <module>ui</module>
