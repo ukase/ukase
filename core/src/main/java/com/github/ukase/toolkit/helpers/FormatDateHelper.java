@@ -37,8 +37,6 @@ import java.util.regex.Pattern;
 @Component
 public class FormatDateHelper extends AbstractHelper<Object> {
     private static final String HELPER_NAME = "format_date";
-    //private static final Pattern DATE_TIME = Pattern.compile("^\\d+.\\d+.\\d+ \\d+:\\d+$");
-    //private static final String DATE_TIME_FORMAT = "dd.MM.yyyy HH:mm";
     private static final String PARAMETER_FORMAT = "parseFormat";
     private static final String EMPTY_VALUE_MODE = "mode";
 
