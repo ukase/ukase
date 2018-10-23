@@ -8,7 +8,7 @@ import java.time.*;
 
 /**
  * Evaluate period between two dates.
- * By default end date is now.
+ * If one of the date is null, it will be replaced to current datetime
  */
 @Component
 public class DatePeriodHelper extends AbstractHelper<Object> {
@@ -20,11 +20,12 @@ public class DatePeriodHelper extends AbstractHelper<Object> {
 
     @Override
     public Object apply(Object context, Options options) {
-        if( context == null)
+        if( context == null && extractDateTo(options) == null)
             return  "";
-        OffsetDateTime dateFrom = (OffsetDateTime) context;
+
+        OffsetDateTime dateFrom = ( context != null ) ? (OffsetDateTime) context : OffsetDateTime.now();
         PeriodType periodType = PeriodType.valueOf( options.param(0) );
-        OffsetDateTime dateTo = options.param(1, OffsetDateTime.now() );
+        OffsetDateTime dateTo = extractDateTo(options);
 
         Period period = Period.between(dateFrom.toLocalDate(), dateTo.toLocalDate());
 
@@ -32,7 +33,12 @@ public class DatePeriodHelper extends AbstractHelper<Object> {
             case day: return period.getDays();
             default: throw new RuntimeException("Unsupported period: " + periodType);
         }
-
     }
+
+    private OffsetDateTime extractDateTo(Options options) {
+        return options.param(1, OffsetDateTime.now() );
+    }
+
+
 }
 
