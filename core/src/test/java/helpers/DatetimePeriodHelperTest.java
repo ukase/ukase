@@ -13,13 +13,20 @@ import org.junit.Test;
 public class DatetimePeriodHelperTest {
 
     @Test
-    public void testDays() throws IOException {
+    public void testDaysWithDateToNull() {
         int period = 5;
         OffsetDateTime tillNow = OffsetDateTime.now().minusDays(period);
         testPeriod(PeriodType.day.name(), tillNow, null, period);
     }
 
-    private void testPeriod(String periodType, OffsetDateTime dateFrom, OffsetDateTime dateTo, int expected) throws IOException {
+    @Test
+    public void testDaysWithDateFromNull() {
+        int period = 5;
+        OffsetDateTime tillNow = OffsetDateTime.now().minusDays(period);
+        testPeriod(PeriodType.day.name(), null, tillNow, - period);
+    }
+
+    private void testPeriod(String periodType, OffsetDateTime dateFrom, OffsetDateTime dateTo, int expected)  {
         DatePeriodHelper helper = new DatePeriodHelper();
         Object[] params = (dateTo== null) ?
                 new Object[] { periodType }
