@@ -14,7 +14,7 @@ ukase:
   enabled-sources:
     fs: true
     jar: false
-    upload: false
+    upload: true
   water-mark:
     degree: 60
     size: 180

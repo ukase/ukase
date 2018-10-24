@@ -3,11 +3,19 @@ package com.github.ukase.toolkit.helpers;
 
 import com.github.jknack.handlebars.*;
 import org.junit.*;
+import org.junit.runner.RunWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
-import java.util.*;
 
-public class DefaulValueHelperTest {
+import static com.github.ukase.toolkit.helpers.OptionsFactory.getOptions;
+
+@RunWith(SpringRunner.class)
+@ActiveProfiles("test")
+@SpringBootTest()
+public class DefaulValueHelperTest extends BaseHelperTest {
     private static final Helper HELPER = new DefaultValueHelper();
     private static final String VALUE = "VALUE";
     private static final String DEFAULT_VALUE = "DEFAULT_VALUE";
@@ -31,15 +39,5 @@ public class DefaulValueHelperTest {
         Assert.assertEquals( VALUE, result);
     }
 
-    private Options getOptions(Object context, String... params) {
-        return new Options(null,
-                "default_value",
-                TagType.VAR,
-                Context.newContext(context),
-                null,
-                null,
-                params,
-                new HashMap<>(),
-                Collections.emptyList());
-    }
+
 }
