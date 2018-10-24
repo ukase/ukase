@@ -17,10 +17,11 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.ukase.toolkit.helpers;
+package com.github.ukase.toolkit.helpers.datetime;
 
 import com.github.jknack.handlebars.Options;
 import com.github.ukase.config.properties.FormatDateProperties;
+import com.github.ukase.toolkit.helpers.AbstractHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,12 +38,10 @@ import java.util.regex.Pattern;
 @Component
 public class FormatDateHelper extends AbstractHelper<Object> {
     private static final String HELPER_NAME = "format_date";
-    //private static final Pattern DATE_TIME = Pattern.compile("^\\d+.\\d+.\\d+ \\d+:\\d+$");
-    //private static final String DATE_TIME_FORMAT = "dd.MM.yyyy HH:mm";
     private static final String PARAMETER_FORMAT = "parseFormat";
     private static final String EMPTY_VALUE_MODE = "mode";
 
-    static final String DATE_FORMAT = "dd.MM.yyyy";
+    public static final String DATE_FORMAT = "dd.MM.yyyy";
 
     private final Pattern datePattern;
     private final DateTimeFormatter dateParser;
