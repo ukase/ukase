@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.time.OffsetDateTime;
+import java.time.*;
 import java.time.temporal.ChronoUnit;
 
 /**
@@ -29,25 +29,39 @@ public class DatePeriodHelper extends AbstractHelper<Object> {
                 return "";
             }
 
-            OffsetDateTime dateFrom = ( !StringUtils.isEmpty((String)context ))
+            LocalDateTime dateFrom = (( !StringUtils.isEmpty((String)context ))
                     ? parseDateTime((String)context)
-                    : OffsetDateTime.now();
+                    : OffsetDateTime.now()).toLocalDateTime();
             PeriodType periodType = PeriodType.valueOf(options.param(0));
-            OffsetDateTime dateTo = extractDateTimeOrCurrent(options, 1);
+            LocalDateTime dateTo = extractDateTimeOrCurrent(options, 1).toLocalDateTime();
+
+
 
             switch (periodType) {
                 case year:
-                    return ChronoUnit.YEARS.between(dateFrom, dateTo);
+                    return ChronoUnit.YEARS.between(
+                            createBeginOfYear(dateFrom),
+                            createBeginOfYear(dateTo));
                 case month:
-                    return ChronoUnit.MONTHS.between(dateFrom, dateTo);
+                    return ChronoUnit.MONTHS.between(
+                            createBeginOfMonth(dateFrom),
+                            createBeginOfMonth(dateTo));
                 case day:
-                    return ChronoUnit.DAYS.between(dateFrom, dateTo);
+                    return ChronoUnit.DAYS.between(
+                            createBeginOfDay(dateFrom),
+                            createBeginOfDay(dateTo));
                 case hour:
-                    return ChronoUnit.HOURS.between(dateFrom, dateTo);
+                    return ChronoUnit.HOURS.between(
+                            createBeginOfHour(dateFrom),
+                            createBeginOfHour(dateTo));
                 case min:
-                    return ChronoUnit.MINUTES.between(dateFrom, dateTo);
+                    return ChronoUnit.MINUTES.between(
+                            createBeginOfMinute(dateFrom),
+                            createBeginOfMinute(dateTo));
                 case sec:
-                    return ChronoUnit.SECONDS.between(dateFrom, dateTo);
+                    return ChronoUnit.SECONDS.between(
+                            createBeginOfSecond(dateFrom),
+                            createBeginOfSecond(dateTo));
                 default:
                     log.error("Date time period {} is not supported.", periodType);
                     return "";
@@ -57,6 +71,30 @@ public class DatePeriodHelper extends AbstractHelper<Object> {
             log.error("Can not evaluate.", e);
             return "";
         }
+    }
+
+    private LocalDate createBeginOfYear(LocalDateTime dateFrom) {
+        return LocalDate.of(dateFrom.getYear(), 1, 1);
+    }
+
+    private LocalDate createBeginOfMonth(LocalDateTime date) {
+        return LocalDate.of(date.getYear(), date.getMonth(), 1);
+    }
+
+    private LocalDate createBeginOfDay(LocalDateTime date) {
+        return LocalDate.of(date.getYear(), date.getMonth(), date.getDayOfMonth());
+    }
+
+    private LocalDateTime createBeginOfHour(LocalDateTime date) {
+        return LocalDateTime.of(date.getYear(), date.getMonth(), date.getDayOfMonth(), date.getHour(), 0, 0);
+    }
+
+    private LocalDateTime createBeginOfMinute(LocalDateTime date) {
+        return LocalDateTime.of(date.getYear(), date.getMonth(), date.getDayOfMonth(), date.getHour(), date.getMinute());
+    }
+
+    private LocalDateTime createBeginOfSecond(LocalDateTime date) {
+        return LocalDateTime.of(date.getYear(), date.getMonth(), date.getDayOfMonth(), date.getHour(), date.getMinute(), date.getSecond());
     }
 
     private OffsetDateTime extractDateTimeOrCurrent(Options options, int index) {

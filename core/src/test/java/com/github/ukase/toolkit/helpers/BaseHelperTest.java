@@ -65,9 +65,12 @@ public class BaseHelperTest {
     }
 
     protected Map<String, Object> createDataInDataContianer(Object value) {
-        String valueStr = Objects.toString(value, null);
-        return Collections.singletonMap(DATA_CONTAINER_KEY, new SingleValueContainer(valueStr));
+        return createDataInDataContianer(DATA_CONTAINER_KEY, value);
+    }
 
+    protected Map<String, Object> createDataInDataContianer(String containerName, Object value) {
+        String valueStr = Objects.toString(value, null);
+        return Collections.singletonMap(containerName, new SingleValueContainer(valueStr));
     }
 }
 
