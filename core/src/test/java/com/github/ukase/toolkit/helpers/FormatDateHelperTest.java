@@ -26,6 +26,7 @@ import com.github.ukase.config.properties.FormatDateProperties;
 import com.github.ukase.toolkit.helpers.datetime.FormatDateHelper;
 import org.junit.Test;
 
+import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 
@@ -95,6 +96,13 @@ public class FormatDateHelperTest {
     @Test
     public void testStringDate() throws Exception {
         test(STRING_DATE, FormatDateHelper.DATE_FORMAT, STRING_DATE);
+    }
+
+    @Test
+    public void testOffsetDateTime() throws Exception {
+        OffsetDateTime offsetDateTime = OffsetDateTime.parse("2018-12-11T13:46:10.629+03:00");
+        String offsetDateTimeStr = "11.12.2018";
+        test(offsetDateTime, FormatDateHelper.DATE_FORMAT, offsetDateTimeStr);
     }
 
     @Test

@@ -26,9 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
@@ -70,15 +68,26 @@ public class FormatDateHelper extends AbstractHelper<Object> {
         if (context instanceof Number) {
             return apply((Number) context, options);
         }
+
         if (context instanceof CharSequence) {
             return apply(context.toString(), options);
         }
+
+        if (context instanceof OffsetDateTime) {
+            return apply((OffsetDateTime)context, options);
+        }
+
         return apply(options);
     }
 
     private Object apply(Number context, Options options) {
         Instant instant = Instant.ofEpochMilli(context.longValue());
         LocalDateTime date = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+        return format(date, options);
+    }
+
+    private Object apply(OffsetDateTime context, Options options) {
+        LocalDateTime date = context.toLocalDateTime();
         return format(date, options);
     }
 
